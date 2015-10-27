@@ -67,6 +67,7 @@ class PictshareModel extends Model
 			case 'png':		return 'png';
 			case 'jpeg':	return 'jpg';
 			case 'pjpeg':	return 'jpg';
+			case 'image/gif':
 			case 'gif':		return 'gif';
 			default: return false;
 		}
@@ -74,11 +75,29 @@ class PictshareModel extends Model
 
 	function uploadImageFromURL($url)
 	{
+		$dup_id = $this->isDuplicate($url);
+		if($dup_id)
+		{
+			$hash = $dup_id;
+			$url = ROOT.DS.'upload'.DS.$hash.DS.$hash;
+			
+		}
+		else
+		{
+			$hash = $this->getNewHash($type);
+			$this->saveSHAOfFile($url,$hash);
+		}
+				
 		$type = $this->getTypeOfFile($url);
 		$type = $this->isTypeAllowed($type);
+		
+		
 		if(!$type)
 			return array('status'=>'ERR','reason'=>'wrong filetype');
-		$hash = $this->getNewHash($type);
+			
+		if($dup_id)
+			return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash);
+		
 		mkdir(ROOT.DS.'upload'.DS.$hash);
 		$file = ROOT.DS.'upload'.DS.$hash.DS.$hash;
 		$status = file_put_contents($file, file_get_contents($url));
@@ -108,15 +127,7 @@ class PictshareModel extends Model
 		{
 			if ($error == UPLOAD_ERR_OK)
 			{
-				$dup_id = $this->isDuplicate($_FILES["pic"]["tmp_name"][$key]);
-				if(!$dup_id)
-				{
-					$data = $this->uploadImageFromURL($_FILES["pic"]["tmp_name"][$key],false);
-					if($data['hash'])
-						$this->saveSHAOfFile($_FILES["pic"]["tmp_name"][$key],$data['hash']);
-				}
-				else
-					$data = array('hash'=>$dup_id,'status'=>'OK');
+				$data = $this->uploadImageFromURL($_FILES["pic"]["tmp_name"][$key]);
 
 				if($data['status']=='OK')
 				{
@@ -217,37 +228,18 @@ class PictshareModel extends Model
 		return $words[$index];
 	}
 	
-	function uploadImageFromBase64($data,$type)
-        {
-                $type = $this->base64_to_type($data);
-                if(!$type)
-                        return array('status'=>'ERR','reason'=>'wrong filetype','type'=>$type);
-                $hash = $this->getNewHash($type);
-                $picname = $hash;
-                $file = ROOT.DS.'originals'.DS.$hash;
-                $this->base64_to_image($data,$file,$type);
-                copy($file,'store/'.$hash);
-                //alle exif daten entfernen if any..
-                if($type=='jpg')
-                {
-                        $res = imagecreatefromjpeg($file);
-                        imagejpeg($res, 'store/'.$picname, 100);
-                }
-
-                $this->AddWatermark('store/'.$picname,$type);
-
-                if($log)
-                {
-                        $fh = fopen('uploads.txt', 'a');
-                        fwrite($fh, time().';'.$url.';'.$hash.';'.$_SERVER['REMOTE_ADDR']."\n");
-                        fclose($fh);
-                }
-
-
-                //$this->resizeAndThumbnails($hash,$type);
-
-                return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>'https://'.$_SERVER['SERVER_NAME'].'/i/info/'.$hash);
-        }
+	function uploadImageFromBase64($data,$type=false)
+	{
+	        $type = $this->base64_to_type($data);
+	        if(!$type)
+	                return array('status'=>'ERR','reason'=>'wrong filetype','type'=>$type);
+	        $hash = $this->getNewHash($type);
+	        $picname = $hash;
+	        $file = ROOT.DS.'tmp'.DS.$hash;
+	        $this->base64_to_image($data,$file,$type);
+			
+			return $this->uploadImageFromURL($file);
+	}
 
 	function base64_to_type($base64_string)
 	{
@@ -258,6 +250,8 @@ class PictshareModel extends Model
 		$data = base64_decode($data);
 	
 		$info = getimagesizefromstring($data);
+		
+		
 	
 		trigger_error("########## FILETYPE: ".$info['mime']);
 	
