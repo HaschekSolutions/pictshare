@@ -63,10 +63,15 @@ class PictshareModel extends Model
 	{
 		switch($type)
 		{
-			case 'x-png': 	return 'png';
+			case 'image/png':
+			case 'image/x-png':
+			case 'x-png':
 			case 'png':		return 'png';
-			case 'jpeg':	return 'jpg';
+			
+			case 'image/jpeg':
+			case 'jpeg':
 			case 'pjpeg':	return 'jpg';
+			
 			case 'image/gif':
 			case 'gif':		return 'gif';
 			default: return false;
