@@ -6,7 +6,7 @@ If you own a server (even an home server) you can host your own PictShare instan
 
 ## Features
 - Uploads without logins or validation (that's a good thing, right?)
-- Simple API to upload any image from remote servers to your instance via URL or base64 encoded image
+- Simple API to upload any image from remote servers to your instance via URL
 - 100% file based - no database needed
 - PictShare removes all exif data so you can upload photos from your phone and all GPS tags and camera model info get wiped
 - Builtin and simple resizing and caching
@@ -16,7 +16,22 @@ If you own a server (even an home server) you can host your own PictShare instan
 Lets's say you have uploaded this image: ```https://www.pictshare.net/b260e36b60.jpg``` but you want to use it as your avatar in some forum that only allows 100x100 pixel images.
 Instead of editing it yourself you just use ```https://www.pictshare.net/100x100/b260e36b60.jpg```
 
-Just by editing the URL the image gets resized and the resized version gets cached to the disk so it loads much faster.
+Just by editing the URL and adding the size (in width**x**height) the image gets resized and the resized version gets cached to the disk so it loads much faster on the next request.
+
+## How does the API work?
+PictShare has a simple REST API to upload remote pictures. The API can be accessed via the backend.php file like this:
+
+```https://pictshare.net/backend.php?getimage=<URL of the image you want to upload>```.
+
+#### Example:
+
+Request: ```https://pictshare.net/backend.php?getimage=https://www.0xf.at/css/imgs/logo.png```
+
+The server will answer with the file name and the server path in JSON:
+
+```
+{"status":"OK","type":"png","hash":"10ba188162.png","url":"http:\/\/pictshare.net\/10ba188162.png"}
+```
 
 ## Security and privacy
 - By hosting your own images you can delete them any time you want
@@ -28,5 +43,9 @@ Just by editing the URL the image gets resized and the resized version gets cach
 - PHP 5 GD library
 - Some hostname or subdomain. Site might get messed up if it's not stored in the root directory of the webserver
 
+## Installing PictShare
+- Just unpack it on your webserver (remember, pictshare needs to be in a root directory) and it should work out of the box
+
 ## Coming soon
 - Restricted uploads so you can control who may upload on your instance
+- API upload via Base64 encoded images
