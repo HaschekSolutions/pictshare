@@ -1,5 +1,5 @@
 # PictShare
-PictShare is an open source image hosting service with a simple resizing API
+PictShare is an open source image hosting service with a simple resizing API that you can host yourself.
 
 ## Why would I want to host my own images?
 If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
@@ -13,8 +13,14 @@ If you own a server (even an home server) you can host your own PictShare instan
 - Duplicates don't take up space. If the exact same images is uploaded twice, the second upload will link to the first
 
 ## What's that about resizing?
-Lets's say you have uploaded this image: ```https://www.pictshare.net/b260e36b60.jpg``` but you want to use it as your avatar in some forum that only allows 100x100 pixel images.
-Instead of editing it yourself you just use ```https://www.pictshare.net/100x100/b260e36b60.jpg```
+Lets's say you have uploaded this image:
+![Venus](https://www.pictshare.net/b260e36b60.jpg) 
+URL: ```https://www.pictshare.net/b260e36b60.jpg```
+
+But you want to use it as your avatar in some forum that only allows **100x100** pixel images.
+Instead of editing it yourself you just edit the URL and add "/100x100/ before the image name like this: ```https://www.pictshare.net/100x100/b260e36b60.jpg```
+
+![Smaller Venus](https://www.pictshare.net/100x100/b260e36b60.jpg)
 
 Just by editing the URL and adding the size (in width**x**height) the image gets resized and the resized version gets cached to the disk so it loads much faster on the next request.
 
@@ -37,6 +43,7 @@ The server will answer with the file name and the server path in JSON:
 - By hosting your own images you can delete them any time you want
 - You can enable or disable upload logging. Don't want to know who uploaded stuff? Just change the setting in index.php
 - No exif data is stored on the server, all jpegs get cleaned on upload
+- You have full control over your data. PictShare doesn't need remote libaries or tracking crap
 
 ## Requirements
 - Apache Webserver with PHP (Apache because of the included .htaccess files)
@@ -49,3 +56,4 @@ The server will answer with the file name and the server path in JSON:
 ## Coming soon
 - Restricted uploads so you can control who may upload on your instance
 - API upload via Base64 encoded images
+- Albums
