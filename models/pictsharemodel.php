@@ -85,7 +85,6 @@ class PictshareModel extends Model
 		{
 			$hash = $dup_id;
 			$url = ROOT.DS.'upload'.DS.$hash.DS.$hash;
-			
 		}
 		else
 		{
