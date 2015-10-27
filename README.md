@@ -9,7 +9,7 @@ If you own a server (even an home server) you can host your own PictShare instan
 
 ## Features
 - Uploads without logins or validation (that's a good thing, right?)
-- Simple API to upload any image from remote servers to your instance via URL
+- Simple API to upload any image from remote servers to your instance via URL and via Base64
 - 100% file based - no database needed
 - PictShare removes all exif data so you can upload photos from your phone and all GPS tags and camera model info get wiped
 - Builtin and simple resizing and caching
@@ -63,5 +63,4 @@ The server will answer with the file name and the server path in JSON:
 
 ## Coming soon
 - Restricted uploads so you can control who may upload on your instance
-- API upload via Base64 encoded images
 - Albums
