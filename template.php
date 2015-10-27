@@ -35,7 +35,7 @@
         <div id="content">
             <?php echo $content?>
         </div>
-        <div class="content"><center>(c)<?php echo date("y");?> by<br/><a href="http://haschek-solutions.com" target="_blank"><img height="30" src="/css/imgs/hs_logo.png" /></a></center></div>
+        <div class="content"><center>(c)<?php echo date("y");?> by<br/><a href="https://haschek.solutions" target="_blank"><img height="30" src="/css/imgs/hs_logo.png" /></a></center></div>
         <div id="footer"></div>
       </div>
       
