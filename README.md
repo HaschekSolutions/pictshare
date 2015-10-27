@@ -1,6 +1,7 @@
 # PictShare
 PictShare is an open source image hosting service with a simple resizing API that you can host yourself.
 
+![PictShare](https://www.pictshare.net/da6733407c.png)
 
 ## Why would I want to host my own images?
 If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
