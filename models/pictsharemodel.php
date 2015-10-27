@@ -125,7 +125,6 @@ class PictshareModel extends Model
 			}
 		}
 		$html = new HTML();
-		//if($i==1)$html->goToLocation('/i/info/'.$data['hash']);
 		
 		return $o;
 	}
@@ -161,12 +160,6 @@ class PictshareModel extends Model
 		fclose($fp);
 		
 		return false;
-	}
-
-	function GetPictureDimensions($bildname)
-	{
-		$size = getimagesize($bildname);  
-		return $size;
 	}
 
 	function translate($index,$params="")
@@ -223,260 +216,93 @@ class PictshareModel extends Model
 
 		return $words[$index];
 	}
-
-
-	function AddWatermark($bildname,$type)
-	{
-		$watermark = imagecreatefrompng('inc/wasserzeichen.png');
-				$watermark_width = imagesx($watermark);  
-				$watermark_height = imagesy($watermark);
-				
-				if($type=='image/png' ||$type == 'png')
-					$image = imagecreatefrompng($bildname);
-				else if($type=='image/jpeg' ||$type == 'jpg')
-					$image = imagecreatefromjpeg($bildname);
-				else if($type=='image/gif' ||$type == 'gif')
-					$image = imagecreatefromgif($bildname);
-				else exit("Dateityp nicht erkannt");
-				
-				$size = getimagesize($bildname);  
-				$dest_x = $size[0] - $watermark_width - 5;  
-				$dest_y = $size[1] - $watermark_height - 5;
-				
-				imagesavealpha($watermark,true);
-				
-				//imagecopymerge($image, $watermark, $dest_x, $dest_y, 0, 0, $watermark_width, $watermark_height, 100);
-				imagecopy($image, $watermark,  $dest_x, $dest_y, 0, 0, $watermark_width, $watermark_height); 
-				
-				//$black = imagecolorallocate($image, 0, 0, 0);
-				//imagecolortransparent($image, $black);
-			
-			imagesavealpha($image,true);
-				
-			if($type=='image/png'|| $type == 'png')
-				imagepng($image,$bildname,5);
-			else if($type=='image/jpeg'|| $type == 'jpg')
-				imagejpeg($image,$bildname,100);
-			else if($type=='image/gif'|| $type == 'gif')
-				imagegif($image,$bildname);
-	}
-
-	function BildResize($filename,$max_hoehe,$max_breite,$output)
-	{
-		$image = new Imagick($filename);
-		$image->adaptiveResizeImage($max_hoehe,$max_breite);
-		$im->imageWriteFile (fopen ($output, "wb"));
-
-		return $output;
-		///////////////////////////
-
-		// Set a maximum height and width
-		$width = $max_breite;
-		$height = $max_hoehe;
-		
-		// Get new dimensions
-		list($width_orig, $height_orig) = getimagesize($filename);
-		$size = getimagesize($filename);
-		$ratio_orig = $width_orig/$height_orig;
-		if($width_orig < $width && $height_orig < $height)
-		{
-			$width = $width_orig;
-			$height = $height_orig;
-		}
-		else
-		{
-			if ($width/$height > $ratio_orig)
-			   $width = $height*$ratio_orig;
-			else
-			   $height = $width/$ratio_orig;
-		}
-
-		// Resample
-		$image_p = imagecreatetruecolor($width, $height);
-		
-			 if($size['mime']=='image/jpeg')
-				$image = imagecreatefromjpeg($filename);
-		else if($size['mime']=='image/png')
-				$image = imagecreatefrompng($filename);
-		else if($size['mime']=='image/gif')
-				$image = imagecreatefromgif($filename);
-		else if($size['mime']=='image/bmp')
-				$image = imagecreatefromwbmp($filename);
-		else exit('Bildart nicht unterstützt');
-		
-		imagesavealpha($image,true);
-		
-		imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
-
-		// Output
-		$file = $output;
-
-		imagesavealpha($image_p,true);
-		
-		if($size['mime']=='image/jpeg')
-				imagejpeg($image_p, $file, 100);
-		else if($size['mime']=='image/png')
-				imagepng($image_p, $file, 5);
-		else if($size['mime']=='image/gif')
-				imagegif($image_p, $file);
-		//else if($size['mime']=='image/bmp')
-				//$image = imagecreatefromwbmp($filename);
-		else exit('Bildart nicht unterstützt');
-		
-		
-		return $file;
-	}
-
-	function getUniqueIPs($hash,$type)
-	{
-		$db = new SQLite3("pictures.db");
-		$results = $db->query("SELECT DISTINCT(ip) FROM views WHERE hash = '$hash' OR hash = '$hash.$type'");
-		$i = 0;
-        while ($row = $results->fetchArray())
+	
+	function uploadImageFromBase64($data,$type)
         {
-            $i++;
-        }
-
-        return $i;
-	}
-
-	function renderGraphOfImage($hash,$type)
-	{
-		$db = new SQLite3("pictures.db");
-        $results = $db->query("SELECT * FROM views WHERE hash = '$hash' OR hash = '$hash.$type' ORDER BY time ASC");
-        $first = false;
-        $count = 0;
-        while ($row = $results->fetchArray())
-        {
-        	$count++;
-        	$index = floor(($row['time']+7200)/3600);
-        	if(!$first)
-        		$first = $index;
-            $data[$index]++;
-            $ref = $row['referrer'];
-            if($ref=='-')
-            	$a[2] = $this->translate(14);
-            else
-            	$a = explode('/', $ref);
-            $domains[$a[2]]++;
-        }
-
-        if(!$count) return;
-
-        $lasttime = $first*3600;
-
-        foreach ($domains as $dom => $count)
-        {
-        	$doms[] = "['$dom',   $count]";
-        }
-        $doms = implode(',', $doms);
-
-        foreach($data as $time=>$count)
-        {
-        	$time *=3600;
-        	$difh = (($time-$lasttime)/3600)-1;
-        	if($difh>0)
-        		for($i=0;$i<$difh;$i++)
-        			$d[] = '['.(($lasttime+(($i+1)*3600))*1000).', 0]';
-        	$d[] = '['.($time*1000).', '.$count.']';
-        	$lasttime = $time;
-        }
-        array_pop($d);
-        $d = implode(',', $d);
-
-		$o = "$(function () {
-		        $('#container').highcharts({
-		            chart: {
-		            	zoomType: 'x',
-		                type: 'spline'
-		            },
-		            title: {
-		                text: 'Views of this image compared to time'
-		            },
-		            xAxis: {
-		                type: 'datetime',
-		                maxZoom: 3600000,
-		                title: {
-		                    text: null
-		                }
-
-		            },
-		            yAxis: {
-		                title: {
-		                    text: 'Views / Hour'
-		                },
-		                min: 0
-		            },
-		            tooltip: {
-		            	crosshairs: true,
-
-		                pointFormat: '<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}</b><br/>',
-
-		            },
-            plotOptions: {
-                spline: {
-                    lineWidth: 4,
-                    states: {
-                        hover: {
-                            lineWidth: 5
-                        }
-                    },
-                    marker: {
-                        enabled: false
-                    }
+                $type = $this->base64_to_type($data);
+                if(!$type)
+                        return array('status'=>'ERR','reason'=>'wrong filetype','type'=>$type);
+                $hash = $this->getNewHash($type);
+                $picname = $hash;
+                $file = ROOT.DS.'originals'.DS.$hash;
+                $this->base64_to_image($data,$file,$type);
+                copy($file,'store/'.$hash);
+                //alle exif daten entfernen if any..
+                if($type=='jpg')
+                {
+                        $res = imagecreatefromjpeg($file);
+                        imagejpeg($res, 'store/'.$picname, 100);
                 }
-            },
-		            legend: {
-		                enabled: true
-		            },
-		            series: [{
-		                name: 'Views',
-		                data: [$d]
-		            }]
-		        });
-		    });
+
+                $this->AddWatermark('store/'.$picname,$type);
+
+                if($log)
+                {
+                        $fh = fopen('uploads.txt', 'a');
+                        fwrite($fh, time().';'.$url.';'.$hash.';'.$_SERVER['REMOTE_ADDR']."\n");
+                        fclose($fh);
+                }
 
 
-			$(function () {
-			    var chart;
-			    
-			    $(document).ready(function () {
-			    	
-			    	// Build the chart
-			        $('#pie').highcharts({
-			            chart: {
-			                plotBackgroundColor: null,
-			                plotBorderWidth: null,
-			                plotShadow: false
-			            },
-			            title: {
-			                text: 'Referring sites'
-			            },
-			            tooltip: {
-			        	    pointFormat: '{series.name}: <b>{point.y} = {point.percentage:.2f}%</b>'
-			            },
-			            plotOptions: {
-			                pie: {
-			                    allowPointSelect: true,
-			                    cursor: 'pointer',
-			                    dataLabels: {
-			                        enabled: false
-			                    },
-			                    showInLegend: true
-			                }
-			            },
-			            series: [{
-			                type: 'pie',
-			                name: '".$this->translate(15)."',
-			                data: [
-			                    $doms
-			                ]
-			            }]
-			        });
-			    });
-			    
-			});";
+                //$this->resizeAndThumbnails($hash,$type);
 
-		return $o;
+                return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>'https://'.$_SERVER['SERVER_NAME'].'/i/info/'.$hash);
+        }
+
+	function base64_to_type($base64_string)
+	{
+		$data = explode(',', $base64_string);
+		$data = $data[1];
+	
+		$data = str_replace(' ','+',$data);
+		$data = base64_decode($data);
+	
+		$info = getimagesizefromstring($data);
+	
+		trigger_error("########## FILETYPE: ".$info['mime']);
+	
+	
+		$f = finfo_open();
+		$type = $this->isTypeAllowed(finfo_buffer($f, $data, FILEINFO_MIME_TYPE));
+	
+		return $type;
+	}
+	
+	function base64_to_image($base64_string, $output_file,$type)
+	{
+		$data = explode(',', $base64_string);
+		$data = $data[1];
+	
+		$data = str_replace(' ','+',$data);
+	
+		$data = base64_decode($data);
+	
+		$source = imagecreatefromstring($data);
+		switch($type)
+		{
+		case 'jpg':
+				imagejpeg($source,$output_file,100);
+				trigger_error("========= SAVING AS ".$type." TO ".$output_file);
+		break;
+	
+		case 'png':
+				imagepng($source,$output_file,5);
+				trigger_error("========= SAVING AS ".$type." TO ".$output_file);
+		break;
+	
+		case 'gif':
+				imagegif($source,$output_file);
+				trigger_error("========= SAVING AS ".$type." TO ".$output_file);
+		break;
+	
+		default:
+				imagepng($source,$output_file,5);
+		break;
+		}
+	
+		//$imageSave = imagejpeg($source,$output_file,100);
+		imagedestroy($source);
+	
+		return $type;
 	}
 }
