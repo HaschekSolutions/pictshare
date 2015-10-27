@@ -58,7 +58,8 @@ The server will answer with the file name and the server path in JSON:
 - Just unpack it on your webserver (remember, pictshare needs to be in a root directory) and it should work out of the box
 
 ## Browser extensions
-- Chrome: https://github.com/chrisiaut/PictShare-Chrome-extension
+- Chrome: https://chrome.google.com/webstore/detail/pictshare-1-click-imagesc/mgomffcdpnohakmlhhjmiemlolonpafc
+  - Source: https://github.com/chrisiaut/PictShare-Chrome-extension
 
 ## Coming soon
 - Restricted uploads so you can control who may upload on your instance
