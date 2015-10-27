@@ -76,3 +76,9 @@ Server will automatically try to guess the file type (which should work in 90% o
 ## Coming soon
 - Restricted uploads so you can control who may upload on your instance
 - Albums
+
+---
+
+This is a [HASCHEK SOLUTIONS](https://haschek.solutions) project
+
+[![HS logo](https://pictshare.net/css/imgs/hs_logo.png)](https://haschek.solutions)
