@@ -63,17 +63,17 @@ class PictshareModel extends Model
 	{
 		switch($type)
 		{
-			case 'image/png':
-			case 'image/x-png':
-			case 'x-png':
-			case 'png':		return 'png';
+			case 'image/png':	return 'png';
+			case 'image/x-png':	return 'png';
+			case 'x-png':		return 'png';
+			case 'png':			return 'png';
 			
-			case 'image/jpeg':
-			case 'jpeg':
-			case 'pjpeg':	return 'jpg';
+			case 'image/jpeg':	return 'jpg';
+			case 'jpeg':		return 'jpg';
+			case 'pjpeg':		return 'jpg';
 			
-			case 'image/gif':
-			case 'gif':		return 'gif';
+			case 'image/gif':	return 'gif';
+			case 'gif':			return 'gif';
 			default: return false;
 		}
 	}
@@ -89,12 +89,14 @@ class PictshareModel extends Model
 		}
 		else
 		{
-			$hash = $this->getNewHash($type);
 			$this->saveSHAOfFile($url,$hash);
 		}
 				
 		$type = $this->getTypeOfFile($url);
 		$type = $this->isTypeAllowed($type);
+		
+		if(!$hash)
+			$hash = $this->getNewHash($type);
 		
 		
 		if(!$type)
