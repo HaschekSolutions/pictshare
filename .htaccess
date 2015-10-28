@@ -1,8 +1,6 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-ErrorDocument 404 /error/notfound
-
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
