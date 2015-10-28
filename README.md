@@ -30,7 +30,7 @@ Just by editing the URL and adding the size (in width**x**height) the image gets
 
 You can limit the number of resizes per image in the ```index.php``` file
 
-## How does the API work?
+## How does the external-upload-API work?
 
 ### From URL
 PictShare has a simple REST API to upload remote pictures. The API can be accessed via the backend.php file like this:
@@ -78,6 +78,7 @@ Server will automatically try to guess the file type (which should work in 90% o
 - Albums
 
 ---
+Design (c) by [Bernhard Moser](mailto://bernhard.moser91@gmail.com)
 
 This is a [HASCHEK SOLUTIONS](https://haschek.solutions) project
 
