@@ -733,6 +733,16 @@ class easyphpthumbnail {
 		$this->Displacementmapthumb   = array(0,'',0,0,0,25,25);		
 		
 	}
+	
+	public function getIm()
+	{
+		return $this->im;
+	}
+	
+	public function getThumb()
+	{
+		return $this->thumb;
+	}
 
 	/**
 	 * Class destructor

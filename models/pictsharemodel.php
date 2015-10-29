@@ -102,7 +102,7 @@ class PictshareModel extends Model
 			return array('status'=>'ERR','reason'=>'wrong filetype');
 			
 		if($dup_id)
-			return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash);
+			return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
 		
 		mkdir(ROOT.DS.'upload'.DS.$hash);
 		$file = ROOT.DS.'upload'.DS.$hash.DS.$hash;
@@ -122,7 +122,7 @@ class PictshareModel extends Model
 			fclose($fh);
 		}
 
-		return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash);
+		return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
 	}
 
 	function ProcessUploads()

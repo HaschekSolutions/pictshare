@@ -13,12 +13,11 @@
         <link rel="stylesheet" href="/css/normalize.css">
         <link rel="stylesheet" href="/css/pictshare.css">
         <script src="/js/vendor/modernizr-2.6.2.min.js"></script>
-        <!--<script src="/js/highslide-full.js"></script>-->
         <script type="text/javascript" src="/js/jquery-2.1.0.min.js"></script>
-        <TITLE>PictShare - Free picture hosting</TITLE>
+        <TITLE>PictShare - Free image hosting</TITLE>
 
-		<meta name="description" content="Free picture sharing, linking and tracking">
-		<meta name="keywords" content="picture, share, hosting, free">
+		<meta name="description" content="Free image sharing, linking and tracking">
+		<meta name="keywords" content="image, share, hosting, free">
 		<meta name="robots" content="index, follow">
 		<meta name="copyright" content="Haschek Solutions">
 		<meta name="language" content="EN,DE">

@@ -60,4 +60,93 @@ class Image
         
         return '/'.$filename;
     }
+    
+    function rotate(&$im,$direction)
+    {
+        switch($direction)
+        {
+            case 'upside': $angle = 180;break;
+            case 'left': $angle = 90;break;
+            case 'right': $angle = -90;break;
+            default: $angle = 0;break;
+        }
+        
+        $im = imagerotate($im,$angle,0);
+    }
+    
+    /**
+    * From: https://stackoverflow.com/questions/4590441/php-thumbnail-image-resizing-with-proportions
+    */
+    function resize(&$img,$size)
+    {
+        if(!is_numeric($size))
+            $size = explode('x',$size);
+    
+        if(is_array($size))
+        {
+            $maxwidth = $size[0];
+            $maxheight = $size[1];
+        }
+        else if($size)
+        {
+            $maxwidth = $size;
+            $maxheight = $size;
+        }
+        
+        $width = imagesx($img);
+        $height = imagesy($img);
+        
+        if($maxwidth>$width)$maxwidth = $width;
+        if($maxheight>$height)$maxheight = $height;
+            
+        if ($height > $width) 
+        {   
+            $ratio = $maxheight / $height;  
+            $newheight = $maxheight;
+            $newwidth = $width * $ratio; 
+        }
+        else 
+        {
+            $ratio = $maxwidth / $width;   
+            $newwidth = $maxwidth;  
+            $newheight = $height * $ratio;   
+        }
+        
+        $newimg = imagecreatetruecolor($newwidth,$newheight); 
+        
+        $palsize = ImageColorsTotal($img);
+        for ($i = 0; $i < $palsize; $i++)
+        { 
+            $colors = ImageColorsForIndex($img, $i);   
+            ImageColorAllocate($newimg, $colors['red'], $colors['green'], $colors['blue']);
+        }
+        
+        imagecopyresized($newimg, $img, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+        
+        $img = $newimg;
+    }
+    
+    function filter(&$im,$vars)
+    {
+        
+        foreach($vars as $var)
+        {
+            if(strpos($var,'_'))
+            {
+                $a = explode('_',$var);
+                $var = $a[0];
+                $val = $a[1];
+            }
+            switch($var)
+            {
+                case 'negative': imagefilter($im,IMG_FILTER_NEGATE); break;
+                case 'grayscale': imagefilter($im,IMG_FILTER_GRAYSCALE); break; 
+                case 'brightness': imagefilter($im,IMG_FILTER_BRIGHTNESS,$val); break; 
+                case 'edgedetect': imagefilter($im,IMG_FILTER_EDGEDETECT); break; 
+                case 'smooth': imagefilter($im,IMG_FILTER_SMOOTH,$val); break; 
+                case 'contrast': imagefilter($im,IMG_FILTER_CONTRAST,$val); break;
+                case 'pixelate': imagefilter($im,IMG_FILTER_PIXELATE,$val); break; 
+            }
+        }
+    }
 }
