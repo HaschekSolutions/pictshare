@@ -42,13 +42,13 @@ Original URL: ```https://www.pictshare.net/b260e36b60.jpg```
 
 |      Filter     |      Paramter      |      Example URL       |      Result      |
 | ---------------------------------------------------------------------- |
-| negative | -none-         | https://pictshare.net/negative/b260e36b60.jpg         | ![Negative](https://pictshare.net/negative/b260e36b60.jpg)  |
-| grayscale | -none-        | https://pictshare.net/negative/b260e36b60.jpg 		    | ![grayscale](https://pictshare.net/negative/b260e36b60.jpg)   |
-| brightness | -255 to 255 	| https://pictshare.net/brightness_100/b260e36b60.jpg 	| ![brightness](https://pictshare.net/brightness_100/b260e36b60.jpg)   |
-| edgedetect | -none- 		  | https://pictshare.net/edgedetect/b260e36b60.jpg 		  | ![edgedetect](https://pictshare.net/edgedetect/b260e36b60.jpg)  |
-| smooth | -10 to 2048      | https://pictshare.net/smooth_3/b260e36b60.jpg 		    | ![smooth](https://pictshare.net/smooth_3/b260e36b60.jpg)  |
-| contrast | -100 to 100 	  | https://pictshare.net/contrast_-90/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_90/b260e36b60.jpg)  |
-| pixelate | -100 to 100 	  | https://pictshare.net/pixelate_10/b260e36b60.jpg      | ![pixelate](https://pictshare.net/pixelate_10/b260e36b60.jpg)   |
+| negative | -none-         | https://pictshare.net/negative/b260e36b60.jpg         | ![Negative](https://pictshare.net/negative/200/b260e36b60.jpg)  |
+| grayscale | -none-        | https://pictshare.net/grayscale/b260e36b60.jpg 		    | ![grayscale](https://pictshare.net/negative/200/b260e36b60.jpg)   |
+| brightness | -255 to 255 	| https://pictshare.net/brightness_100/b260e36b60.jpg 	| ![brightness](https://pictshare.net/brightness_100/200/b260e36b60.jpg)   |
+| edgedetect | -none- 		  | https://pictshare.net/edgedetect/b260e36b60.jpg 		  | ![edgedetect](https://pictshare.net/edgedetect/200/b260e36b60.jpg)  |
+| smooth | -10 to 2048      | https://pictshare.net/smooth_3/b260e36b60.jpg 		    | ![smooth](https://pictshare.net/smooth_3/200/b260e36b60.jpg)  |
+| contrast | -100 to 100 	  | https://pictshare.net/contrast_-90/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_90/200/b260e36b60.jpg)  |
+| pixelate | -100 to 100 	  | https://pictshare.net/pixelate_10/b260e36b60.jpg      | ![pixelate](https://pictshare.net/pixelate_10/200/b260e36b60.jpg)   |
 
 
 
