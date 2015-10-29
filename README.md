@@ -50,7 +50,11 @@ smooth         | -10 to 2048         | https://pictshare.net/smooth_3/b260e36b60
 contrast       | -100 to 100         | https://pictshare.net/contrast_-90/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_90/200/b260e36b60.jpg)
 pixelate       | -100 to 100         | https://pictshare.net/pixelate_10/b260e36b60.jpg      | ![pixelate](https://pictshare.net/pixelate_10/200/b260e36b60.jpg)
 
+## You can also mix filters and resizes
 
+Just add what you want to the URL and PictShare will render it for you.
+
+For example if you want to pixelate and resize it and make it a grayscale you can do that: ```https://www.pictshare.net/400x400/brightness_100/negative/b260e36b60.jpg```
 
 ## How does the external-upload-API work?
 
