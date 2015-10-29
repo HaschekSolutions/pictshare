@@ -37,10 +37,10 @@ You can limit the number of resizes per image in the ```index.php``` file
 ## Rotation
 You can now see a rotated version of an image by adding ````/left/```, ````right``` or ````/upside/``` to the URL.
 
-Original URL: https://www.pictshare.net/b260e36b60.jpg
-Rotated left: https://www.pictshare.net/left/b260e36b60.jpg
-Rotated right: https://www.pictshare.net/right/b260e36b60.jpg
-Upside down: https://www.pictshare.net/upsdie/b260e36b60.jpg
+- Original URL: https://www.pictshare.net/b260e36b60.jpg
+- Rotated left: https://www.pictshare.net/left/b260e36b60.jpg
+- Rotated right: https://www.pictshare.net/right/b260e36b60.jpg
+- Upside down: https://www.pictshare.net/upsdie/b260e36b60.jpg
 
 ## Filters
 PictShare also supports multiple filters (at once) that you can apply just by changing the URL.
