@@ -4,9 +4,9 @@ PictShare is an multi lingual, open source image hosting service with a simple r
 
 ![PictShare](https://www.pictshare.net/da6733407c.png)
 
-The filter update is out!
+The rotation and filter update is out!
 ========
-[Check it out](#filters)
+[Check it out](#rotation)
 
 ## Why would I want to host my own images?
 If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
@@ -34,6 +34,14 @@ Just by editing the URL and adding the size (in width**x**height) the image gets
 
 You can limit the number of resizes per image in the ```index.php``` file
 
+## Rotation
+You can now see a rotated version of an image by adding ````/left/```, ````right``` or ````/upside/``` to the URL.
+
+Original URL: https://www.pictshare.net/b260e36b60.jpg
+Rotated left: https://www.pictshare.net/left/b260e36b60.jpg
+Rotated right: https://www.pictshare.net/right/b260e36b60.jpg
+Upside down: https://www.pictshare.net/upsdie/b260e36b60.jpg
+
 ## Filters
 PictShare also supports multiple filters (at once) that you can apply just by changing the URL.
 Filters that need values are set like this: ```filtername_value```. Eg: ```pixelate_10```
@@ -47,7 +55,7 @@ grayscale      | -none-              | https://pictshare.net/grayscale/b260e36b6
 brightness     | -255 to 255         | https://pictshare.net/brightness_100/b260e36b60.jpg 	| ![brightness](https://pictshare.net/brightness_100/200/b260e36b60.jpg)
 edgedetect     | -none-              | https://pictshare.net/edgedetect/b260e36b60.jpg 		  | ![edgedetect](https://pictshare.net/edgedetect/200/b260e36b60.jpg)
 smooth         | -10 to 2048         | https://pictshare.net/smooth_3/b260e36b60.jpg 		    | ![smooth](https://pictshare.net/smooth_3/200/b260e36b60.jpg)
-contrast       | -100 to 100         | https://pictshare.net/contrast_-90/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_90/200/b260e36b60.jpg)
+contrast       | -100 to 100         | https://pictshare.net/contrast_40/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_40/200/b260e36b60.jpg)
 pixelate       | -100 to 100         | https://pictshare.net/pixelate_10/b260e36b60.jpg      | ![pixelate](https://pictshare.net/pixelate_10/200/b260e36b60.jpg)
 
 ## You can also mix filters and resizes
