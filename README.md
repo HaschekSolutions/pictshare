@@ -41,8 +41,8 @@ Filters that need values are set like this: ```filtername_value```. Eg: ```pixel
 Original URL: ```https://www.pictshare.net/b260e36b60.jpg```
 
 
-| Filter     |      Paramter      |      Example URL       |      Result    |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Filter     |      Paramter      |      Example URL       |
+| -------------------------------------------------------- |
 | negative       | -none-              | https://pictshare.net/negative/b260e36b60.jpg        | 
 | grayscale      | -none-              | https://pictshare.net/grayscale/b260e36b60.jpg 		  | 
 | brightness     | -255 to 255         | https://pictshare.net/brightness_100/b260e36b60.jpg 	| 
