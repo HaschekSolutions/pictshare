@@ -5,7 +5,7 @@ session_start();
 define('LOG_UPLOADER', true);
 
 //how many resizes may one image have?
-define('MAX_RESIZED_IMAGES',10);
+define('MAX_RESIZED_IMAGES',50);
 
 //don't change stuff beyond this point
 define('DOMAINPATH',(isset($_SERVER['HTTPS'])?'https':'http').'://'.$_SERVER['HTTP_HOST'].'/');
