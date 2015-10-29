@@ -35,7 +35,7 @@ Just by editing the URL and adding the size (in width**x**height) the image gets
 You can limit the number of resizes per image in the ```index.php``` file
 
 ## Rotation
-You can now see a rotated version of an image by adding ````/left/```, ````right``` or ````/upside/``` to the URL.
+You can now see a rotated version of an image by adding ```/left/```, ```/right/``` or ```/upside/``` to the URL.
 
 - Original URL: https://www.pictshare.net/b260e36b60.jpg
 - Rotated left: https://www.pictshare.net/left/b260e36b60.jpg
