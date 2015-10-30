@@ -80,6 +80,11 @@ class PictshareModel extends Model
 
 	function uploadImageFromURL($url)
 	{
+		
+				
+		$type = $this->getTypeOfFile($url);
+		$type = $this->isTypeAllowed($type);
+			
 		$dup_id = $this->isDuplicate($url);
 		if($dup_id)
 		{
@@ -88,14 +93,9 @@ class PictshareModel extends Model
 		}
 		else
 		{
+			$hash = $this->getNewHash($type);
 			$this->saveSHAOfFile($url,$hash);
 		}
-				
-		$type = $this->getTypeOfFile($url);
-		$type = $this->isTypeAllowed($type);
-		
-		if(!$hash)
-			$hash = $this->getNewHash($type);
 		
 		
 		if(!$type)
