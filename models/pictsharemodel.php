@@ -86,6 +86,7 @@ class PictshareModel extends Model
 		$type = $this->isTypeAllowed($type);
 			
 		$dup_id = $this->isDuplicate($url);
+
 		if($dup_id)
 		{
 			$hash = $dup_id;
