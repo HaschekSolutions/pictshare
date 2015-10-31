@@ -48,7 +48,7 @@ smooth         | -10 to 2048         | https://pictshare.net/smooth_3/b260e36b60
 contrast       | -100 to 100         | https://pictshare.net/contrast_40/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_40/200/b260e36b60.jpg)
 pixelate       | -100 to 100         | https://pictshare.net/pixelate_10/b260e36b60.jpg      | ![pixelate](https://pictshare.net/pixelate_10/200/b260e36b60.jpg)
 
-You can also combine as many options as you want. Even multiple times! Want your image to be negative, resized, grayscale and with increased brightness? No problem: https://pictshare.net/500x500/grayscale/negative/brightness_100/b260e36b60.jpg
+You can also combine as many options as you want. Even multiple times! Want your image to be negative, resized, grayscale , with increased brightness and negate it again? No problem: https://pictshare.net/500x500/grayscale/negative/brightness_100/negative/b260e36b60.jpg
 
 ## How does the external-upload-API work?
 
