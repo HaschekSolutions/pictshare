@@ -208,12 +208,7 @@ function renderImage($data)
         case 'gif': 
             header ("Content-type: image/gif");
             $im = imagecreatefromgif($path);
-            if(!$cached)
-            {
-                changeImage($im,$data);
-                imagegif($im,$cachepath);
-            }
-            imagegif($im);
+            readfile($path);
         break;
     }
     
