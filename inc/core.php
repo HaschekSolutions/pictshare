@@ -180,7 +180,7 @@ function renderImage($data)
         $path = $cachepath;
         $cached = true;
     }
-    else if($pm->countResizedImages($hash)>MAX_RESIZED_IMAGES) //if the number of max resized images is reached, just show the real one
+    else if(MAX_RESIZED_IMAGES > -1 && $pm->countResizedImages($hash)>MAX_RESIZED_IMAGES) //if the number of max resized images is reached, just show the real one
         $path = ROOT.DS.'upload'.DS.$hash.DS.$hash;
     
     switch($type)

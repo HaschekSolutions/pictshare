@@ -96,8 +96,11 @@ class Image
         $width = imagesx($img);
         $height = imagesy($img);
         
-        if($maxwidth>$width)$maxwidth = $width;
-        if($maxheight>$height)$maxheight = $height;
+        if(!ALLOW_BLOATING)
+        {
+            if($maxwidth>$width)$maxwidth = $width;
+            if($maxheight>$height)$maxheight = $height;
+        }
             
         if ($height > $width) 
         {   
