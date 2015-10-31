@@ -4,9 +4,9 @@ PictShare is an multi lingual, open source image hosting service with a simple r
 
 ![PictShare](https://www.pictshare.net/da6733407c.png)
 
-The rotation and filter update is out!
+Now with rotations and filters!
 ========
-[Check it out](#rotation)
+[Check it out](#smart-query-system)
 
 ## Why would I want to host my own images?
 If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
@@ -24,7 +24,7 @@ PictShare images can be changed after upload just by modifying the URL. It works
 
 <span style="color:blue">https://base.domain</span>/<span style="color:red">&lt;options&gt;</span>/<span style="color:green">&lt;image&gt;</span>
 
-For example: <span style="color:blue">https://pictshare.net</span>/<span style="color:red">100x100/negative</span>/<span style="color:green">b260e36b60.jpg</span>
+For example: https://pictshare.net/100x100/negative/b260e36b60.jpg will show you the uploaded Image ```b260e36b60.jpg````but resize it to 100x100 and apply the "negative" filter. The original image will stay untouched.
 
 ### Available options
 Original URL: ```https://www.pictshare.net/b260e36b60.jpg```
