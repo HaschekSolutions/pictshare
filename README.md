@@ -103,6 +103,37 @@ Server will automatically try to guess the file type (which should work in 90% o
 - (optional) You can and should put a [nginx](https://www.nginx.com/) proxy before the Apache server. That thing is just insanely fast with static content like images.
 - (optional) To secure your traffic I'd highly recommend getting an [SSL Cert](https://letsencrypt.org/) for your server if you don't already have one.
 
+### On nginx
+This is a simple config file that should make PictShare work on nginx
+
+```
+server {
+        listen 80 default_server;
+        server_name your.awesome.domain.name;
+
+        root /var/www/pictshare; # or where ever you put it
+        index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?url=$request_uri; # instead of htaccess mod_rewrite
+    }
+
+    location ~ \.php {
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_script_name;
+    }
+
+    location ~ /(upload|tmp) {
+       deny all;
+       return 404;
+    }
+
+}
+```
+
 ## Browser extensions
 - Chrome: https://chrome.google.com/webstore/detail/pictshare-1-click-imagesc/mgomffcdpnohakmlhhjmiemlolonpafc
   - Source: https://github.com/chrisiaut/PictShare-Chrome-extension
