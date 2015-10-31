@@ -106,6 +106,9 @@ Server will automatically try to guess the file type (which should work in 90% o
 ### On nginx
 This is a simple config file that should make PictShare work on nginx
 
+- Install php fpm: ```apt-get install php5-fpm```
+- Install php Graphics libraries: ```apt-get install php5-gd```
+
 ```
 server {
         listen 80 default_server;
