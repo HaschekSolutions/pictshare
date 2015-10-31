@@ -16,40 +16,30 @@ If you own a server (even an home server) you can host your own PictShare instan
 - Simple API to upload any image from remote servers to your instance via URL and via Base64
 - 100% file based - no database needed
 - PictShare removes all exif data so you can upload photos from your phone and all GPS tags and camera model info get wiped
-- Builtin and simple resizing and caching
+- Smart resize, filter and rotation features
 - Duplicates don't take up space. If the exact same images is uploaded twice, the second upload will link to the first
 
-## What's that about resizing?
-Lets's say you have uploaded this image:
-![Venus](https://www.pictshare.net/b260e36b60.jpg)
+## Smart query system
+PictShare images can be changed after upload just by modifying the URL. It works like this:
 
-URL: ```https://www.pictshare.net/b260e36b60.jpg```
+<span style="color:blue">https://base.domain</span>/<span style="color:red">&lt;options&gt;</span>/<span style="color:green">&lt;image&gt;</span>
 
-But you want to use it as your avatar in some forum that only allows **100x100** pixel images.
-Instead of editing the picture and re-uploading it you just edit the URL and add "/100x100/ before the image name like this: ```https://www.pictshare.net/100x100/b260e36b60.jpg```
+For example: <span style="color:blue">https://pictshare.net</span>/<span style="color:red">100x100/negative</span>/<span style="color:green">b260e36b60.jpg</span>
 
-![Smaller Venus](https://www.pictshare.net/100x100/b260e36b60.jpg)
-
-Just by editing the URL and adding the size (in width**x**height) the image gets resized and the resized version gets cached to the disk so it loads much faster on the next request.
-
-You can limit the number of resizes per image in the ```index.php``` file
-
-## Rotation
-You can now see a rotated version of an image by adding ```/left/```, ```/right/``` or ```/upside/``` to the URL.
-
-- Original URL: https://www.pictshare.net/b260e36b60.jpg
-- Rotated left: https://www.pictshare.net/left/b260e36b60.jpg
-- Rotated right: https://www.pictshare.net/right/b260e36b60.jpg
-- Upside down: https://www.pictshare.net/upside/b260e36b60.jpg
-
-## Filters
-PictShare also supports multiple filters (at once) that you can apply just by changing the URL.
-Filters that need values are set like this: ```filtername_value```. Eg: ```pixelate_10```
-
+### Available options
 Original URL: ```https://www.pictshare.net/b260e36b60.jpg```
 
-     Filter    |      Paramter      |      Example URL       |      Result      
+Note: If an option needs a value it works like this: ```optionname_value```. Eg: ```pixelate_10```
+
+     Option    |      Paramter      |      Example URL       |      Result
 -------------- | ------------------ | ---------------------- | ---------------
+**Resizing** |  |  | 
+<span style="color:blue">&lt;width&gt;</span>x<span style="color:red">&lt;height&gt;</span> | -none-			| https://pictshare.net/50x50/b260e36b60.jpg | ![Resized](https://pictshare.net/50x50/b260e36b60.jpg)
+**Rotating** |  |  | 
+left		   | -none-				| https://pictshare.net/left/b260e36b60.jpg | ![Rotated left]()
+right		   | -none-				| https://pictshare.net/right/b260e36b60.jpg | ![Rotated right]()
+upside		   | -none-				| https://pictshare.net/upside/b260e36b60.jpg | ![Upside down]()
+**Filters** |  |  | 
 negative       | -none-              | https://pictshare.net/negative/b260e36b60.jpg         | ![Negative](https://pictshare.net/negative/200/b260e36b60.jpg)
 grayscale      | -none-              | https://pictshare.net/grayscale/b260e36b60.jpg 		    | ![grayscale](https://pictshare.net/grayscale/200/b260e36b60.jpg)
 brightness     | -255 to 255         | https://pictshare.net/brightness_100/b260e36b60.jpg 	| ![brightness](https://pictshare.net/brightness_100/200/b260e36b60.jpg)
@@ -58,11 +48,7 @@ smooth         | -10 to 2048         | https://pictshare.net/smooth_3/b260e36b60
 contrast       | -100 to 100         | https://pictshare.net/contrast_40/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_40/200/b260e36b60.jpg)
 pixelate       | -100 to 100         | https://pictshare.net/pixelate_10/b260e36b60.jpg      | ![pixelate](https://pictshare.net/pixelate_10/200/b260e36b60.jpg)
 
-## You can also mix filters and resizes
-
-Just add what you want to the URL and PictShare will render it for you.
-
-For example if you want to pixelate and resize it and make it a grayscale you can do that: ```https://www.pictshare.net/400x400/brightness_100/negative/b260e36b60.jpg```
+You can also combine as many options as you want. Even multiple times! Want your image to be negative, resized, grayscale and with increased brightness? No problem: https://pictshare.net/500x500/grayscale/negative/brightness_100/b260e36b60.jpg
 
 ## How does the external-upload-API work?
 
