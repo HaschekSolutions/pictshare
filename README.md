@@ -80,12 +80,14 @@ Server will automatically try to guess the file type (which should work in 90% o
 - You have full control over your data. PictShare doesn't need remote libaries or tracking crap
 
 ## Requirements
-- Apache Webserver with PHP (Apache because of the included .htaccess files)
+- Apache or Nginx Webserver with PHP
 - PHP 5 GD library
-- Some hostname or subdomain. Site might get messed up if it's not stored in the root directory of the webserver
+- A domain or sub-domain since PictShare can't be run from a subfolder of some other domain
 
-## Installing PictShare
-- Just unpack it on your webserver (remember, pictshare needs to be in a root directory) and it should work out of the box
+## Installation
+- Make sure you have PHP5 GD libraries installed: ```apt-get install php5-gd```
+- Unpack the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip)
+- Rename /inc/example.config.inc.php to /inc/config.inc.php
 - (optional) You can and should put a [nginx](https://www.nginx.com/) proxy before the Apache server. That thing is just insanely fast with static content like images.
 - (optional) To secure your traffic I'd highly recommend getting an [SSL Cert](https://letsencrypt.org/) for your server if you don't already have one.
 
@@ -122,6 +124,9 @@ server {
 
 }
 ```
+
+## Upgrading
+- Just re-download the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip) file and extract and overwrite existing pictshare files. Uploads and config won't be affected.
 
 ## Browser extensions
 - Chrome: https://chrome.google.com/webstore/detail/pictshare-1-click-imagesc/mgomffcdpnohakmlhhjmiemlolonpafc
