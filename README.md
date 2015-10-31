@@ -34,11 +34,11 @@ Note: If an option needs a value it works like this: ```optionname_value```. Eg:
      Option    |      Paramter      |      Example URL       |      Result
 -------------- | ------------------ | ---------------------- | ---------------
 **Resizing** |  |  | 
-<span style="color:blue">&lt;width&gt;</span>x<span style="color:red">&lt;height&gt;</span> | -none-			| https://pictshare.net/50x50/b260e36b60.jpg | ![Resized](https://pictshare.net/50x50/b260e36b60.jpg)
+<span style="color:blue">&lt;width&gt;</span>x<span style="color:red">&lt;height&gt;</span> | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg)
 **Rotating** |  |  | 
-left		   | -none-				| https://pictshare.net/left/b260e36b60.jpg | ![Rotated left]()
-right		   | -none-				| https://pictshare.net/right/b260e36b60.jpg | ![Rotated right]()
-upside		   | -none-				| https://pictshare.net/upside/b260e36b60.jpg | ![Upside down]()
+left		   | -none-				| https://pictshare.net/left/b260e36b60.jpg | ![Rotated left](https://pictshare.net/200/left/b260e36b60.jpg)
+right		   | -none-				| https://pictshare.net/right/b260e36b60.jpg | ![Rotated right](https://pictshare.net/200/right/b260e36b60.jpg)
+upside		   | -none-				| https://pictshare.net/upside/b260e36b60.jpg | ![Upside down](https://pictshare.net/200/upside/b260e36b60.jpg)
 **Filters** |  |  | 
 negative       | -none-              | https://pictshare.net/negative/b260e36b60.jpg         | ![Negative](https://pictshare.net/negative/200/b260e36b60.jpg)
 grayscale      | -none-              | https://pictshare.net/grayscale/b260e36b60.jpg 		    | ![grayscale](https://pictshare.net/grayscale/200/b260e36b60.jpg)
