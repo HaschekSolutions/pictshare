@@ -24,7 +24,7 @@ PictShare images can be changed after upload just by modifying the URL. It works
 
 <span style="color:blue">https://base.domain</span>/<span style="color:red">&lt;options&gt;</span>/<span style="color:green">&lt;image&gt;</span>
 
-For example: https://pictshare.net/100x100/negative/b260e36b60.jpg will show you the uploaded Image ```b260e36b60.jpg````but resize it to 100x100 and apply the "negative" filter. The original image will stay untouched.
+For example: https://pictshare.net/100x100/negative/b260e36b60.jpg will show you the uploaded Image ```b260e36b60.jpg``` but resize it to 100x100 pixels and apply the "negative" filter. The original image will stay untouched.
 
 ### Available options
 Original URL: ```https://www.pictshare.net/b260e36b60.jpg```
@@ -33,9 +33,9 @@ Note: If an option needs a value it works like this: ```optionname_value```. Eg:
 
      Option    |      Paramter      |      Example URL       |      Result
 -------------- | ------------------ | ---------------------- | ---------------
-**Resizing** |  |  | 
-<span style="color:blue">&lt;width&gt;</span>x<span style="color:red">&lt;height&gt;</span> | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg)
-**Rotating** |  |  | 
+**Resizing**   |  |  | 
+&lt;width&gt;**x**&lt;height&gt; | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg)
+**Rotating**   |  |  | 
 left		   | -none-				| https://pictshare.net/left/b260e36b60.jpg | ![Rotated left](https://pictshare.net/200/left/b260e36b60.jpg)
 right		   | -none-				| https://pictshare.net/right/b260e36b60.jpg | ![Rotated right](https://pictshare.net/200/right/b260e36b60.jpg)
 upside		   | -none-				| https://pictshare.net/upside/b260e36b60.jpg | ![Upside down](https://pictshare.net/200/upside/b260e36b60.jpg)
