@@ -16,6 +16,7 @@ if(SHOW_ERRORS)
 	ini_set('display_errors','On');
 else ini_set('display_errors','Off');
 
+include_once(ROOT.DS.'inc'.DS.'core.php');
 
 $pm = new PictshareModel();
 
