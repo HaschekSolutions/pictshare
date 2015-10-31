@@ -11,6 +11,8 @@ Now with rotations and filters!
 ## Why would I want to host my own images?
 If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
 
+If you're an app developer or sysadmin you can use it for a centralized image hosting. With the simple upload API you can upload images to your PictShare instance and get a nice short URL
+
 ## Features
 - Uploads without logins or validation (that's a good thing, right?)
 - Simple API to upload any image from remote servers to your instance via URL and via Base64
@@ -30,6 +32,7 @@ For example: https://pictshare.net/100x100/negative/b260e36b60.jpg will show you
 Original URL: ```https://www.pictshare.net/b260e36b60.jpg```
 
 Note: If an option needs a value it works like this: ```optionname_value```. Eg: ```pixelate_10```
+If there is some option that's not recognized by PictShare it's simply ignored, so this will work: https://www.pictshare.net/pictshare-is-awesome/b260e36b60.jpg and also even this will work: https://www.pictshare.net/b260e36b60.jpg/how-can-this-still/work/
 
      Option    |      Paramter      |      Example URL       |      Result
 -------------- | ------------------ | ---------------------- | ---------------
