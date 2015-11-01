@@ -16,11 +16,12 @@ If you're an app developer or sysadmin you can use it for a centralized image ho
 
 ## Features
 - Uploads without logins or validation (that's a good thing, right?)
-- Simple API to upload any image from remote servers to your instance via URL and via Base64
+- Simple API to upload any image from remote servers to your instance [via URL](#upload-from-url) and [via Base64](#upload-from-base64-string)
 - 100% file based - no database needed
 - PictShare removes all exif data so you can upload photos from your phone and all GPS tags and camera model info get wiped
-- Smart resize, filter and rotation features
+- Smart [resize, filter and rotation](#smart-query-system) features
 - Duplicates don't take up space. If the exact same images is uploaded twice, the second upload will link to the first
+- You can control who can upload images or use filters/resizes by defining an [upload-code](#restriction-settings)
 
 ## Smart query system
 PictShare images can be changed after upload just by modifying the URL. It works like this:
@@ -88,7 +89,7 @@ If set, will show users a code field in the upload form. If it doesn't match you
 If enabled, the Upload API will need the variable ```upload_code``` via GET (eg: ```https://pictshare.net/backend.php?getimage=https://www.0xf.at/css/imgs/logo.png&upload_code=YourUploadCodeHere```)
 
 ### IMAGE_CHANGE_CODE
-If set,the [options](#smart-query-system) will only work if the URL got the code in it. You can provide the code as option ```changecode_YourChangeCode```
+If set,the [options](#available-options) will only work if the URL got the code in it. You can provide the code as option ```changecode_YourChangeCode```
 
 For example: If enabled the image ```https://www.pictshare.net/negative/b260e36b60.jpg``` won't show the negative version but the original.
 If then access the image with the code like this: ```https://www.pictshare.net/changecode_YourChangeCode/b260e36b60.jpg``` it gets cached on the server so the next time someone requests the link without providing the change code, they'll see the inverted image (because you just created it before by accessing the image with the code)
@@ -153,7 +154,6 @@ server {
   - Source: https://github.com/chrisiaut/PictShare-Chrome-extension
 
 ## Coming soon
-- Restricted uploads so you can control who may upload on your instance
 - Albums
 
 ---
