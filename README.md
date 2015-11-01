@@ -4,9 +4,10 @@ PictShare is an multi lingual, open source image hosting service with a simple r
 
 ![PictShare](https://www.pictshare.net/da6733407c.png)
 
-Now with rotations and filters!
+UPDATES
 ========
-[Check it out](#smart-query-system)
+Nov. 01: [Restricted uploads and option-use](#restriction-settings)!
+Oct. 30: [Rotations and filters](#smart-query-system)!
 
 ## Why would I want to host my own images?
 If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
@@ -55,7 +56,7 @@ You can also combine as many options as you want. Even multiple times! Want your
 
 ## How does the external-upload-API work?
 
-### From URL
+### Upload from URL
 PictShare has a simple REST API to upload remote pictures. The API can be accessed via the backend.php file like this:
 
 ```https://pictshare.net/backend.php?getimage=<URL of the image you want to upload>```.
@@ -70,11 +71,27 @@ The server will answer with the file name and the server path in JSON:
 {"status":"OK","type":"png","hash":"10ba188162.png","url":"http:\/\/pictshare.net\/10ba188162.png"}
 ```
 
-### From base64
+### Upload from base64 string
 
 Just send a POST request to ```https://pictshare.net/backend.php``` and send your image in base64 as the variable name ```base64```
 
 Server will automatically try to guess the file type (which should work in 90% of the cases) and if it can't figure it out it'll just upload it as png.
+
+## Restriction settings
+In your ```config.inc.php``` there are two values to be set: ```UPLOAD_CODE``` and ```IMAGE_CHANGE_CODE```
+
+Both can be set to strings or multiple strings semi;colon;separated. If there is a semicolon in the string, any of the elements will work
+
+### UPLOAD_CODE
+If set, will show users a code field in the upload form. If it doesn't match your setting, files won't be uploaded.
+
+If enabled, the Upload API will need the variable ```upload_code``` via GET (eg: ```https://pictshare.net/backend.php?getimage=https://www.0xf.at/css/imgs/logo.png&upload_code=YourUploadCodeHere```)
+
+### IMAGE_CHANGE_CODE
+If set,the [options](#smart-query-system) will only work if the URL got the code in it. You can provide the code as option ```changecode_YourChangeCode```
+
+For example: If enabled the image ```https://www.pictshare.net/negative/b260e36b60.jpg``` won't show the negative version but the original.
+If then access the image with the code like this: ```https://www.pictshare.net/changecode_YourChangeCode/b260e36b60.jpg``` it gets cached on the server so the next time someone requests the link without providing the change code, they'll see the inverted image (because you just created it before by accessing the image with the code)
 
 ## Security and privacy
 - By hosting your own images you can delete them any time you want
