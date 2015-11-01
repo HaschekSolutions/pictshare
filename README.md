@@ -6,8 +6,8 @@ PictShare is an multi lingual, open source image hosting service with a simple r
 
 UPDATES
 ========
-Nov. 01: [Restricted uploads and option-use](#restriction-settings)!
-Oct. 30: [Rotations and filters](#smart-query-system)!
+- Nov. 01: [Restricted uploads and option-use](#restriction-settings)!
+- Oct. 30: [Rotations and filters](#smart-query-system)!
 
 ## Why would I want to host my own images?
 If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
