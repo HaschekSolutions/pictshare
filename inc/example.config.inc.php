@@ -1,5 +1,17 @@
 <?php 
 
+//if set to a string, this string must be provided before upload.
+//you can set multiple codes by;separating;them;with;semicolons
+//if set to false, everybody can upload
+//for API uploads, the GET Variable 'upload_code' must be provided
+define('UPLOAD_CODE', false);
+
+//if set to a string, this string must be provided in the URL to use any options (filters, resizes, etc..)
+//you can set multiple codes by;separating;them;with;semicolons
+//if set to false, everybody can use options on all images
+//if image change code is not provided but the requested image (with options) already exists, it will render to the user just fine
+define('IMAGE_CHANGE_CODE', false);
+
 // shall we log all uploaders IP addresses?
 define('LOG_UPLOADER', true);
 

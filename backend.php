@@ -20,6 +20,9 @@ include_once(ROOT.DS.'inc'.DS.'core.php');
 
 $pm = new PictshareModel();
 
+if(UPLOAD_CODE!=false && !$pm->uploadCodeExists($_REQUEST['upload_code']))
+	exit(json_encode(array('status'=>'ERR','reason'=>'Wrong upload code provided')));
+
 if($_REQUEST['getimage'])
 {
 	$url = $_REQUEST['getimage'];

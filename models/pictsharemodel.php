@@ -10,6 +10,10 @@ class PictshareModel extends Model
 	function renderUploadForm()
 	{
 		$maxfilesize = (int)(ini_get('upload_max_filesize'));
+		
+		if(UPLOAD_CODE!=false)
+			$upload_code_form = '<strong>'.$this->translate(20).': </strong><input class="input" type="password" name="upload_code" value="'.$_REQUEST['upload_code'].'"><div class="clear"></div>';
+		
 		return '
 		<div class="clear"></div>
 		<strong>'.$this->translate(0).': '.$maxfilesize.'MB / File</strong><br>
@@ -17,6 +21,7 @@ class PictshareModel extends Model
 		<br><br>
 		<FORM enctype="multipart/form-data" method="post">
 		<div id="formular">
+			'.$upload_code_form.'
 			<strong>'.$this->translate(4).': </strong><input class="input" type="file" name="pic[]" multiple><div class="clear"></div>
 			<div class="clear"></div><br>
 		</div>
@@ -125,9 +130,41 @@ class PictshareModel extends Model
 
 		return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
 	}
+	
+	function uploadCodeExists($code)
+	{
+		if(strpos(UPLOAD_CODE,';'))
+		{
+			$codes = explode(';',UPLOAD_CODE);
+			foreach($codes as $ucode)
+				if($code==$ucode) return true;
+		}	
+		
+		if($code==UPLOAD_CODE) return true;
+		
+		return false;
+	}
+	
+	function changeCodeExists($code)
+	{
+		if(IMAGE_CHANGE_CODE===false) return true;
+		if(strpos(IMAGE_CHANGE_CODE,';'))
+		{
+			$codes = explode(';',IMAGE_CHANGE_CODE);
+			foreach($codes as $ucode)
+				if($code==$ucode) return true;
+		}
+		
+		if($code==IMAGE_CHANGE_CODE) return true;
+		
+		return false;
+	}
 
 	function ProcessUploads()
 	{
+		if(UPLOAD_CODE!=false && !$this->uploadCodeExists($_REQUEST['upload_code']))
+			return '<span class="error">' . $this->translate(21) . '</span>';
+		
 		$im = new Image();
 		$i = 0;
 		foreach ($_FILES["pic"]["error"] as $key => $error)
@@ -142,7 +179,6 @@ class PictshareModel extends Model
 				}
 			}
 		}
-		$html = new HTML();
 		
 		return $o;
 	}
@@ -206,6 +242,8 @@ class PictshareModel extends Model
 		    	$words[17] = 'Dieses Bild wurde '.$params[0].' mal von '.$params[1].' verschiedenen IPs gesehen und hat '.$params[2].' Traffic verursacht';
 		    	$words[18] = 'Dieses Bild wurde von folgenden Ländern aufgerufen: ';
 		    	$words[19] = $params[0].' Aufrufe aus '.$params[1];
+				$words[20] = 'Upload-Code';
+				$words[21] = 'Falscher Upload Code eingegeben. Upload abgebrochen';
 
 		    break;
 
@@ -230,6 +268,8 @@ class PictshareModel extends Model
 		    	$words[17] = 'Was seen '.$params[0].' times by '.$params[1].' unique IPs and produced '.$params[2].' traffic';
 		    	$words[18] = 'This picture was seen from the following countries: ';
 		    	$words[19] = $params[0].' views from '.$params[1];
+				$words[20] = 'Upload code';
+				$words[21] = 'Invalid upload code provided';
 		}
 
 		return $words[$index];

@@ -66,6 +66,9 @@ function whatToDo($url)
         $el = strtolower($el);
         if(!$el) continue;
         
+        if(IMAGE_CHANGE_CODE!=false && substr($el,0,10)=='changecode')
+            $changecode = substr($el,11);
+        
         if(isImage($el))
             $data['hash']=$el;
         else if(isSize($el))
@@ -94,7 +97,7 @@ function whatToDo($url)
         render($vars);
     }
     else
-        renderImage($data);
+        renderImage($data,$changecode);
 }
 
 function isLegacyThumbnail($val)
@@ -164,7 +167,7 @@ function renderLegacyResized($path)
     renderResizedImage($size,$hash);
 }
 
-function renderImage($data)
+function renderImage($data,$changecode)
 {
     $hash = $data['hash'];
     $pm = new PictshareModel();
@@ -190,8 +193,12 @@ function renderImage($data)
             $im = imagecreatefromjpeg($path);
             if(!$cached)
             {
-                changeImage($im,$data);
-                imagejpeg($im,$cachepath,95);
+                if($pm->changeCodeExists($changecode))
+                {
+                    changeImage($im,$data);
+                    imagejpeg($im,$cachepath,95);
+                }
+                    
             }
             imagejpeg($im);
         break;
@@ -200,8 +207,11 @@ function renderImage($data)
             $im = imagecreatefrompng($path);
             if(!$cached)
             {
-                changeImage($im,$data);
-                imagepng($im,$cachepath,1);
+                if($pm->changeCodeExists($changecode))
+                {
+                    changeImage($im,$data);
+                    imagepng($im,$cachepath,1);
+                }
             }
             imagepng($im);
         break;
