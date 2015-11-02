@@ -318,13 +318,16 @@ class PictshareModel extends Model
 	
 	function processSingleUpload($file,$name)
 	{
-		if(UPLOAD_CODE!=false && !$pm->uploadCodeExists($_REQUEST['upload_code']))
-			exit(json_encode(array('status'=>'ERR','reason'=>'Wrong upload code provided')));
+		if(UPLOAD_CODE && !$pm->uploadCodeExists($_REQUEST['upload_code']))
+			exit(json_encode(array('status'=>'ERR','reason'=>$this->translate(21))));
 		
 		$im = new Image();
-		$i = 0;
 		if ($_FILES[$name]["error"] == UPLOAD_ERR_OK)
 		{
+			$type = $this->getTypeOfFile($_FILES[$name]["tmp_name"]);
+			$type = $this->isTypeAllowed($type);
+			if(!$type) exit(json_encode(array('status'=>'ERR','reason'=>'Unsupported type')));
+			
 			$data = $this->uploadImageFromURL($_FILES[$name]["tmp_name"]);		
 			if($data['status']=='OK')
 			{
