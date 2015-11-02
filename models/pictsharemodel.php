@@ -315,6 +315,27 @@ class PictshareModel extends Model
 		
 		return false;
 	}
+	
+	function processSingleUpload($file,$name)
+	{
+		if(UPLOAD_CODE!=false && !$pm->uploadCodeExists($_REQUEST['upload_code']))
+			exit(json_encode(array('status'=>'ERR','reason'=>'Wrong upload code provided')));
+		
+		$im = new Image();
+		$i = 0;
+		if ($_FILES[$name]["error"] == UPLOAD_ERR_OK)
+		{
+			$data = $this->uploadImageFromURL($_FILES[$name]["tmp_name"]);		
+			if($data['status']=='OK')
+			{
+				$hash = $data['hash'];
+				return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
+			}
+		}
+
+		
+		return $o;
+	}
 
 	function ProcessUploads()
 	{

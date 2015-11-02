@@ -29,6 +29,11 @@ if($_REQUEST['getimage'])
 
 	echo json_encode($pm->uploadImageFromURL($url));
 }
+if($_FILES['postimage'])
+{
+	$image = $_FILES['postimage'];
+	echo json_encode($pm->processSingleUpload($file,'postimage'));
+}
 else if($_REQUEST['base64'])
 {
      $data = $_REQUEST['base64'];
@@ -37,6 +42,5 @@ else if($_REQUEST['base64'])
 }
 else if($_REQUEST['getsize'])
 	echo json_encode($pm->getSizeOfURL($_REQUEST['getsize']));
-
 else
 	echo json_encode(array('status'=>'ERR'));

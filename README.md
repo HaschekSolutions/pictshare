@@ -59,7 +59,7 @@ You can also combine as many options as you want. Even multiple times! Want your
 
 ## How does the external-upload-API work?
 
-### Upload from URL
+### Upload from external URL
 PictShare has a simple REST API to upload remote pictures. The API can be accessed via the backend.php file like this:
 
 ```https://pictshare.net/backend.php?getimage=<URL of the image you want to upload>```.
@@ -70,8 +70,18 @@ Request: ```https://pictshare.net/backend.php?getimage=https://www.0xf.at/css/im
 
 The server will answer with the file name and the server path in JSON:
 
+```json
+{"status":"OK","type":"png","hash":"10ba188162.png","url":"https:\/\/pictshare.net\/10ba188162.png"}
 ```
-{"status":"OK","type":"png","hash":"10ba188162.png","url":"http:\/\/pictshare.net\/10ba188162.png"}
+
+### Upload via POST
+
+Send a POST request to ```https://pictshare.net/backend.php``` and send the image in the variable ```postimage```.
+
+Server will return JSON of uploaded data like this:
+
+```json
+{"status":"OK","type":"png","hash":"2f18a052c4.png","url":"https:\/\/pictshare.net\/2f18a052c4.png","domain":"https:\/\/pictshare.net\/"}
 ```
 
 ### Upload from base64 string
