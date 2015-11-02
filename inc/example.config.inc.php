@@ -1,7 +1,7 @@
 <?php 
 
 //If set, upload form will only be shown on that location
-//eg: define('UPLOAD_FORM_LOCATION', '/secret/upload'); then the upload form will only be visible
+//eg: define('UPLOAD_FORM_LOCATION', 'secret/upload'); then the upload form will only be visible
 //from http://your.domain/secret/upload
 define('UPLOAD_FORM_LOCATION', false);
 
