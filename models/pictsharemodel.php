@@ -39,7 +39,7 @@ class PictshareModel extends Model
 			$el = strtolower($el);
 			if(!$el) continue;
 			
-			if(IMAGE_CHANGE_CODE!=false && substr($el,0,10)=='changecode')
+			if(IMAGE_CHANGE_CODE && substr($el,0,10)=='changecode')
 				$data['changecode'] = substr($el,11);
 			
 			if($this->isImage($el))
@@ -167,7 +167,7 @@ class PictshareModel extends Model
 	{
 		$maxfilesize = (int)(ini_get('upload_max_filesize'));
 		
-		if(UPLOAD_CODE!=false)
+		if(UPLOAD_CODE)
 			$upload_code_form = '<strong>'.$this->translate(20).': </strong><input class="input" type="password" name="upload_code" value="'.$_REQUEST['upload_code'].'"><div class="clear"></div>';
 		
 		return '
@@ -303,7 +303,7 @@ class PictshareModel extends Model
 	
 	function changeCodeExists($code)
 	{
-		if(IMAGE_CHANGE_CODE===false) return true;
+		if(!IMAGE_CHANGE_CODE) return true;
 		if(strpos(IMAGE_CHANGE_CODE,';'))
 		{
 			$codes = explode(';',IMAGE_CHANGE_CODE);
@@ -318,7 +318,7 @@ class PictshareModel extends Model
 
 	function ProcessUploads()
 	{
-		if(UPLOAD_CODE!=false && !$this->uploadCodeExists($_REQUEST['upload_code']))
+		if(UPLOAD_CODE && !$this->uploadCodeExists($_REQUEST['upload_code']))
 			return '<span class="error">' . $this->translate(21) . '</span>';
 		
 		$im = new Image();
