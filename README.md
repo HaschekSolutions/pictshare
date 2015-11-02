@@ -161,9 +161,10 @@ server {
 ## Upgrading
 - Just re-download the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip) file and extract and overwrite existing pictshare files. Uploads and config won't be affected.
 
-## Browser extensions
-- Chrome: https://chrome.google.com/webstore/detail/pictshare-1-click-imagesc/mgomffcdpnohakmlhhjmiemlolonpafc
+## Addons
+- Chrome Browser extension: https://chrome.google.com/webstore/detail/pictshare-1-click-imagesc/mgomffcdpnohakmlhhjmiemlolonpafc
   - Source: https://github.com/chrisiaut/PictShare-Chrome-extension
+- Plugin to upload images with ShareX: https://github.com/chrisiaut/CustomUploaders/blob/master/pictshare.net.json
 
 ## Coming soon
 - Albums
