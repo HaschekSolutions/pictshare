@@ -124,6 +124,10 @@ class Image
             ImageColorAllocate($newimg, $colors['red'], $colors['green'], $colors['blue']);
         }
         
+        imagefill($newimg, 0, 0, IMG_COLOR_TRANSPARENT);
+        imagesavealpha($newimg,true);
+        imagealphablending($newimg, true);
+        
         imagecopyresized($newimg, $img, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
         
         $img = $newimg;
