@@ -129,6 +129,8 @@ function renderImage($data)
                     imagepng($im,$cachepath,1);
                 }
             }
+            imageAlphaBlending($im, true);
+            imageSaveAlpha($im, true);
             imagepng($im);
         break;
         case 'gif': 
