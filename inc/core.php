@@ -59,14 +59,29 @@ function whatToDo($url)
     
     if(!is_array($data) || !$data['hash'])
     {
-        if($_POST['submit']==$pm->translate(3))
-            $o=$pm->ProcessUploads();
-        else
-            $o.= $pm->renderUploadForm();
+        if((UPLOAD_FORM_LOCATION && $url==UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION && $url='/'))
+        {
+            if($_POST['submit']==$pm->translate(3))
+                $o=$pm->ProcessUploads();
+            else
+                $o.= $pm->renderUploadForm();
+            
+            $vars['content'] = $o;
+            $vars['slogan'] = $pm->translate(2);
+            
+        }
         
-        $vars['content'] = $o;
-        $vars['slogan'] = $pm->translate(2);
-        
+        if(!$vars && LOW_PROFILE)
+        {
+            header('HTTP/1.0 404 Not Found');
+            exit();
+        }
+        else if(!$vars)
+        {
+            $vars['content'] = $pm->translate(12);
+            $vars['slogan'] = $pm->translate(2);
+        }
+
         render($vars);
     }
     else

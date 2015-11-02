@@ -1,5 +1,16 @@
 <?php 
 
+//If set, upload form will only be shown on that location
+//eg: define('UPLOAD_FORM_LOCATION', '/secret/upload'); then the upload form will only be visible
+//from http://your.domain/secret/upload
+define('UPLOAD_FORM_LOCATION', false);
+
+//If set to true, the only page that will be rendered is the upload form
+//if a wrong link is provided, 404 will be shown instead of the error page
+//It's meant to be used to hide the fact that you're using pictshare and your site just looks like a content server
+//use in combination with UPLOAD_FORM_LOCATION for maximum sneakiness
+define('LOW_PROFILE', false);
+
 //if set to a string, this string must be provided before upload.
 //you can set multiple codes by;separating;them;with;semicolons
 //if set to false, everybody can upload
