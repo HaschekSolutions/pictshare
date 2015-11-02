@@ -6,6 +6,162 @@ class PictshareModel extends Model
 	{
 		return array('status'=>'ok');
 	}
+	
+	function getSizeOfURL($url)
+	{
+		$url = rawurldecode($url);
+		$data = $this->urlToData($url);
+		$hash = $data['hash'];
+		if(!$hash)
+			return array('status'=>'ERR','Reason'=>'Image not found');
+		
+		$file = $this->getCacheName($data);
+		$html = new HTML;
+		
+		$path = ROOT.DS.'upload'.DS.$hash.DS.$file;
+		if(file_exists($path))
+		{
+			$byte = filesize($path);
+			return array('status'=>'ok','size'=>$byte,'humansize'=>$html->renderSize($byte));
+		}
+			
+		else
+			return array('status'=>'ERR','Reason'=>'Image not found');
+	}
+	
+	function urlToData($url)
+	{
+		$html = new HTML;
+		$url = explode("/",$url);
+		foreach($url as $el)
+		{
+			$el = $html->sanatizeString($el);
+			$el = strtolower($el);
+			if(!$el) continue;
+			
+			if(IMAGE_CHANGE_CODE!=false && substr($el,0,10)=='changecode')
+				$data['changecode'] = substr($el,11);
+			
+			if($this->isImage($el))
+				$data['hash']=$el;
+			else if($this->isSize($el))
+				$data['size'] = $el;
+			else if($this->isRotation($el))
+				$data['rotate'] = $el;
+			else if($this->isFilter($el))
+				$data['filter'][] = $el;
+			else if($legacy = $this->isLegacyThumbnail($el)) //so old uploads will still work
+			{
+				$data['hash'] = $legacy['hash'];
+				$data['size'] = $legacy['size'];
+			}
+		}
+		
+		return $data;
+	}
+	
+	function isLegacyThumbnail($val)
+	{
+		if(strpos($val,'_'))
+		{
+			$a = explode('_',$val);
+			$size = $a[0];
+			$hash = $a[1];
+			if(!$this->isSize($size) || !$this->isImage($hash)) return false;
+			
+			return array('hash'=>$hash,'size'=>$size);
+		}
+		else return false;
+	}
+	
+	function isFilter($var)
+	{
+		if(strpos($var,'_'))
+		{
+			$a = explode('_',$var);
+			$var = $a[0];
+			$val = $a[1];
+			if(!is_numeric($val)) return false;
+		}
+		
+		switch($var)
+		{
+			case 'negative':
+			case 'grayscale': 
+			case 'brightness': 
+			case 'edgedetect': 
+			case 'smooth': 
+			case 'contrast':
+			case 'pixelate': return true; 
+			
+			default: return false;
+		}
+	}
+	
+	function isRotation($var)
+	{
+		switch($var)
+		{
+			case 'upside':
+			case 'left':
+			case 'right': return true;
+			
+			default: return false;
+		}
+	}
+	
+	function renderLegacyResized($path)
+	{
+		$a = explode('_',$path);
+		if(count($a)!=2) return false;
+		
+		$hash = $a[1];
+		$size = $a[0];
+		
+		if(!$this->hashExists($hash)) return false;
+		
+		
+		
+		renderResizedImage($size,$hash);
+	}
+	
+	function getCacheName($data)
+	{
+		ksort($data);
+		$name = false;
+		foreach($data as $key=>$val)
+		{
+			if($key!='hash')
+			{
+				if(!is_array($val))
+					$name[] = $key.'_'.$val;
+				else 
+					foreach($val as $valdata)
+						$name[] = $valdata;
+			}
+				
+		}
+		
+		if(is_array($name))
+			$name = implode('.',$name);
+		
+		return ($name?$name.'.':'').$data['hash'];
+	}
+	
+	function isSize($var)
+	{
+		if(is_numeric($var)) return true;
+		$a = explode('x',$var);
+		if(count($a)!=2 || !is_numeric($a[0]) || !is_numeric($a[1])) return false;
+		
+		return true;
+	}
+	
+	function isImage($hash)
+	{
+		if(!$hash) return false;
+		return $this->hashExists($hash);
+	}
 
 	function renderUploadForm()
 	{
@@ -147,6 +303,7 @@ class PictshareModel extends Model
 	
 	function changeCodeExists($code)
 	{
+		var_dump($code);
 		if(IMAGE_CHANGE_CODE===false) return true;
 		if(strpos(IMAGE_CHANGE_CODE,';'))
 		{
