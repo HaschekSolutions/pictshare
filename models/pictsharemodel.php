@@ -303,7 +303,6 @@ class PictshareModel extends Model
 	
 	function changeCodeExists($code)
 	{
-		var_dump($code);
 		if(IMAGE_CHANGE_CODE===false) return true;
 		if(strpos(IMAGE_CHANGE_CODE,';'))
 		{
