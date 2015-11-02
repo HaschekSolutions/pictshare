@@ -29,7 +29,7 @@ if($_REQUEST['getimage'])
 
 	echo json_encode($pm->uploadImageFromURL($url));
 }
-if($_FILES['postimage'])
+else if($_FILES['postimage'])
 {
 	$image = $_FILES['postimage'];
 	echo json_encode($pm->processSingleUpload($file,'postimage'));
