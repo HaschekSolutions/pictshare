@@ -12,7 +12,9 @@ UPDATES
 ## Why would I want to host my own images?
 If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
 
-If you're an app developer or sysadmin you can use it for a centralized image hosting. With the simple upload API you can upload images to your PictShare instance and get a nice short URL
+If you're an **app developer** or **sysadmin** you can use it for a centralized image hosting. With the simple upload API you can upload images to your PictShare instance and get a nice short URL
+
+If you're a blogger like myself, you can use it as storage for your images so the images will still work even if you change blog providers or servers
 
 ## Features
 - Uploads without logins or validation (that's a good thing, right?)
@@ -92,7 +94,7 @@ If enabled, the Upload API will need the variable ```upload_code``` via GET (eg:
 If set,the [options](#available-options) will only work if the URL got the code in it. You can provide the code as option ```changecode_YourChangeCode```
 
 For example: If enabled the image ```https://www.pictshare.net/negative/b260e36b60.jpg``` won't show the negative version but the original.
-If then access the image with the code like this: ```https://www.pictshare.net/changecode_YourChangeCode/b260e36b60.jpg``` it gets cached on the server so the next time someone requests the link without providing the change code, they'll see the inverted image (because you just created it before by accessing the image with the code)
+If you access the image with the code like this: ```https://www.pictshare.net/changecode_YourChangeCode/b260e36b60.jpg``` it gets cached on the server so the next time someone requests the link without providing the change-code, they'll see the inverted image (because you just created it before by accessing the image with the code)
 
 ## Security and privacy
 - By hosting your own images you can delete them any time you want
