@@ -164,7 +164,7 @@ server {
 ## Addons
 - Chrome Browser extension: https://chrome.google.com/webstore/detail/pictshare-1-click-imagesc/mgomffcdpnohakmlhhjmiemlolonpafc
   - Source: https://github.com/chrisiaut/PictShare-Chrome-extension
-- Plugin to upload images with ShareX: https://github.com/chrisiaut/CustomUploaders/blob/master/pictshare.net.json
+- Plugin to upload images with ShareX: https://github.com/ShareX/CustomUploaders/blob/master/pictshare.net.json
 
 ## Coming soon
 - Albums
