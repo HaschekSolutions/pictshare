@@ -61,8 +61,9 @@ function whatToDo($url)
     {
         if((UPLOAD_FORM_LOCATION && $url==UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION && $url='/'))
         {
-            if($_POST['submit']==$pm->translate(3))
-                $o=$pm->ProcessUploads();
+            $upload_answer = $pm->ProcessUploads();
+            if($_POST['submit']==$pm->translate(3) && $upload_answer)
+                $o=$upload_answer;
             else
                 $o.= $pm->renderUploadForm();
             
