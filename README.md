@@ -168,6 +168,9 @@ server {
 
 ## Coming soon
 - Albums
+- Traffic analysis tool for server admins
+
+![Traffic analysis tool](https://www.pictshare.net/102687fe65.gif)
 
 ---
 Design (c) by [Bernhard Moser](mailto://bernhard.moser91@gmail.com)
