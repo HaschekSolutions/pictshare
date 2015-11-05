@@ -161,6 +161,15 @@ server {
 ## Upgrading
 - Just re-download the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip) file and extract and overwrite existing pictshare files. Uploads and config won't be affected.
 
+Or use these commands:
+
+```bash
+# to be run from the directory where your pictshare directory sits in
+git clone https://github.com/chrisiaut/pictshare.git temp
+cp -r temp/* pictshare/.
+rm -rf temp
+```
+
 ## Addons
 - Chrome Browser extension: https://chrome.google.com/webstore/detail/pictshare-1-click-imagesc/mgomffcdpnohakmlhhjmiemlolonpafc
   - Source: https://github.com/chrisiaut/PictShare-Chrome-extension
