@@ -40,7 +40,7 @@ else if($_REQUEST['base64'])
      $format = $_REQUEST['format'];
      echo json_encode($pm->uploadImageFromBase64($data,$format));
 }
-else if($_REQUEST['getsize'])
-	echo json_encode($pm->getSizeOfURL($_REQUEST['getsize']));
+else if($_REQUEST['geturlinfo'])
+	echo json_encode($pm->getURLInfo($_REQUEST['geturlinfo']));
 else
 	echo json_encode(array('status'=>'ERR'));

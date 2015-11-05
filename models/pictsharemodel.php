@@ -7,7 +7,7 @@ class PictshareModel extends Model
 		return array('status'=>'ok');
 	}
 	
-	function getSizeOfURL($url)
+	function getURLInfo($url)
 	{
 		$url = rawurldecode($url);
 		$data = $this->urlToData($url);
@@ -22,7 +22,7 @@ class PictshareModel extends Model
 		if(file_exists($path))
 		{
 			$byte = filesize($path);
-			return array('status'=>'ok','size'=>$byte,'humansize'=>$html->renderSize($byte));
+			return array('status'=>'ok','hash'=>$hash,'cachename'=>$file,'size'=>$byte,'humansize'=>$html->renderSize($byte));
 		}
 			
 		else
