@@ -128,7 +128,7 @@ class Image
         imagesavealpha($newimg,true);
         imagealphablending($newimg, true);
         
-        imagecopyresized($newimg, $img, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+        imagecopyresampled($newimg, $img, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
         
         $img = $newimg;
     }
