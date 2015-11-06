@@ -1,5 +1,13 @@
 <?php 
 
+//If set, can be added to any image URL to delete the image and all versions of the image
+//Must be longer than 10 characters
+//Usage example:
+// image: https://pictshare.net/b260e36b60.jpg
+// to delete it, access https://pictshare.net/delete_YOURMASTERDELETECODE/b260e36b60.jpg
+// Will render one last time, if refreshed won't be on the server anymore
+define('MASTER_DELETE_CODE', false);
+
 //If set, upload form will only be shown on that location
 //eg: define('UPLOAD_FORM_LOCATION', 'secret/upload'); then the upload form will only be visible
 //from http://your.domain/secret/upload

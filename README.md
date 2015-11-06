@@ -6,6 +6,7 @@ PictShare is an multi lingual, open source image hosting service with a simple r
 
 UPDATES
 ========
+- Nov. 06: Master delete code. One code to delete them all
 - Nov. 01: [Restricted uploads and option-use](#restriction-settings)
 - Oct. 30: [Rotations and filters](#smart-query-system)
 
@@ -24,6 +25,7 @@ If you're a blogger like myself, you can use it as storage for your images so th
 - Smart [resize, filter and rotation](#smart-query-system) features
 - Duplicates don't take up space. If the exact same images is uploaded twice, the second upload will link to the first
 - You can control who can upload images or use filters/resizes by defining an [upload-code](#restriction-settings)
+- You can set a code in your ```/inc/config.inc.php``` (MASTER_DELETE_CODE) that, if appended to any URL of an Image, will delete the image and all cached versions of it from the server
 
 ## Smart query system
 PictShare images can be changed after upload just by modifying the URL. It works like this:
@@ -162,6 +164,7 @@ server {
 
 ## Upgrading
 - Just re-download the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip) file and extract and overwrite existing pictshare files. Uploads and config won't be affected.
+- Check if your ```/inc/config.inc.php``` file has all settings required by the ```/inc/example.config.inc.php``` since new options might get added in new versions
 
 Or use these commands:
 
@@ -178,6 +181,7 @@ rm -rf temp
 - Plugin to upload images with ShareX: https://github.com/ShareX/CustomUploaders/blob/master/pictshare.net.json
 
 ## Coming soon
+- Delete codes for every uploaded image so users can delete images if no longer needed
 - Albums
 - Traffic analysis tool for server admins
 

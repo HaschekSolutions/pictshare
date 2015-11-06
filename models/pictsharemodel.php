@@ -57,10 +57,41 @@ class PictshareModel extends Model
 			}
 			else if($el=='forcesize')
 				$data['forcesize'] = true;
+			else if(strlen(MASTER_DELETE_CODE)>10 && $el=='delete_'.MASTER_DELETE_CODE)
+				$data['delete'] = true;
+				
 		}
+		
+		if($data['delete'] && $data['hash'])
+		{
+			$this->deleteImage($data['hash']);
+			return false;
+		}
+			
 		
 		return $data;
 	}
+	
+	function deleteImage($hash)
+    {
+        $base_path = ROOT.DS.'upload'.DS.$hash.DS;
+		if(!is_dir($base_path)) return false;
+		if ($handle = opendir($base_path))
+		{
+			while (false !== ($entry = readdir($handle)))
+			{
+				if ($entry != "." && $entry != "..")
+				{
+					unlink($base_path.$entry);
+				}
+			}
+			closedir($handle);
+		}
+		
+		rmdir($base_path);
+		
+		return true;
+    }
 	
 	function isLegacyThumbnail($val)
 	{
