@@ -2,9 +2,18 @@
 
 class HTML {
 
+    /*
+    * Characters that will pass:
+    * a-z
+    * A-Z
+    * 0-9
+    * .
+    * _
+    * -
+    */
     function sanatizeString($string)
     {
-        return preg_replace("/[^a-zA-Z0-9._]+/", "", $string);
+        return preg_replace("/[^a-zA-Z0-9._\-]+/", "", $string);
     }
 
     function renderSize($byte)
