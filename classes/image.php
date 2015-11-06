@@ -15,6 +15,51 @@ class Image
         $im = imagerotate($im,$angle,0);
     }
     
+    function forceResize(&$img,$size)
+    {
+        if(!is_numeric($size))
+            $size = explode('x',$size);
+    
+        if(is_array($size))
+        {
+            $maxwidth = $size[0];
+            $maxheight = $size[1];
+        }
+        else if($size)
+        {
+            $maxwidth = $size;
+            $maxheight = $size;
+        }
+        
+        
+        
+        $width = imagesx($img);
+        $height = imagesy($img);
+        
+        $maxwidth = ($maxwidth>$width?$width:$maxwidth);
+        $maxheight = ($maxheight>$height?$height:$maxheight);
+
+        
+        $dst_img = imagecreatetruecolor($maxwidth, $maxheight);
+        $src_img = $img;
+        
+        $width_new = $height * $maxwidth / $maxheight;
+        $height_new = $width * $maxheight / $maxwidth;
+        //if the new width is greater than the actual width of the image, then the height is too large and the rest cut off, or vice versa
+        if($width_new > $width){
+            //cut point by height
+            $h_point = (($height - $height_new) / 2);
+            //copy image
+            imagecopyresampled($dst_img, $src_img, 0, 0, 0, $h_point, $maxwidth, $maxheight, $width, $height_new);
+        }else{
+            //cut point by width
+            $w_point = (($width - $width_new) / 2);
+            imagecopyresampled($dst_img, $src_img, 0, 0, $w_point, 0, $maxwidth, $maxheight, $width_new, $height);
+        }
+        
+        $img = $dst_img;
+    }
+    
     /**
     * From: https://stackoverflow.com/questions/4590441/php-thumbnail-image-resizing-with-proportions
     */

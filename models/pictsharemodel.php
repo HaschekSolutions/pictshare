@@ -38,7 +38,7 @@ class PictshareModel extends Model
 			$el = $html->sanatizeString($el);
 			$el = strtolower($el);
 			if(!$el) continue;
-			
+
 			if(IMAGE_CHANGE_CODE && substr($el,0,10)=='changecode')
 				$data['changecode'] = substr($el,11);
 			
@@ -55,6 +55,8 @@ class PictshareModel extends Model
 				$data['hash'] = $legacy['hash'];
 				$data['size'] = $legacy['size'];
 			}
+			else if($el=='forcesize')
+				$data['forcesize'] = true;
 		}
 		
 		return $data;
@@ -343,6 +345,8 @@ class PictshareModel extends Model
 
 	function ProcessUploads()
 	{
+		if($_POST['submit']!=$this->translate(3)) return false;
+		
 		if(UPLOAD_CODE && !$this->uploadCodeExists($_REQUEST['upload_code']))
 			return '<span class="error">' . $this->translate(21) . '</span>';
 		

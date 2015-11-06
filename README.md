@@ -42,6 +42,7 @@ If there is some option that's not recognized by PictShare it's simply ignored, 
 -------------- | ------------------ | ---------------------- | ---------------
 **Resizing**   |  |  | 
 &lt;width&gt;**x**&lt;height&gt; | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg)
+forcesize      | -none-				| https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg)
 **Rotating**   |  |  | 
 left		   | -none-				| https://pictshare.net/left/b260e36b60.jpg | ![Rotated left](https://pictshare.net/200/left/b260e36b60.jpg)
 right		   | -none-				| https://pictshare.net/right/b260e36b60.jpg | ![Rotated right](https://pictshare.net/200/right/b260e36b60.jpg)

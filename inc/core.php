@@ -62,7 +62,7 @@ function whatToDo($url)
         if((UPLOAD_FORM_LOCATION && $url==UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION && $url='/'))
         {
             $upload_answer = $pm->ProcessUploads();
-            if($_POST['submit']==$pm->translate(3) && $upload_answer)
+            if($upload_answer)
                 $o=$upload_answer;
             else
                 $o.= $pm->renderUploadForm();
@@ -164,11 +164,10 @@ function changeImage(&$im,$data)
     $image = new Image();
     foreach($data as $action=>$val)
     {
-        
         switch($action)
         {
             case 'rotate': $image->rotate($im,$val);break; 
-            case 'size': $image->resize($im,$val);break;
+            case 'size': (($data['forcesize']===true)?$image->forceResize($im,$val):$image->resize($im,$val));break;
             case 'filter': $image->filter($im,$val);break;
         }
     }
