@@ -92,6 +92,7 @@ class PictshareModel extends Model
 			case 'edgedetect': 
 			case 'smooth': 
 			case 'contrast':
+			case 'blur':
 			case 'pixelate': return true; 
 			
 			default: return false;
