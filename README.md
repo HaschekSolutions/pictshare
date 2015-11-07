@@ -6,6 +6,7 @@ PictShare is an multi lingual, open source image hosting service with a simple r
 
 UPDATES
 ========
+- Nov. 07: Added 9 new (instagram-like) filters
 - Nov. 06: Master delete code. One code to delete them all
 - Nov. 01: [Restricted uploads and option-use](#restriction-settings)
 - Oct. 30: [Rotations and filters](#smart-query-system)
@@ -58,6 +59,15 @@ smooth         | -10 to 2048         | https://pictshare.net/smooth_3/b260e36b60
 contrast       | -100 to 100         | https://pictshare.net/contrast_40/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_40/200/b260e36b60.jpg)
 pixelate       | 0 to 100            | https://pictshare.net/pixelate_10/b260e36b60.jpg      | ![pixelate](https://pictshare.net/pixelate_10/200/b260e36b60.jpg)
 blur           | -none- or 0 to 5    | https://pictshare.net/blur/b260e36b60.jpg      | ![pixelate](https://pictshare.net/blur/200/b260e36b60.jpg)
+sepia			| -none-				| https://pictshare.net/sepia/b260e36b60.jpg	| ![instagram filter sepia](https://pictshare.net/200/sepia/b260e36b60.jpg)
+sharpen			| -none-				| https://pictshare.net/sharpen/b260e36b60.jpg	| ![instagram filter sharpen](https://pictshare.net/200/sharpen/b260e36b60.jpg)
+emboss			| -none-				| https://pictshare.net/emboss/b260e36b60.jpg	| ![instagram filter emboss](https://pictshare.net/200/emboss/b260e36b60.jpg)
+cool			| -none-				| https://pictshare.net/cool/b260e36b60.jpg		| ![instagram filter cool](https://pictshare.net/200/cool/b260e36b60.jpg)	
+light			| -none-				| https://pictshare.net/light/b260e36b60.jpg	| ![instagram filter light](https://pictshare.net/200/light/b260e36b60.jpg)
+aqua			| -none-				| https://pictshare.net/aqua/b260e36b60.jpg		| ![instagram filter aqua](https://pictshare.net/200/aqua/b260e36b60.jpg)	
+fuzzy			| -none-				| https://pictshare.net/fuzzy/b260e36b60.jpg	| ![instagram filter fuzzy](https://pictshare.net/200/fuzzy/b260e36b60.jpg)
+boost			| -none-				| https://pictshare.net/boost/b260e36b60.jpg	| ![instagram filter boost](https://pictshare.net/200/boost/b260e36b60.jpg)
+gray			| -none-				| https://pictshare.net/gray/b260e36b60.jpg		| ![instagram filter gray](https://pictshare.net/200/gray/b260e36b60.jpg)	
 
 You can also combine as many options as you want. Even multiple times! Want your image to be negative, resized, grayscale , with increased brightness and negate it again? No problem: https://pictshare.net/500x500/grayscale/negative/brightness_100/negative/b260e36b60.jpg
 

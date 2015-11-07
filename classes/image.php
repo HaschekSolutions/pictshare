@@ -205,6 +205,15 @@ class Image
                 case 'contrast': imagefilter($im,IMG_FILTER_CONTRAST,$val); break;
                 case 'pixelate': imagefilter($im,IMG_FILTER_PIXELATE,$val); break;
                 case 'blur': $this->blur($im,$val); break;
+                case 'sepia': (new Filter($im))->sepia()->getImage();break;
+                case 'sharpen':(new Filter($im))->sharpen()->getImage();break;
+				case 'emboss':(new Filter($im))->emboss()->getImage();break;
+				case 'cool':(new Filter($im))->cool()->getImage();break;
+				case 'light':(new Filter($im))->light()->getImage();break;
+				case 'aqua':(new Filter($im))->aqua()->getImage();break;
+				case 'fuzzy':(new Filter($im))->fuzzy()->getImage();break;
+				case 'boost':(new Filter($im))->boost()->getImage();break;
+				case 'gray':(new Filter($im))->gray()->getImage();break;
             }
         }
     }

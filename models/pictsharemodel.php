@@ -126,6 +126,15 @@ class PictshareModel extends Model
 			case 'smooth': 
 			case 'contrast':
 			case 'blur':
+			case 'sepia':
+			case 'sharpen':
+			case 'emboss':
+			case 'cool':
+			case 'light':
+			case 'aqua':
+			case 'fuzzy':
+			case 'boost':
+			case 'gray':
 			case 'pixelate': return true; 
 			
 			default: return false;
