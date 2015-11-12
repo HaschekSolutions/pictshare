@@ -6,6 +6,7 @@ PictShare is an multi lingual, open source image hosting service with a simple r
 
 UPDATES
 ========
+- Nov. 12: Created new git project: [Pictshare stats](https://github.com/chrisiaut/pictshare_stats)
 - Nov. 07: Added 9 new (instagram-like) filters
 - Nov. 06: Master delete code. One code to delete them all
 - Nov. 01: [Restricted uploads and option-use](#restriction-settings)
@@ -27,6 +28,7 @@ If you're a blogger like myself, you can use it as storage for your images so th
 - Duplicates don't take up space. If the exact same images is uploaded twice, the second upload will link to the first
 - You can control who can upload images or use filters/resizes by defining an [upload-code](#restriction-settings)
 - You can set a code in your ```/inc/config.inc.php``` (MASTER_DELETE_CODE) that, if appended to any URL of an Image, will delete the image and all cached versions of it from the server
+- Detailed traffic and view statistics of your images via [Pictshare stats](https://github.com/chrisiaut/pictshare_stats)
 
 ## Smart query system
 PictShare images can be changed after upload just by modifying the URL. It works like this:
@@ -190,12 +192,12 @@ rm -rf temp
   - Source: https://github.com/chrisiaut/PictShare-Chrome-extension
 - Plugin to upload images with ShareX: https://github.com/ShareX/CustomUploaders/blob/master/pictshare.net.json
 
+## Traffic analysis
+See [Pictshare stats](https://github.com/chrisiaut/pictshare_stats)
+
 ## Coming soon
 - Delete codes for every uploaded image so users can delete images if no longer needed
 - Albums
-- Traffic analysis tool for server admins
-
-![Traffic analysis tool](https://www.pictshare.net/102687fe65.gif)
 
 ---
 Design (c) by [Bernhard Moser](mailto://bernhard.moser91@gmail.com)
