@@ -43,6 +43,17 @@ class Image
         $dst_img = imagecreatetruecolor($maxwidth, $maxheight);
         $src_img = $img;
         
+        $palsize = ImageColorsTotal($img);
+        for ($i = 0; $i < $palsize; $i++)
+        { 
+            $colors = ImageColorsForIndex($img, $i);   
+            ImageColorAllocate($dst_img, $colors['red'], $colors['green'], $colors['blue']);
+        }
+        
+        imagefill($dst_img, 0, 0, IMG_COLOR_TRANSPARENT);
+        imagesavealpha($dst_img,true);
+        imagealphablending($dst_img, true);
+        
         $width_new = $height * $maxwidth / $maxheight;
         $height_new = $width * $maxheight / $maxwidth;
         //if the new width is greater than the actual width of the image, then the height is too large and the rest cut off, or vice versa
