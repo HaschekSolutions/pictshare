@@ -629,13 +629,51 @@ class PictshareModel extends Model
 
 		return $ismp4;
 	}
+	
+	function resizeMP4($data,$cachepath)
+	{
+		$file = ROOT.DS.'upload'.DS.$data['hash'].DS.$data['hash'];
+		$file = escapeshellarg($file);
+		$tmp = '/dev/null';
+		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		
+		$size = $data['size'];
+		
+		if(!$size) return $file;
+		
+		if(!is_numeric($size))
+            $size = explode('x',$size);
+    
+        if(is_array($size))
+        {
+            $maxwidth = $size[0];
+            $maxheight = $size[1];
+        }
+        else if($size)
+        {
+            $maxwidth = $size;
+            $maxheight = 0;
+        }
+        
+        if($maxwidth>1080)
+        	$maxwidth = 1080;
+        
+        //if(!$maxheight)
+        $maxheight = 'trunc(ow/a/2)*2';
+		
+		$cmd = "$bin -i $file -y -vf scale=\"$maxwidth:$maxheight\" -c:v libx264 $cachepath";
+
+		system($cmd);
+		
+		return $cachepath;
+	}
 
 	function gifToMP4($gifpath)
 	{
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
 		$file = escapeshellarg($gifpath);
 		$mp4file = $gifpath.'.mp4';
-		$cmd = "$bin -f gif -i $file $file.mp4";
+		$cmd = "$bin -f gif -y -i $file -c:v libx264 $file.mp4";
 
 		system($cmd);
 

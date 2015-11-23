@@ -150,13 +150,11 @@ function renderImage($data)
             imagepng($im);
         break;
         case 'gif': 
-            
             if($data['mp4'])
             {
                 header("Content-Type: video/mp4");
                 readfile($pm->gifToMP4($path));
             }
-                
             else
             {
                 header ("Content-type: image/gif");
@@ -165,7 +163,16 @@ function renderImage($data)
                 
         break;
         case 'mp4':
-            header("Content-Type: video/mp4");
+            if(!$cached)
+            {
+            	$path = $pm->resizeMP4($data,$cachepath);
+            }
+            header('Content-type: video/mp4');
+			//header('Content-type: video/mpeg');
+			header('Content-disposition: inline');
+			header("Content-Transfer-Encoding:­ binary");
+			header("Content-Length: ".filesize($path));
+			
             readfile($path);
         break;
     }
