@@ -604,7 +604,6 @@ class PictshareModel extends Model
 	
 	function isProperMP4($filename)
 	{
-		$filename = '/var/www/outfile.mp4';
 		$file = escapeshellarg($filename);
 		$tmp = ROOT.DS.'tmp'.DS.md5(time()+rand(1,10000)).'.'.rand(1,10000).'.log';
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
