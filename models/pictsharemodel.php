@@ -308,6 +308,9 @@ class PictshareModel extends Model
 	{
 		$type = $this->getTypeOfFile($url);
 		$type = $this->isTypeAllowed($type);
+		
+		if(!$type)
+			return array('status'=>'ERR','reason'=>'wrong filetype');
 
 		$dup_id = $this->isDuplicate($url);
 		if($dup_id)
@@ -322,8 +325,7 @@ class PictshareModel extends Model
 		}
 		
 		
-		if(!$type)
-			return array('status'=>'ERR','reason'=>'wrong filetype');
+		
 			
 		if($dup_id)
 			return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
