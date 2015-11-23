@@ -150,8 +150,22 @@ function renderImage($data)
             imagepng($im);
         break;
         case 'gif': 
-            header ("Content-type: image/gif");
-            $im = imagecreatefromgif($path);
+            
+            if($data['mp4'])
+            {
+                header("Content-Type: video/mp4");
+                readfile($pm->gifToMP4($path));
+            }
+                
+            else
+            {
+                header ("Content-type: image/gif");
+                readfile($path);
+            }
+                
+        break;
+        case 'mp4':
+            header("Content-Type: video/mp4");
             readfile($path);
         break;
     }

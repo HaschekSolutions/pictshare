@@ -6,6 +6,7 @@ PictShare is an multi lingual, open source image hosting service with a simple r
 
 UPDATES
 ========
+- Nov. 23: Added support for MP4 uploads and conversion from gif to mp4
 - Nov. 12: Created new git project: [Pictshare stats](https://github.com/chrisiaut/pictshare_stats)
 - Nov. 07: Added 9 new (instagram-like) filters
 - Nov. 06: Master delete code. One code to delete them all
@@ -48,6 +49,8 @@ If there is some option that's not recognized by PictShare it's simply ignored, 
 **Resizing**   |  |  | 
 &lt;width&gt;**x**&lt;height&gt; | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg)
 forcesize      | -none-				| https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg)
+**GIF to mp4**   |  |  | 
+mp4           | -none-             | https://www.pictshare.net/mp4/102687fe65.gif | Converts gif to mp4 and displays as that. Note that you can't include that mp4 in an img tag
 **Rotating**   |  |  | 
 left		   | -none-				| https://pictshare.net/left/b260e36b60.jpg | ![Rotated left](https://pictshare.net/200/left/b260e36b60.jpg)
 right		   | -none-				| https://pictshare.net/right/b260e36b60.jpg | ![Rotated right](https://pictshare.net/200/right/b260e36b60.jpg)
@@ -137,6 +140,7 @@ If you access the image with the code like this: ```https://www.pictshare.net/ch
 - Make sure you have PHP5 GD libraries installed: ```apt-get install php5-gd```
 - Unpack the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip)
 - Rename /inc/example.config.inc.php to /inc/config.inc.php
+- ```chmod +x bin/ffmpeg``` if you want to be able to use mp4 uploads
 - (optional) You can and should put a [nginx](https://www.nginx.com/) proxy before the Apache server. That thing is just insanely fast with static content like images.
 - (optional) To secure your traffic I'd highly recommend getting an [SSL Cert](https://letsencrypt.org/) for your server if you don't already have one.
 
@@ -166,7 +170,7 @@ server {
         fastcgi_param PATH_INFO $fastcgi_script_name;
     }
 
-    location ~ /(upload|tmp) {
+    location ~ /(upload|tmp|bin) {
        deny all;
        return 404;
     }

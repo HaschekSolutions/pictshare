@@ -44,6 +44,8 @@ class PictshareModel extends Model
 			
 			if($this->isImage($el))
 				$data['hash']=$el;
+			else if($el=='mp4')
+				$data['mp4'] = 1;
 			else if($this->isSize($el))
 				$data['size'] = $el;
 			else if($this->isRotation($el))
@@ -68,6 +70,12 @@ class PictshareModel extends Model
 			return false;
 		}
 			
+		if($data['mp4'])
+		{
+			$hash = $data['hash'];
+			if(!$hash || $this->getTypeOfHash($hash)!='gif')
+				unset($data['mp4']);
+		}
 		
 		return $data;
 	}
@@ -257,10 +265,20 @@ class PictshareModel extends Model
 		if(count($arr)>1)
 		{
 			$a2 = explode('/', $arr[0]);
-			return $a2[1];
+			$type = $a2[1];
 		}
-		$a2 = explode('/', $type);
-			return $a2[1];
+		else
+		{
+			$a2 = explode('/', $type);
+			$type = $a2[1];
+		}
+
+		if($type=='mp4' && !$this->isProperMP4($url))
+			return false;
+		
+
+		return $type;
+
 	}
 
 	function isTypeAllowed($type)
@@ -278,19 +296,19 @@ class PictshareModel extends Model
 			
 			case 'image/gif':	return 'gif';
 			case 'gif':			return 'gif';
+
+			case 'mp4':			return 'mp4';
+
 			default: return false;
 		}
 	}
 
 	function uploadImageFromURL($url)
 	{
-		
-				
 		$type = $this->getTypeOfFile($url);
 		$type = $this->isTypeAllowed($type);
-			
-		$dup_id = $this->isDuplicate($url);
 
+		$dup_id = $this->isDuplicate($url);
 		if($dup_id)
 		{
 			$hash = $dup_id;
@@ -400,7 +418,10 @@ class PictshareModel extends Model
 
 				if($data['status']=='OK')
 				{
-					$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.$data['hash'].'"><img src="'.DOMAINPATH.'300/'.$data['hash'].'" /></a><br/>';
+					if($data['type']=='mp4')
+						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.$data['hash'].'">'.$data['hash'].'</a><br/>';
+					else
+						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.$data['hash'].'"><img src="'.DOMAINPATH.'300/'.$data['hash'].'" /></a><br/>';
 				}
 			}
 		}
@@ -570,5 +591,52 @@ class PictshareModel extends Model
 		imagedestroy($source);
 	
 		return $type;
+	}
+
+	function getTypeOfHash($hash)
+	{
+	    $base_path = ROOT.DS.'upload'.DS.$hash.DS;
+	    $path = $base_path.$hash;
+	    $type = $this->isTypeAllowed($this->getTypeOfFile($path));
+
+	    return $type;
+	}
+	
+	function isProperMP4($filename)
+	{
+		$filename = '/var/www/outfile.mp4';
+		$file = escapeshellarg($filename);
+		$tmp = ROOT.DS.'tmp'.DS.md5(time()+rand(1,10000)).'.'.rand(1,10000).'.log';
+		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		
+		$cmd = "$bin -i $file > $tmp 2>> $tmp";
+
+		system($cmd);
+
+		$answer = file($tmp);
+		unlink($tmp);
+		$ismp4 = false;
+		if(is_array($answer))
+		foreach($answer as $line)
+		{
+			$line = trim($line);
+			if(strpos($line,'Duration: 00:00:00')) return false;
+			if(strpos($line, 'Video: h264'))
+				$ismp4 = true;
+		}
+
+		return $ismp4;
+	}
+
+	function gifToMP4($gifpath)
+	{
+		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$file = escapeshellarg($gifpath);
+		$mp4file = $gifpath.'.mp4';
+		$cmd = "$bin -f gif -i $file $file.mp4";
+
+		system($cmd);
+
+		return $mp4file;
 	}
 }
