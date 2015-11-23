@@ -273,6 +273,7 @@ class PictshareModel extends Model
 			$type = $a2[1];
 		}
 
+		if($type=='octet-stream' && $this->isProperMP4($url)) return 'mp4';
 		if($type=='mp4' && !$this->isProperMP4($url))
 			return false;
 		
