@@ -50,7 +50,13 @@ If there is some option that's not recognized by PictShare it's simply ignored, 
 &lt;width&gt;**x**&lt;height&gt; | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg)
 forcesize      | -none-				| https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg)
 **GIF to mp4**   |  |  | 
-mp4           | -none-             | https://www.pictshare.net/mp4/102687fe65.gif | Converts gif to mp4 and displays as that. Note that you can't include that mp4 in an img tag
+mp4            | -none-             | https://www.pictshare.net/mp4/102687fe65.gif | Converts gif to mp4 and displays as that. Note that you can't include that mp4 in an img tag
+raw            | -none-             | https://www.pictshare.net/mp4/raw/102687fe65.gif | Renders the converted mp4 directly. Use with /mp4/
+preview        | -none-             | https://www.pictshare.net/mp4/preview/102687fe65.gif | Renders the first frame of generated MP4 as JPEG. Use with /mp4/
+**MP4 options**   |  |  | 
+-none-            | -none-             | https://www.pictshare.net/65714d22f0.mp4 | Renders the mp4 embedded in a simple HTML template. This link can't be embedded into video tags, use /raw/ instead if you want to embed
+raw            | -none-             | https://www.pictshare.net/raw/65714d22f0.mp4 | Renders the mp4 video directly so you can link it
+preview        | -none-             | https://www.pictshare.net/preview/65714d22f0.mp4 | Renders the first frame of the MP4 as an JPEG image
 **Rotating**   |  |  | 
 left		   | -none-				| https://pictshare.net/left/b260e36b60.jpg | ![Rotated left](https://pictshare.net/200/left/b260e36b60.jpg)
 right		   | -none-				| https://pictshare.net/right/b260e36b60.jpg | ![Rotated right](https://pictshare.net/200/right/b260e36b60.jpg)

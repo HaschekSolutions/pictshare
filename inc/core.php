@@ -152,7 +152,21 @@ function renderImage($data)
         case 'gif': 
             if($data['mp4'])
             {
-                renderMP4($pm->gifToMP4($path),$data);
+                $mp4path = $path.'.mp4';
+                if($data['raw'])
+                {
+                    serveFile($mp4path, 'gif/raw/'.$hash,'video/mp4');
+                }
+                else if($data['preview'])
+                {
+                    $file = $mp4path.'.jpg';
+                    if(!file_exists($file))
+                        $pm->saveFirstFrameOfMP4($mp4path);
+                    header ("Content-type: image/jpeg");
+                    readfile($file);
+                }
+                else
+                    renderMP4($pm->gifToMP4($path),$data);
             }
             else
             {
