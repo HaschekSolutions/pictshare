@@ -42,5 +42,7 @@ else if($_REQUEST['base64'])
 }
 else if($_REQUEST['geturlinfo'])
 	echo json_encode($pm->getURLInfo($_REQUEST['geturlinfo']));
+else if($_REQUEST['a']=='oembed')
+	echo json_encode($pm->oembed($_REQUEST['url'],$_REQUEST['t']));
 else
 	echo json_encode(array('status'=>'ERR'));

@@ -21,8 +21,19 @@ class PictshareModel extends Model
 		$path = ROOT.DS.'upload'.DS.$hash.DS.$file;
 		if(file_exists($path))
 		{
+			$type = $this->getTypeOfHash($hash);
 			$byte = filesize($path);
-			return array('status'=>'ok','hash'=>$hash,'cachename'=>$file,'size'=>$byte,'humansize'=>$html->renderSize($byte));
+			if($type=='mp4')
+			{
+				$info = $this->getSizeOfMP4($path);
+				$width = intval($info['width']);
+    			$height = intval($info['height']);
+			}
+			else
+			{
+				list($width, $height) = getimagesize($path);
+			}
+			return array('status'=>'ok','hash'=>$hash,'cachename'=>$file,'size'=>$byte,'humansize'=>$html->renderSize($byte),'width'=>$width,'height'=>$height,'type'=>$type);
 		}
 			
 		else
@@ -44,8 +55,8 @@ class PictshareModel extends Model
 			
 			if($this->isImage($el))
 				$data['hash']=$el;
-			else if($el=='mp4')
-				$data['mp4'] = 1;
+			else if($el=='mp4' || $el=='raw' || $el=='preview' || $el=='webm')
+				$data[$el] = 1;
 			else if($this->isSize($el))
 				$data['size'] = $el;
 			else if($this->isRotation($el))
@@ -179,6 +190,9 @@ class PictshareModel extends Model
 	function getCacheName($data)
 	{
 		ksort($data);
+		unset($data['raw']);
+		unset($data['preview']);
+		unset($data['raw']);
 		$name = false;
 		foreach($data as $key=>$val)
 		{
@@ -190,7 +204,6 @@ class PictshareModel extends Model
 					foreach($val as $valdata)
 						$name[] = $valdata;
 			}
-				
 		}
 		
 		if(is_array($name))
@@ -332,7 +345,14 @@ class PictshareModel extends Model
 		
 		mkdir(ROOT.DS.'upload'.DS.$hash);
 		$file = ROOT.DS.'upload'.DS.$hash.DS.$hash;
-		$status = file_put_contents($file, file_get_contents($url));
+		
+
+		if($type=='mp4')
+		{
+			$this->saveFirstFrameOfMP4($file);
+		}
+		
+		file_put_contents($file, file_get_contents($url));
 
 		//remove all exif data from jpeg
 		if($type=='jpg')
@@ -678,5 +698,90 @@ class PictshareModel extends Model
 		system($cmd);
 
 		return $mp4file;
+	}
+
+	function saveAsMP4($source,$target)
+	{
+		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$source = escapeshellarg($source);
+		$target = escapeshellarg($target);
+		$cmd = "$bin -y -i $source -c:v libx264 $target";
+
+		system($cmd);
+	}
+
+	function saveFirstFrameOfMP4($path)
+	{
+		//$path = ROOT.DS.'upload'.DS.$hash.DS.$hash;
+		$jpgpath = $path.'.jpg';
+		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$file = escapeshellarg($path);
+		$cmd = "$bin -y -i $file -vframes 1 -f image2 $jpgpath";
+		
+		system($cmd);
+	}
+
+	//from https://stackoverflow.com/questions/4847752/how-to-get-video-duration-dimension-and-size-in-php
+	function getSizeOfMP4($video)
+	{
+		$video = escapeshellarg($video);
+		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+	    $command = $bin . ' -i ' . $video . ' -vstats 2>&1';  
+	    $output = shell_exec($command);  
+
+	    $regex_sizes = "/Video: ([^,]*), ([^,]*), ([0-9]{1,4})x([0-9]{1,4})/";
+	    if (preg_match($regex_sizes, $output, $regs)) {
+	        $codec = $regs [1] ? $regs [1] : null;
+	        $width = $regs [3] ? $regs [3] : null;
+	        $height = $regs [4] ? $regs [4] : null;
+	     }
+
+	    $regex_duration = "/Duration: ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}).([0-9]{1,2})/";
+	    if (preg_match($regex_duration, $output, $regs)) {
+	        $hours = $regs [1] ? $regs [1] : null;
+	        $mins = $regs [2] ? $regs [2] : null;
+	        $secs = $regs [3] ? $regs [3] : null;
+	        $ms = $regs [4] ? $regs [4] : null;
+	    }
+
+	    return array ('codec' => $codec,
+	            'width' => $width,
+	            'height' => $height,
+	            'hours' => $hours,
+	            'mins' => $mins,
+	            'secs' => $secs,
+	            'ms' => $ms
+	    );
+
+	}
+
+	function oembed($url,$type)
+	{
+		$data = $this->getURLInfo($url);
+		$rawurl = $url.'/raw';
+		switch($type)
+		{
+			case 'json':
+				header('Content-Type: application/json');
+				return array(	"version"=> "1.0",
+								"type"=> "video",
+								"thumbnail_url"=>$url.'/preview',
+								"thumbnail_width"=>$data['width'],
+								"thumbnail_height"=>$data['height'],
+								"width"=> $data['width'],
+								"height"=> $data['height'],
+								"title"=> "PictShare",
+								//"url"=> $url.'/raw',
+								"provider_name"=> "PictShare",
+								"provider_url"=> DOMAINPATH,
+								"html"=> '<video id="video" poster="'.$url.'/preview'.'" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>
+							                <source src="'.$rawurl.'" type="video/mp4">
+            							  </video>');
+			break;
+
+			case 'xml':
+
+			break;
+		}
 	}
 }
