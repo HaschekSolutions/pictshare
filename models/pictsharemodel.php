@@ -7,7 +7,7 @@ class PictshareModel extends Model
 		return array('status'=>'ok');
 	}
 	
-	function getURLInfo($url)
+	function getURLInfo($url,$ispath=false)
 	{
 		$url = rawurldecode($url);
 		$data = $this->urlToData($url);
@@ -21,8 +21,10 @@ class PictshareModel extends Model
 		$path = ROOT.DS.'upload'.DS.$hash.DS.$file;
 		if(file_exists($path))
 		{
-			$type = $this->getTypeOfHash($hash);
-			$byte = filesize($path);
+			$type = $this->getType($path);
+			if($ispath)
+				$byte = filesize($url);
+			else $byte = filesize($path);
 			if($type=='mp4')
 			{
 				$info = $this->getSizeOfMP4($path);
@@ -191,8 +193,7 @@ class PictshareModel extends Model
 	{
 		ksort($data);
 		unset($data['raw']);
-		unset($data['preview']);
-		unset($data['raw']);
+		//unset($data['preview']);
 		$name = false;
 		foreach($data as $key=>$val)
 		{
@@ -317,6 +318,11 @@ class PictshareModel extends Model
 		}
 	}
 
+	function getType($url)
+	{
+		return $this->isTypeAllowed($this->getTypeOfFile($url));
+	}
+
 	function uploadImageFromURL($url)
 	{
 		$type = $this->getTypeOfFile($url);
@@ -345,12 +351,6 @@ class PictshareModel extends Model
 		
 		mkdir(ROOT.DS.'upload'.DS.$hash);
 		$file = ROOT.DS.'upload'.DS.$hash.DS.$hash;
-		
-
-		if($type=='mp4')
-		{
-			$this->saveFirstFrameOfMP4($file);
-		}
 		
 		file_put_contents($file, file_get_contents($url));
 
@@ -681,27 +681,26 @@ class PictshareModel extends Model
         //if(!$maxheight)
         $maxheight = 'trunc(ow/a/2)*2';
 		
-		$cmd = "$bin -i $file -y -vf scale=\"$maxwidth:$maxheight\" -c:v libx264 $cachepath";
+		$cmd = "$bin -i $file -y -vf scale=\"$maxwidth:$maxheight\" -c:v libx264 -f mp4 $cachepath";
 
 		system($cmd);
 		
 		return $cachepath;
 	}
 
-	function gifToMP4($gifpath)
+	function gifToMP4($gifpath,$target)
 	{
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
 		$file = escapeshellarg($gifpath);
-		$mp4file = $gifpath.'.mp4';
 		
-		if(!file_exists($mp4file)) //simple caching.. have to think of something better
+		if(!file_exists($target)) //simple caching.. have to think of something better
 		{
-			$cmd = "$bin -f gif -y -i $file -c:v libx264 $file.mp4";
+			$cmd = "$bin -f gif -y -i $file -c:v libx264 -f mp4 $target";
 			system($cmd);
 		}
 		
 
-		return $mp4file;
+		return $target;
 	}
 
 	function saveAsMP4($source,$target)
@@ -709,18 +708,16 @@ class PictshareModel extends Model
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
 		$source = escapeshellarg($source);
 		$target = escapeshellarg($target);
-		$cmd = "$bin -y -i $source -c:v libx264 $target";
+		$cmd = "$bin -y -i $source -c:v libx264 -f mp4 $target";
 
 		system($cmd);
 	}
 
-	function saveFirstFrameOfMP4($path)
+	function saveFirstFrameOfMP4($path,$target)
 	{
-		//$path = ROOT.DS.'upload'.DS.$hash.DS.$hash;
-		$jpgpath = $path.'.jpg';
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
 		$file = escapeshellarg($path);
-		$cmd = "$bin -y -i $file -vframes 1 -f image2 $jpgpath";
+		$cmd = "$bin -y -i $file -vframes 1 -f image2 $target";
 		
 		system($cmd);
 	}
@@ -787,5 +784,10 @@ class PictshareModel extends Model
 
 			break;
 		}
+	}
+
+	function getMP4PathOfGif($gifpath)
+	{
+
 	}
 }

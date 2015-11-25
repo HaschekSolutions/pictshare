@@ -152,21 +152,25 @@ function renderImage($data)
         case 'gif': 
             if($data['mp4'])
             {
-                $mp4path = $path.'.mp4';
+                $mp4path = $cachepath;
+
+                if(!file_exists($mp4path)) //if mp4 does not exist, create it
+                    $pm->gifToMP4($path,$mp4path);
+
                 if($data['raw'])
                 {
-                    serveFile($mp4path, 'gif/raw/'.$hash,'video/mp4');
+                    serveFile($mp4path, $hash.'.mp4','video/mp4');
                 }
                 else if($data['preview'])
                 {
-                    $file = $mp4path.'.jpg';
+                    $file = $mp4path;
                     if(!file_exists($file))
-                        $pm->saveFirstFrameOfMP4($mp4path);
+                        $pm->saveFirstFrameOfMP4($mp4path,$path);
                     header ("Content-type: image/jpeg");
                     readfile($file);
                 }
                 else
-                    renderMP4($pm->gifToMP4($path),$data);
+                    renderMP4($mp4path,$data);
             }
             else
             {
@@ -176,26 +180,25 @@ function renderImage($data)
                 
         break;
         case 'mp4':
-            if(!$cached)
+            if(!$cached && !$data['preview'])
             {
             	$pm->resizeMP4($data,$cachepath);
                 $path = $cachepath;
             }
 
-            if(filesize($path)==0) //if there was an error and the file is 0 bytes, use the original
-                $path = ROOT.DS.'upload'.DS.$hash.DS.$hash;
+            if(file_exists($cachepath) && filesize($cachepath)==0) //if there was an error and the file is 0 bytes, use the original
+                $cachepath = ROOT.DS.'upload'.DS.$hash.DS.$hash;
             
             if($data['raw'])
             {
-                serveFile($path, '/raw/'.$hash,'video/mp4');
+                serveFile($cachepath, $hash,'video/mp4');
             }
             else if($data['preview'])
             {
-                $file = $path.'.jpg';
-                if(!file_exists($file))
-                    $pm->saveFirstFrameOfMP4($path);
+                if(!file_exists($cachepath))
+                    $pm->saveFirstFrameOfMP4($path,$cachepath);
                 header ("Content-type: image/jpeg");
-                readfile($file);
+                readfile($cachepath);
             }
             else
                 renderMP4($path,$data);
@@ -232,11 +235,13 @@ function renderMP4($path,$data)
 {
     $pm = new PictshareModel;
     $hash = $data['hash'];
+    $urldata = $pm->getURLInfo($path,true);
     if($data['size'])
         $hash = $data['size'].'/'.$hash;
     $info = $pm->getSizeOfMP4($path);
     $width = $info['width'];
     $height = $info['height'];
+    $filesize = $urldata['humansize'];
     include (ROOT . DS . 'template_mp4.php');
 }
 

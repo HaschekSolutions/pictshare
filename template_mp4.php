@@ -7,9 +7,15 @@
         <meta id="viewport" name="viewport" content="width=<?php echo $width ?>, user-scalable=yes" />
 
         <style type="text/css">
-            #content, #video {
+            /*#content, #video {
                 width:  <?php echo $width ?>px;
                 height: <?php echo $height ?>px;
+            }*/
+
+            video {  
+               width:100%; 
+               max-width:<?php echo $width ?>px; 
+               height:auto; 
             }
         </style>
         
@@ -40,6 +46,7 @@
             <video id="video" poster="<?php echo DOMAINPATH.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>
                 <source src="<?php echo DOMAINPATH.'raw/'.$hash; ?>" type="video/mp4">
             </video>
+            <small><?php echo $filesize; ?></small>
 
         </div>
 
