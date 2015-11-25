@@ -6,7 +6,7 @@ PictShare is an multi lingual, open source image hosting service with a simple r
 
 UPDATES
 ========
-- Nov. 23: Added support for MP4 uploads and conversion from gif to mp4
+- Nov. 23: Added support for MP4 uploads and conversion from gif to MP4
 - Nov. 12: Created new git project: [Pictshare stats](https://github.com/chrisiaut/pictshare_stats)
 - Nov. 07: Added 9 new (instagram-like) filters
 - Nov. 06: Master delete code. One code to delete them all
@@ -24,6 +24,8 @@ If you're a blogger like myself, you can use it as storage for your images so th
 - Uploads without logins or validation (that's a good thing, right?)
 - Simple API to upload any image from remote servers to your instance [via URL](#upload-from-url) and [via Base64](#upload-from-base64-string)
 - 100% file based - no database needed
+- Converts gif to (much smaller) MP4
+- MP4 resizing
 - PictShare removes all exif data so you can upload photos from your phone and all GPS tags and camera model info get wiped
 - Smart [resize, filter and rotation](#smart-query-system) features
 - Duplicates don't take up space. If the exact same images is uploaded twice, the second upload will link to the first
