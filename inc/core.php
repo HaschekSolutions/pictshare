@@ -150,12 +150,13 @@ function renderImage($data)
             imagepng($im);
         break;
         case 'gif': 
-            if($data['mp4'])
+            if($data['mp4']) //user wants mp4
             {
-                $mp4path = $cachepath;
+                $gifpath = $path;
+                $mp4path = $base_path.'mp4_1.'.$hash; //workaround.. find a better solution!
 
-                if(!file_exists($mp4path)) //if mp4 does not exist, create it
-                    $pm->gifToMP4($path,$mp4path);
+                if(!file_exists($mp4path) && !$data['preview']) //if mp4 does not exist, create it
+                    $pm->gifToMP4($gifpath,$mp4path);
 
                 if($data['raw'])
                 {
@@ -164,15 +165,15 @@ function renderImage($data)
                 else if($data['preview'])
                 {
                     $file = $mp4path;
-                    if(!file_exists($file))
-                        $pm->saveFirstFrameOfMP4($mp4path,$path);
+                    if(!file_exists($cachepath))
+                        $pm->saveFirstFrameOfMP4($mp4path,$cachepath);
                     header ("Content-type: image/jpeg");
-                    readfile($file);
+                    readfile($cachepath);
                 }
                 else
                     renderMP4($mp4path,$data);
             }
-            else
+            else //user wants gif
             {
                 header ("Content-type: image/gif");
                 readfile($path);
