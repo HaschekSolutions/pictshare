@@ -152,8 +152,7 @@ function renderImage($data)
         case 'gif': 
             if($data['mp4'])
             {
-                header("Content-Type: video/mp4");
-                readfile($pm->gifToMP4($path));
+                renderMP4($pm->gifToMP4($path),$data);
             }
             else
             {

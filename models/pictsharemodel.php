@@ -693,9 +693,13 @@ class PictshareModel extends Model
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
 		$file = escapeshellarg($gifpath);
 		$mp4file = $gifpath.'.mp4';
-		$cmd = "$bin -f gif -y -i $file -c:v libx264 $file.mp4";
-
-		system($cmd);
+		
+		if(!file_exists($mp4file)) //simple caching.. have to think of something better
+		{
+			$cmd = "$bin -f gif -y -i $file -c:v libx264 $file.mp4";
+			system($cmd);
+		}
+		
 
 		return $mp4file;
 	}
