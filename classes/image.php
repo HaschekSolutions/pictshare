@@ -20,8 +20,8 @@ class Image
         $pm = new PictshareModel();
         
         $sd = $pm->sizeStringToWidthHeight($size);
-		$maxwidth  = $sd['maxwidth'];
-        $maxheight = $sd['maxheight'];
+		$maxwidth  = $sd['width'];
+        $maxheight = $sd['height'];
         
         
         
@@ -71,8 +71,8 @@ class Image
         $pm = new PictshareModel();
         
         $sd = $pm->sizeStringToWidthHeight($size);
-		$maxwidth  = $sd['maxwidth'];
-        $maxheight = $sd['maxheight'];
+		$maxwidth  = $sd['width'];
+        $maxheight = $sd['height'];
         
         $width = imagesx($img);
         $height = imagesy($img);
