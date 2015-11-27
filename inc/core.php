@@ -157,7 +157,7 @@ function renderImage($data)
 
                 if(!file_exists($mp4path) && !$data['preview']) //if mp4 does not exist, create it
                     $pm->gifToMP4($gifpath,$mp4path);
-
+                    
                 if($data['raw'])
                 {
                     serveFile($mp4path, $hash.'.mp4','video/mp4');
@@ -175,15 +175,22 @@ function renderImage($data)
             }
             else //user wants gif
             {
+                if(!$cached && $data['size'])
+                {
+                    $pm->resizeFFMPEG($data,$cachepath,'gif');
+                }
                 header ("Content-type: image/gif");
-                readfile($path);
+                if(file_exists($cachepath))
+                    readfile($cachepath);
+                else
+                    readfile($path);
             }
                 
         break;
         case 'mp4':
             if(!$cached && !$data['preview'])
             {
-            	$pm->resizeMP4($data,$cachepath);
+            	$pm->resizeFFMPEG($data,$cachepath,'mp4');
                 $path = $cachepath;
             }
 

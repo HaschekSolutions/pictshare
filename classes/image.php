@@ -17,19 +17,11 @@ class Image
     
     function forceResize(&$img,$size)
     {
-        if(!is_numeric($size))
-            $size = explode('x',$size);
-    
-        if(is_array($size))
-        {
-            $maxwidth = $size[0];
-            $maxheight = $size[1];
-        }
-        else if($size)
-        {
-            $maxwidth = $size;
-            $maxheight = $size;
-        }
+        $pm = new PictshareModel();
+        
+        $sd = $pm->sizeStringToWidthHeight($size);
+		$maxwidth  = $sd['maxwidth'];
+        $maxheight = $sd['maxheight'];
         
         
         
@@ -76,19 +68,11 @@ class Image
     */
     function resize(&$img,$size)
     {
-        if(!is_numeric($size))
-            $size = explode('x',$size);
-    
-        if(is_array($size))
-        {
-            $maxwidth = $size[0];
-            $maxheight = $size[1];
-        }
-        else if($size)
-        {
-            $maxwidth = $size;
-            $maxheight = $size;
-        }
+        $pm = new PictshareModel();
+        
+        $sd = $pm->sizeStringToWidthHeight($size);
+		$maxwidth  = $sd['maxwidth'];
+        $maxheight = $sd['maxheight'];
         
         $width = imagesx($img);
         $height = imagesy($img);

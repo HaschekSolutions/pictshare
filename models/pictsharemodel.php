@@ -650,7 +650,7 @@ class PictshareModel extends Model
 		return $ismp4;
 	}
 	
-	function resizeMP4($data,$cachepath)
+	function resizeFFMPEG($data,$cachepath,$type='mp4')
 	{
 		$file = ROOT.DS.'upload'.DS.$data['hash'].DS.$data['hash'];
 		$file = escapeshellarg($file);
@@ -661,27 +661,20 @@ class PictshareModel extends Model
 		
 		if(!$size) return $file;
 		
-		if(!is_numeric($size))
-            $size = explode('x',$size);
-    
-        if(is_array($size))
-        {
-            $maxwidth = $size[0];
-            $maxheight = $size[1];
-        }
-        else if($size)
-        {
-            $maxwidth = $size;
-            $maxheight = 0;
-        }
-        
-        if($maxwidth>1080)
-        	$maxwidth = 1080;
-        
-        //if(!$maxheight)
+		$sd = $this->sizeStringToWidthHeight($size);
+		$maxwidth  = $sd['width'];
+        $maxheight = $sd['height'];
+		
+		switch($type)
+		{
+			case 'mp4': 
+				$addition = '-c:v libx264';
+			break;
+		}
+		
         $maxheight = 'trunc(ow/a/2)*2';
 		
-		$cmd = "$bin -i $file -y -vf scale=\"$maxwidth:$maxheight\" -c:v libx264 -f mp4 $cachepath";
+		$cmd = "$bin -i $file -y -vf scale=\"$maxwidth:$maxheight\" $addition -f $type $cachepath";
 
 		system($cmd);
 		
@@ -772,7 +765,6 @@ class PictshareModel extends Model
 								"width"=> $data['width'],
 								"height"=> $data['height'],
 								"title"=> "PictShare",
-								//"url"=> $url.'/raw',
 								"provider_name"=> "PictShare",
 								"provider_url"=> DOMAINPATH,
 								"html"=> '<video id="video" poster="'.$url.'/preview'.'" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>
@@ -786,8 +778,24 @@ class PictshareModel extends Model
 		}
 	}
 
-	function getMP4PathOfGif($gifpath)
+	function sizeStringToWidthHeight($size)
 	{
-
+		if(!$size || !$this->isSize($size)) return false;
+		if(!is_numeric($size))
+            $size = explode('x',$size);
+    
+        if(is_array($size))
+        {
+            $maxwidth = $size[0];
+            $maxheight = $size[1];
+        }
+        else if($size)
+        {
+            $maxwidth = $size;
+            $maxheight = $size;
+        }
+		
+		return array('width'=>$maxwidth,'height'=>$maxheight);
 	}
+
 }
