@@ -45,4 +45,4 @@ else if($_REQUEST['geturlinfo'])
 else if($_REQUEST['a']=='oembed')
 	echo json_encode($pm->oembed($_REQUEST['url'],$_REQUEST['t']));
 else
-	echo json_encode(array('status'=>'ERR'));
+	echo json_encode(array('status'=>'ERR','reason'=>'NO_VALID_COMMAND'));
