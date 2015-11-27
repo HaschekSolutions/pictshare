@@ -149,6 +149,7 @@ If you access the image with the code like this: ```https://www.pictshare.net/ch
 - Unpack the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip)
 - Rename /inc/example.config.inc.php to /inc/config.inc.php
 - ```chmod +x bin/ffmpeg``` if you want to be able to use mp4 uploads
+ - The provided ffmpeg binary (bin/ffmpeg) is from [here](http://johnvansickle.com/ffmpeg/) and it's a 64bit linux executable. If you need a different one, load yours and overwrite the one provided
 - (optional) You can and should put a [nginx](https://www.nginx.com/) proxy before the Apache server. That thing is just insanely fast with static content like images.
 - (optional) To secure your traffic I'd highly recommend getting an [SSL Cert](https://letsencrypt.org/) for your server if you don't already have one.
 
