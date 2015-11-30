@@ -44,7 +44,8 @@
     <body id="body">
         <div id="content">
             <video id="video" poster="<?php echo DOMAINPATH.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>
-                <source src="<?php echo DOMAINPATH.'raw/'.$hash; ?>" type="video/mp4">
+                <source src="<?php echo DOMAINPATH.'raw/mp4/'.$hash; ?>" type="video/mp4">
+                <source src="<?php echo DOMAINPATH.'raw/webm/'.$hash; ?>" type="video/webm">
             </video>
             <small><?php echo $filesize; ?></small>
 

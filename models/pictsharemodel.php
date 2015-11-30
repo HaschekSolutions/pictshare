@@ -701,9 +701,17 @@ class PictshareModel extends Model
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
 		$source = escapeshellarg($source);
 		$target = escapeshellarg($target);
-		$cmd = "$bin -y -i $source -c:v libx264 -f mp4 $target";
-
-		system($cmd);
+		$h265 = "$bin -y -i $source -an -c:v libx264 -f mp4 $target";
+		system($h265);
+	}
+	
+	function saveAsWebm($source,$target)
+	{
+		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$source = escapeshellarg($source);
+		$target = escapeshellarg($target);
+		$webm = "$bin -y -i $source -an -vcodec libvpx -f webm $target";
+		system($webm);
 	}
 
 	function saveFirstFrameOfMP4($path,$target)

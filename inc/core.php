@@ -150,17 +150,24 @@ function renderImage($data)
             imagepng($im);
         break;
         case 'gif': 
-            if($data['mp4']) //user wants mp4
+            if($data['mp4'] || $data['webm']) //user wants mp4 or webm
             {
                 $gifpath = $path;
                 $mp4path = $base_path.'mp4_1.'.$hash; //workaround.. find a better solution!
+                $webmpath = $base_path.'webm_1.'.$hash;
 
                 if(!file_exists($mp4path) && !$data['preview']) //if mp4 does not exist, create it
                     $pm->gifToMP4($gifpath,$mp4path);
                     
+                if(!file_exists($webmpath) && $data['webm'] && !$data['preview'])
+                    $pm->saveAsWebm($gifpath,$webmpath);
+                    
                 if($data['raw'])
                 {
-                    serveFile($mp4path, $hash.'.mp4','video/mp4');
+                    if($data['webm'])
+                        serveFile($webmpath, $hash.'.webm','video/webm');
+                    else
+                        serveFile($mp4path, $hash.'.mp4','video/mp4');  
                 }
                 else if($data['preview'])
                 {
