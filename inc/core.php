@@ -203,6 +203,11 @@ function renderImage($data)
 
             if(file_exists($cachepath) && filesize($cachepath)==0) //if there was an error and the file is 0 bytes, use the original
                 $cachepath = ROOT.DS.'upload'.DS.$hash.DS.$hash;
+                
+            if($data['webm'])
+            {
+                $pm->saveAsWebm(ROOT.DS.'upload'.DS.$hash.DS.$hash,$cachepath);
+            }
             
             if($data['raw'])
             {
