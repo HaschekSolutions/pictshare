@@ -5,18 +5,10 @@
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
         <meta name="copyright" content="Copyright <?php echo date("Y"); ?> PictShare" />
         <meta id="viewport" name="viewport" content="width=<?php echo $width ?>, user-scalable=yes" />
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
         <style type="text/css">
-            /*#content, #video {
-                width:  <?php echo $width ?>px;
-                height: <?php echo $height ?>px;
-            }*/
-
-            video {  
-               width:100%; 
-               max-width:<?php echo $width ?>px; 
-               height:auto; 
-            }
+            *{margin:0px;padding:0px;}
         </style>
         
         <link rel="alternate" type="application/json+oembed" href="<?php echo DOMAINPATH; ?>backend.php?a=oembed&t=json&url=<?php echo rawurlencode(DOMAINPATH.$hash); ?>" title="PictShare" />
@@ -42,21 +34,37 @@
         <meta property="og:video:height"      content="<?php echo $height ?>" />
     </head>
     <body id="body">
-        <div id="content">
             <video id="video" poster="<?php echo DOMAINPATH.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>
                 <source src="<?php echo DOMAINPATH.'raw/mp4/'.$hash; ?>" type="video/mp4">
                 <source src="<?php echo DOMAINPATH.'raw/webm/'.$hash; ?>" type="video/webm">
             </video>
-            <small><?php echo $filesize; ?></small>
+            <!--<small><?php echo $filesize; ?></small>-->
             
             <script>
                 var video = document.getElementById('video');
                 video.addEventListener('click',function(){
                     video.play();
                 },false);
+                
+                var $video  = $('video'),
+                    $window = $(window); 
+                
+                $(window).resize(function(){
+                    var height = $window.height();
+                    $video.css('height', height);
+                
+                    var videoWidth = $video.width(),
+                        windowWidth = $window.width(),
+                    marginLeftAdjust =   (windowWidth - videoWidth) / 2;
+                
+                    $video.css({
+                        'height': height, 
+                        'marginLeft' : marginLeftAdjust
+                    });
+                }).resize();
             </script>
 
-        </div>
+        
 
     </body>
 </html>
