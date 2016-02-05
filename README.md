@@ -1,6 +1,6 @@
 # PictShare
 **[Live Demo](https://www.pictshare.net)**
-PictShare is an multi lingual, open source image hosting service with a simple resizing and upload API that you can host yourself.
+PictShare is a multi lingual, open source image hosting service with a simple resizing and upload API that you can host yourself.
 
 ![PictShare](https://www.pictshare.net/39928d8239.gif)
 
