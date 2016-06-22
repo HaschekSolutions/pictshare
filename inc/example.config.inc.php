@@ -1,5 +1,8 @@
 <?php 
 
+//Set title for your image and mp4 hosting service
+define('TITLE', 'PictShare');
+
 //If set, can be added to any image URL to delete the image and all versions of the image
 //Must be longer than 10 characters
 //Usage example:

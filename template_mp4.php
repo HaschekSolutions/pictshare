@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>PictShare</title>
+        <title><?php echo TITLE; ?></title>
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
         <meta name="copyright" content="Copyright <?php echo date("Y"); ?> PictShare" />
         <meta id="viewport" name="viewport" content="width=<?php echo $width ?>, user-scalable=yes" />
