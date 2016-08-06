@@ -15,15 +15,15 @@
                 
         <link rel="canonical"                 href="<?php echo DOMAINPATH.$hash; ?>" />
 
-        <meta property="og:site_name"         content="PictShare" />
+        <meta property="og:site_name"         content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?>" />
         <meta property="og:url"               content="<?php echo DOMAINPATH.$hash; ?>" />
-        <meta property="og:title"             content="PictShare MP4" />
+        <meta property="og:title"             content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?> MP4" />
         <meta property="og:type"              content="video.other" />
         
         <meta property="og:image"             content="<?php echo DOMAINPATH.'preview/'.$hash; ?>" />
         <meta property="og:image:width"       content="<?php echo $width ?>" />
         <meta property="og:image:height"      content="<?php echo $height ?>" />
-        <meta property="og:description"       content="PictShare MP4 Video" />
+        <meta property="og:description"       content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?> MP4 Video" />
         <meta property="og:video"             content="<?php echo DOMAINPATH.$hash; ?>" />
         <meta property="og:video:secure_url"  content="<?php echo DOMAINPATH.$hash; ?>" />
         <meta property="og:video:type"        content="application/x-shockwave-flash" />
