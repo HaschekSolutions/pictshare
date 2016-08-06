@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title><?php echo TITLE; ?></title>
+        <title><?php echo (TITLE?TITLE:'PictShare image hosting'); ?></title>
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
         <meta name="copyright" content="Copyright <?php echo date("Y"); ?> PictShare" />
         <meta id="viewport" name="viewport" content="width=<?php echo $width ?>, user-scalable=yes" />
@@ -15,7 +15,7 @@
                 
         <link rel="canonical"                 href="<?php echo DOMAINPATH.$hash; ?>" />
 
-        <meta property="og:site_name"         content="Imgur" />
+        <meta property="og:site_name"         content="PictShare" />
         <meta property="og:url"               content="<?php echo DOMAINPATH.$hash; ?>" />
         <meta property="og:title"             content="PictShare MP4" />
         <meta property="og:type"              content="video.other" />
