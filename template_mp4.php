@@ -15,6 +15,8 @@
                 
         <link rel="canonical"                 href="<?php echo DOMAINPATH.$hash; ?>" />
 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
         <meta property="og:site_name"         content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?>" />
         <meta property="og:url"               content="<?php echo DOMAINPATH.$hash; ?>" />
         <meta property="og:title"             content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?> MP4" />
@@ -35,10 +37,11 @@
     </head>
     <body id="body">
 
-        <div id="container img-responsive">
+        <div id="container">
             <video id="video" poster="<?php echo DOMAINPATH.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>   
                 <source src="<?php echo DOMAINPATH.'raw/mp4/'.$hash; ?>" type="video/mp4">
                 <source src="<?php echo DOMAINPATH.'raw/webm/'.$hash; ?>" type="video/webm"> 
+                <source src="<?php echo DOMAINPATH.'raw/ogg/'.$hash; ?>" type="video/ogg">
             </video>
         </div>
             <small><?php echo $filesize; ?></small>

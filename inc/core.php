@@ -1,11 +1,32 @@
 <?php
+spl_autoload_register('autoload');
 
-function __autoload($className)
+function autoload($className)
 {
 	if (file_exists(ROOT . DS . 'models' . DS . strtolower($className) . '.php'))
 		require_once(ROOT . DS . 'models' . DS . strtolower($className) . '.php');
     if (file_exists(ROOT . DS . 'classes' . DS . strtolower($className) . '.php'))
 		require_once(ROOT . DS . 'classes' . DS . strtolower($className) . '.php');
+}
+
+function getUserIP()
+{
+	$client  = @$_SERVER['HTTP_CLIENT_IP'];
+	$forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
+	$remote  = $_SERVER['REMOTE_ADDR'];
+	if(filter_var($client, FILTER_VALIDATE_IP))
+	{
+		$ip = $client;
+	}
+	elseif(filter_var($forward, FILTER_VALIDATE_IP))
+	{
+		$ip = $forward;
+	}
+	else
+	{
+		$ip = $remote;
+	}
+	return $ip;
 }
 
 function stripSlashesDeep($value)
@@ -150,22 +171,28 @@ function renderImage($data)
             imagepng($im);
         break;
         case 'gif': 
-            if($data['mp4'] || $data['webm']) //user wants mp4 or webm
+            if($data['mp4'] || $data['webm'] || $data['ogg']) //user wants mp4 or webm or ogg
             {
                 $gifpath = $path;
                 $mp4path = $base_path.'mp4_1.'.$hash; //workaround.. find a better solution!
                 $webmpath = $base_path.'webm_1.'.$hash;
+                $oggpath = $base_path.'ogg_1.'.$hash;
 
                 if(!file_exists($mp4path) && !$data['preview']) //if mp4 does not exist, create it
                     $pm->gifToMP4($gifpath,$mp4path);
                     
                 if(!file_exists($webmpath) && $data['webm'] && !$data['preview'])
                     $pm->saveAsWebm($gifpath,$webmpath);
+
+                if(!file_exists($oggpath) && $data['ogg'] && !$data['preview'])
+                    $pm->saveAsOGG($gifpath,$oggpath);
                     
                 if($data['raw'])
                 {
                     if($data['webm'])
                         serveFile($webmpath, $hash.'.webm','video/webm');
+                    if($data['ogg'])
+                        serveFile($oggpath, $hash.'.ogg','video/ogg');
                     else
                         serveFile($mp4path, $hash.'.mp4','video/mp4');  
                 }
@@ -207,6 +234,11 @@ function renderImage($data)
             if($data['webm'])
             {
                 $pm->saveAsWebm(ROOT.DS.'upload'.DS.$hash.DS.$hash,$cachepath);
+            }
+
+            if($data['ogg'])
+            {
+                $pm->saveAsOGG(ROOT.DS.'upload'.DS.$hash.DS.$hash,$cachepath);
             }
             
             if($data['raw'])

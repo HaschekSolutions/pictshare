@@ -4,6 +4,20 @@ class PictshareModel extends Model
 {
 	function backend($params)
 	{
+		switch($params[0])
+		{
+			case 'mp4convert':
+				$hash = $params[1];
+				$path = $params[2];
+				$source = $path.$hash;
+				if(!$this->isImage($hash))
+					exit('[x] Hash not found'."\n");
+				echo "[i] Converting $hash to mp4\n";
+				$this->saveAsMP4($source,$path.'mp4_1.'.$hash);
+				$this->saveAsMP4($source,$path.'ogg_1.'.$hash);
+			break;
+		}
+		
 		return array('status'=>'ok');
 	}
 	
@@ -57,7 +71,7 @@ class PictshareModel extends Model
 			
 			if($this->isImage($el))
 				$data['hash']=$el;
-			else if($el=='mp4' || $el=='raw' || $el=='preview' || $el=='webm')
+			else if($el=='mp4' || $el=='raw' || $el=='preview' || $el=='webm' || $el=='ogg')
 				$data[$el] = 1;
 			else if($this->isSize($el))
 				$data['size'] = $el;
@@ -705,7 +719,16 @@ class PictshareModel extends Model
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
 		$source = escapeshellarg($source);
 		$target = escapeshellarg($target);
-		$h265 = "$bin -y -i $source -an -c:v libx264 -f mp4 $target";
+		$h265 = "$bin -y -i $source -an -c:v libx264 -qp 0 -f mp4 $target";
+		system($h265);
+	}
+
+	function saveAsOGG($source,$target)
+	{
+		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$source = escapeshellarg($source);
+		$target = escapeshellarg($target);
+		$h265 = "$bin -y -i $source -an -codec:v libtheora -qp 0 -f ogg $target";
 		system($h265);
 	}
 	
