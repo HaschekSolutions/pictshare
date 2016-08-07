@@ -240,13 +240,17 @@ class PictshareModel extends Model
 		<strong>'.$this->translate(0).': '.$maxfilesize.'MB / File</strong><br>
 		<strong>'.$this->translate(1).'</strong>
 		<br><br>
-		<FORM enctype="multipart/form-data" method="post">
+		<FORM id="form" enctype="multipart/form-data" method="post">
 		<div id="formular">
 			'.$upload_code_form.'
 			<strong>'.$this->translate(4).': </strong><input class="input" type="file" name="pic[]" multiple><div class="clear"></div>
 			<div class="clear"></div><br>
 		</div>
-			<INPUT style="font-size:15px;font-weight:bold;background-color:#74BDDE;padding:3px;" type="submit" id="submit" name="submit" value="'.$this->translate(3).'">
+			<INPUT style="font-size:15px;font-weight:bold;background-color:#74BDDE;padding:3px;" type="submit" id="submit" name="submit" value="'.$this->translate(3).'" onClick="setTimeout(function(){document.getElementById(\'submit\').disabled = \'disabled\';}, 1);$(\'#movingBallG\').fadeIn()">
+			<div id="movingBallG" class="invisible">
+				<div class="movingBallLineG"></div>
+				<div id="movingBallG_1" class="movingBallG"></div>
+			</div>
 		</FORM>';
 	}
 

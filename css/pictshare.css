@@ -199,3 +199,131 @@ font-size: 22px;
  color : #fff;
  font-size: 10px;
 }
+
+.invisible
+{
+	display:none;
+}
+
+
+#movingBallG{
+	position:relative;
+	width:250px;
+	height:19px;
+	margin:auto;
+}
+
+.movingBallLineG{
+	position:absolute;
+	left:0px;
+	top:8px;
+	height:4px;
+	width:250px;
+	background-color:rgb(68,169,216);
+}
+
+.movingBallG{
+	background-color:rgb(67,67,67);
+	position:absolute;
+	top:0;
+	left:0;
+	width:19px;
+	height:19px;
+	border-radius:10px;
+		-o-border-radius:10px;
+		-ms-border-radius:10px;
+		-webkit-border-radius:10px;
+		-moz-border-radius:10px;
+	animation-name:bounce_movingBallG;
+		-o-animation-name:bounce_movingBallG;
+		-ms-animation-name:bounce_movingBallG;
+		-webkit-animation-name:bounce_movingBallG;
+		-moz-animation-name:bounce_movingBallG;
+	animation-duration:1.5s;
+		-o-animation-duration:1.5s;
+		-ms-animation-duration:1.5s;
+		-webkit-animation-duration:1.5s;
+		-moz-animation-duration:1.5s;
+	animation-iteration-count:infinite;
+		-o-animation-iteration-count:infinite;
+		-ms-animation-iteration-count:infinite;
+		-webkit-animation-iteration-count:infinite;
+		-moz-animation-iteration-count:infinite;
+	animation-direction:normal;
+		-o-animation-direction:normal;
+		-ms-animation-direction:normal;
+		-webkit-animation-direction:normal;
+		-moz-animation-direction:normal;
+}
+
+
+
+@keyframes bounce_movingBallG{
+	0%{
+		left:0px;
+	}
+
+	50%{
+		left:230px;
+	}
+
+	100%{
+		left:0px;
+	}
+}
+
+@-o-keyframes bounce_movingBallG{
+	0%{
+		left:0px;
+	}
+
+	50%{
+		left:230px;
+	}
+
+	100%{
+		left:0px;
+	}
+}
+
+@-ms-keyframes bounce_movingBallG{
+	0%{
+		left:0px;
+	}
+
+	50%{
+		left:230px;
+	}
+
+	100%{
+		left:0px;
+	}
+}
+
+@-webkit-keyframes bounce_movingBallG{
+	0%{
+		left:0px;
+	}
+
+	50%{
+		left:230px;
+	}
+
+	100%{
+		left:0px;
+	}
+}
+
+@-moz-keyframes bounce_movingBallG{
+	0%{
+		left:0px;
+	}
+
+	50%{
+		left:230px;
+	}
+
+	100%{
+		left:0px;
+	}
+}
