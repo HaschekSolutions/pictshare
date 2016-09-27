@@ -3,7 +3,7 @@
 <!--[if (gt IEMobile 7)|!(IEMobile)]><!--> <html class="no-js"> <!--<![endif]-->
     <head>
         <meta charset="utf-8">
-        <title><?php echo (defined(TITLE)?TITLE:'PictShare image hosting'); ?></title>
+        <title><?php echo (defined('TITLE')?TITLE:'PictShare image hosting'); ?></title>
         <meta name="description" content="">
         <meta name="HandheldFriendly" content="True">
         <meta name="MobileOptimized" content="320">

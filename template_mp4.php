@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title><?php echo (defined(TITLE)?TITLE:'PictShare image hosting'); ?></title>
+        <title><?php echo (defined('TITLE')?TITLE:'PictShare image hosting'); ?></title>
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
         <meta name="copyright" content="Copyright <?php echo date("Y"); ?> PictShare" />
         <meta id="viewport" name="viewport" content="width=<?php echo $width ?>, user-scalable=yes" />
