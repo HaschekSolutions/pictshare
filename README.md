@@ -4,6 +4,29 @@ PictShare is a multi lingual, open source image hosting service with a simple re
 
 ![PictShare](https://www.pictshare.net/39928d8239.gif)
 
+**Table of Contents**
+- [Installation](#)
+	- [Docker](#)
+    - [On nginx](#)
+- [Why would I want to host my own images?](#)
+- [Features](#)
+- [Smart query system](#)
+	- [Available options](#)
+- [How does the external-upload-API work?](#)
+	- [Upload from external URL](#)
+		- [Example:](#)
+	- [Upload via POST](#)
+	- [Upload from base64 string](#)
+- [Restriction settings](#)
+	- [UPLOAD_CODE](#)
+	- [IMAGE_CHANGE_CODE](#)
+- [Security and privacy](#)
+- [Requirements](#)
+- [Upgrading](#)
+- [Addons](#)
+- [Traffic analysis](#)
+- [Coming soon](#)
+
 UPDATES
 ========
 - Nov. 23: Added support for MP4 uploads and conversion from gif to MP4
@@ -145,6 +168,16 @@ If you access the image with the code like this: ```https://www.pictshare.net/ch
 - A domain or sub-domain since PictShare can't be run from a subfolder of some other domain
 
 ## Installation
+
+### Docker
+The fastest way to deploy PictShare is via the official Docker repo:
+
+```bash
+docker run -p 80:80 -e "TITLE=My own PictShare" -d hascheksolutions/pictshare
+```
+
+[![Docker setup](http://www.pictshare.net/b65dea2117.gif)](https://www.pictshare.net/8a1dec0973.mp4)
+
 - Make sure you have PHP5 GD libraries installed: ```apt-get install php5-gd```
 - Unpack the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip)
 - Rename /inc/example.config.inc.php to /inc/config.inc.php
