@@ -29,6 +29,29 @@ Table of contents
 * [Coming soon](#coming-soon)
 
 
+## Installation
+
+### Docker
+The fastest way to deploy PictShare is via the [official Docker repo](https://hub.docker.com/r/hascheksolutions/pictshare/)
+[Source code](https://github.com/HaschekSolutions/PictShare-Docker)
+
+```bash
+docker run -d -p 80:80 -e "TITLE=My own PictShare" -d hascheksolutions/pictshare
+```
+
+[![Docker setup](http://www.pictshare.net/b65dea2117.gif)](https://www.pictshare.net/8a1dec0973.mp4)
+
+### Without Docker
+
+- Make sure you have PHP5 GD libraries installed: ```apt-get install php5-gd```
+- Unpack the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip)
+- Rename /inc/example.config.inc.php to /inc/config.inc.php
+- ```chmod +x bin/ffmpeg``` if you want to be able to use mp4 uploads
+ - The provided ffmpeg binary (bin/ffmpeg) is from [here](http://johnvansickle.com/ffmpeg/) and it's a 64bit linux executable. If you need a different one, load yours and overwrite the one provided
+- (optional) You can and should put a [nginx](https://www.nginx.com/) proxy before the Apache server. That thing is just insanely fast with static content like images.
+- (optional) To secure your traffic I'd highly recommend getting an [SSL Cert](https://letsencrypt.org/) for your server if you don't already have one.
+
+
 UPDATES
 ========
 - Nov. 23: Added support for MP4 uploads and conversion from gif to MP4
@@ -169,26 +192,7 @@ If you access the image with the code like this: ```https://www.pictshare.net/ch
 - PHP 5 GD library
 - A domain or sub-domain since PictShare can't be run from a subfolder of some other domain
 
-## Installation
-
-### Docker
-The fastest way to deploy PictShare is via the official Docker repo:
-
-```bash
-docker run -p 80:80 -e "TITLE=My own PictShare" -d hascheksolutions/pictshare
-```
-
-[![Docker setup](http://www.pictshare.net/b65dea2117.gif)](https://www.pictshare.net/8a1dec0973.mp4)
-
-- Make sure you have PHP5 GD libraries installed: ```apt-get install php5-gd```
-- Unpack the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip)
-- Rename /inc/example.config.inc.php to /inc/config.inc.php
-- ```chmod +x bin/ffmpeg``` if you want to be able to use mp4 uploads
- - The provided ffmpeg binary (bin/ffmpeg) is from [here](http://johnvansickle.com/ffmpeg/) and it's a 64bit linux executable. If you need a different one, load yours and overwrite the one provided
-- (optional) You can and should put a [nginx](https://www.nginx.com/) proxy before the Apache server. That thing is just insanely fast with static content like images.
-- (optional) To secure your traffic I'd highly recommend getting an [SSL Cert](https://letsencrypt.org/) for your server if you don't already have one.
-
-### On nginx
+## nginx config
 This is a simple config file that should make PictShare work on nginx
 
 - Install php fpm: ```apt-get install php5-fpm```
