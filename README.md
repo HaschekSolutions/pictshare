@@ -4,7 +4,11 @@ PictShare is a multi lingual, open source image hosting service with a simple re
 
 ![PictShare](https://www.pictshare.net/39928d8239.gif)
 
-**Table of Contents**
+Table of contents
+=================
+* [Installation](#installation)
+  * [Docker](#docker)
+  * [On nginx](#on-nginx)
 * [Why would I want to host my own images?](#why-would-i-want-to-host-my-own-images)
 * [Features](#features)
 * [Smart query system](#smart-query-system)
@@ -19,9 +23,6 @@ PictShare is a multi lingual, open source image hosting service with a simple re
   * [IMAGE_CHANGE_CODE](#image_change_code)
 * [Security and privacy](#security-and-privacy)
 * [Requirements](#requirements)
-* [Installation](#installation)
-  * [Docker](#docker)
-  * [On nginx](#on-nginx)
 * [Upgrading](#upgrading)
 * [Addons](#addons)
 * [Traffic analysis](#traffic-analysis)
