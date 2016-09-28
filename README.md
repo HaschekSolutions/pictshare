@@ -33,7 +33,7 @@ Table of contents
 
 ### Docker
 The fastest way to deploy PictShare is via the [official Docker repo](https://hub.docker.com/r/hascheksolutions/pictshare/)
-[Source code](https://github.com/HaschekSolutions/PictShare-Docker)
+- [Source code & more examples](https://github.com/HaschekSolutions/PictShare-Docker)
 
 ```bash
 docker run -d -p 80:80 -e "TITLE=My own PictShare" -d hascheksolutions/pictshare
