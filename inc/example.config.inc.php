@@ -3,6 +3,15 @@
 //Set title for your image and mp4 hosting service
 define('TITLE', 'PictShare');
 
+// PNG level from 0 (largest file) to 
+// 9 (smallest file). Note that this doesn't affect
+// quality, only file size and CPU
+define('PNG_COMPRESSION', 6);
+
+// JPG compression percenage from 0 (smallest file, worst quality) 
+// to 100 (large file, best quality)
+define('JPEG_COMPRESSION', 90);
+
 //If set, can be added to any image URL to delete the image and all versions of the image
 //Must be longer than 10 characters
 //Usage example:

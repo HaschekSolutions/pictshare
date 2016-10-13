@@ -149,7 +149,7 @@ function renderImage($data)
                 if($pm->changeCodeExists($changecode))
                 {
                     changeImage($im,$data);
-                    imagejpeg($im,$cachepath,95);
+                    imagejpeg($im,$cachepath,(defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
                 }
                     
             }
@@ -163,7 +163,7 @@ function renderImage($data)
                 if($pm->changeCodeExists($changecode))
                 {
                     changeImage($im,$data);
-                    imagepng($im,$cachepath,1);
+                    imagepng($im,$cachepath,(defined('PNG_COMPRESSION')?PNG_COMPRESSION:6));
                 }
             }
             imageAlphaBlending($im, true);

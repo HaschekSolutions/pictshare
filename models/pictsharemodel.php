@@ -376,7 +376,7 @@ class PictshareModel extends Model
 		if($type=='jpg')
 		{
 			$res = imagecreatefromjpeg($file);
-			imagejpeg($res, $file, 100);
+			imagejpeg($res, $file, (defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
 		}
 
 		if(LOG_UPLOADER)
@@ -609,12 +609,12 @@ class PictshareModel extends Model
 		switch($type)
 		{
 		case 'jpg':
-				imagejpeg($source,$output_file,100);
+				imagejpeg($source,$output_file,(defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
 				trigger_error("========= SAVING AS ".$type." TO ".$output_file);
 		break;
 	
 		case 'png':
-				imagepng($source,$output_file,5);
+				imagepng($source,$output_file,(defined('PNG_COMPRESSION')?PNG_COMPRESSION:6));
 				trigger_error("========= SAVING AS ".$type." TO ".$output_file);
 		break;
 	
@@ -624,7 +624,7 @@ class PictshareModel extends Model
 		break;
 	
 		default:
-				imagepng($source,$output_file,5);
+				imagepng($source,$output_file,(defined('PNG_COMPRESSION')?PNG_COMPRESSION:6));
 		break;
 		}
 	
