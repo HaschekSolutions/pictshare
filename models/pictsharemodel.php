@@ -109,6 +109,28 @@ class PictshareModel extends Model
 	
 	function deleteImage($hash)
     {
+		//delete hash from hashes.csv
+		$tmpname = ROOT.DS.'upload'.DS.'delete_temp.csv';
+		$csv = ROOT.DS.'upload'.DS.'hashes.csv';
+		$fptemp = fopen($tmpname, "w");
+		if (($handle = fopen($csv, "r")) !== FALSE)
+		{
+			while (($line = fgets($handle)) !== false)
+			{
+				$data = explode(';',$line);
+				if ($hash != trim($data[1]) )
+				{
+					fwrite($fptemp, $line);
+				}
+			}
+		}
+		fclose($handle);
+		fclose($fptemp);
+		unlink($csv);
+		rename($tmpname, $csv);
+		unlink($tmpname);
+
+		//delete actual image
         $base_path = ROOT.DS.'upload'.DS.$hash.DS;
 		if(!is_dir($base_path)) return false;
 		if ($handle = opendir($base_path))
