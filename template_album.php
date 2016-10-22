@@ -25,7 +25,7 @@
 		<meta name="rating" content="general">
 
         <style type="text/css">
-            img {
+            .picture {
                 
                 <?php 
                 if($data['responsive']===true)

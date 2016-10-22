@@ -22,8 +22,7 @@
             body {
                 background: none transparent;
             }
-            img {
-                
+            .picture {
                 <?php 
                 if($data['responsive']===true)
                     echo '  display: block;

@@ -126,7 +126,7 @@ function renderAlbum($data)
 
     foreach($data['album'] as $hash)
     {
-        $content.='<a href="/'.$filters.$hash.'"><img src="/'.$size.$forcesize.$filters.$hash.'" /></a>';
+        $content.='<a href="/'.$filters.$hash.'"><img class="picture" src="/'.$size.$forcesize.$filters.$hash.'" /></a>';
     }
 
     if($data['embed']===true)

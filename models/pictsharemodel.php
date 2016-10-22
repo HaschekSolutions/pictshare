@@ -499,8 +499,16 @@ class PictshareModel extends Model
 						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.$data['hash'].'">'.$data['hash'].'</a><br/>';
 					else
 						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.$data['hash'].'"><img src="'.DOMAINPATH.'300/'.$data['hash'].'" /></a><br/>';
+
+					$hashes[] = $data['hash'];
 				}
 			}
+		}
+
+		if(count($hashes)>1)
+		{
+			$albumlink = DOMAINPATH.implode('/',$hashes);
+			$o.='<hr/><h1>Album link</h1><a href="'.$albumlink.'" >'.$albumlink.'</a>';
 		}
 		
 		return $o;
