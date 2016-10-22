@@ -60,6 +60,7 @@ UPDATES
 - Nov. 06: Master delete code. One code to delete them all
 - Nov. 01: [Restricted uploads and option-use](#restriction-settings)
 - Oct. 30: [Rotations and filters](#smart-query-system)
+- Oct. 10: [Album functionality](#smart-query-system) finally ready
 
 ## Why would I want to host my own images?
 If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
@@ -99,6 +100,12 @@ If there is some option that's not recognized by PictShare it's simply ignored, 
 **Resizing**   |  |  | 
 &lt;width&gt;**x**&lt;height&gt; | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg)
 forcesize      | -none-				| https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg)
+**Albums**   |  |  | 
+just add multiple image hashes            | -none-             | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg | Takes the **images** you put in the URL and makes an album out of them
+embed        | -none-             | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg/embed | Renders the album without CSS and with transparent background so you can embed them easily
+responsive        | -none-             | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg/responsive | Renders all images responsive (max-width 100%) according to screen size
+&lt;width&gt;**x**&lt;height&gt;        | -none-             | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg/150x150 | Sets the size for the thumbnails in the album
+forcesize        | -none-             | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg/100x300/forcesize | Forces thumbnail sizes to the values you provided
 **GIF to mp4**   |  |  | 
 mp4            | -none-             | https://www.pictshare.net/mp4/102687fe65.gif | Converts gif to mp4 and displays as that. Note that you can't include that mp4 in an img tag
 raw            | -none-             | https://www.pictshare.net/mp4/raw/102687fe65.gif | Renders the converted mp4 directly. Use with /mp4/

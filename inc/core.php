@@ -106,11 +106,34 @@ function whatToDo($url)
 
         render($vars);
     }
+    else if($data['album'])
+        renderAlbum($data);
     else
         renderImage($data);
 }
 
+function renderAlbum($data)
+{
+    if($data['filter'])
+        $filters = implode('/',$data['filter']).'/';
 
+    if($data['size'])
+        $size = $data['size'].'/';
+    else if(!$data['responsive'])
+        $size = '300x300/';
+
+    $forcesize = ($data['forcesize']?'forcesize/':'');
+
+    foreach($data['album'] as $hash)
+    {
+        $content.='<a href="/'.$filters.$hash.'"><img src="/'.$size.$forcesize.$filters.$hash.'" /></a>';
+    }
+
+    if($data['embed']===true)
+        include (ROOT . DS . 'template_album_embed.php');
+    else
+        include (ROOT . DS . 'template_album.php');
+}
 
 function renderImage($data)
 {

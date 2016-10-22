@@ -70,11 +70,25 @@ class PictshareModel extends Model
 				$data['changecode'] = substr($el,11);
 			
 			if($this->isImage($el))
+			{
+				//if there are mor than one hashes in url
+				//make an album from them
+				if($data['hash'])
+				{
+					if(!$data['album'])
+						$data['album'][] = $data['hash'];
+					$data['album'][] = $el;
+				}
 				$data['hash']=$el;
+			}
 			else if($el=='mp4' || $el=='raw' || $el=='preview' || $el=='webm' || $el=='ogg')
 				$data[$el] = 1;
 			else if($this->isSize($el))
 				$data['size'] = $el;
+			else if($el=='embed')
+				$data['embed'] = true;
+			else if($el=='responsive')
+				$data['responsive'] = true;
 			else if($this->isRotation($el))
 				$data['rotate'] = $el;
 			else if($this->isFilter($el))
