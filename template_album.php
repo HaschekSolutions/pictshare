@@ -24,6 +24,22 @@
 		<meta name="distribution" content="global">
 		<meta name="rating" content="general">
 
+        <style type="text/css">
+            img {
+                
+                <?php 
+                if($data['responsive']===true)
+                    echo '  display: block;
+                            max-width: 100%;
+                            height: auto;
+                            padding-bottom:10px;';
+                else 
+                    echo 'padding:7px;';
+            ?>
+            }
+            
+        </style>
+
     </HEAD>
     <BODY>
       <div class="mitte" id="overall">
