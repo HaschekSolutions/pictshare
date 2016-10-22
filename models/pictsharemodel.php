@@ -509,6 +509,9 @@ class PictshareModel extends Model
 		{
 			$albumlink = DOMAINPATH.implode('/',$hashes);
 			$o.='<hr/><h1>Album link</h1><a href="'.$albumlink.'" >'.$albumlink.'</a>';
+
+			$iframe = '<iframe frameborder="0" width="100%" height="500" src="'.$albumlink.'/300x300/forcesize/embed" <p>iframes are not supported by your browser.</p> </iframe>';
+			$o.='<hr/><h1>Embed code</h1><input style="border:1px solid black;" size="100" type="text" value="'.addslashes(htmlentities($iframe)).'" />';
 		}
 		
 		return $o;

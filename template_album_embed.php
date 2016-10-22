@@ -17,6 +17,7 @@
 		<meta name="author" content="Haschek Solutions">
 		<meta name="distribution" content="global">
 		<meta name="rating" content="general">
+        <base target="_blank" />
 
         <style type="text/css">
             body {

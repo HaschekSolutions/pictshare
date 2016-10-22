@@ -14,6 +14,7 @@
         <link rel="stylesheet" href="/css/pictshare.css">
         <script src="/js/vendor/modernizr-2.6.2.min.js"></script>
         <script type="text/javascript" src="/js/jquery-2.1.0.min.js"></script>
+        <base target="_blank" />
 
 		<meta name="description" content="Free image sharing, linking and tracking">
 		<meta name="keywords" content="image, share, hosting, free">
