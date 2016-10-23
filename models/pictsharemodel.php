@@ -456,7 +456,7 @@ class PictshareModel extends Model
 	
 	function processSingleUpload($file,$name)
 	{
-		if(UPLOAD_CODE && !$pm->uploadCodeExists($_REQUEST['upload_code']))
+		if(UPLOAD_CODE && !$this->uploadCodeExists($_REQUEST['upload_code']))
 			exit(json_encode(array('status'=>'ERR','reason'=>$this->translate(21))));
 		
 		$im = new Image();
