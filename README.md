@@ -2,6 +2,11 @@
 **[Live Demo](https://www.pictshare.net)**
 PictShare is a multi lingual, open source image hosting service with a simple resizing and upload API that you can host yourself.
 
+---
+[![Rocket.Chat](https://rocket.haschek.at/images/join-chat.svg)](https://rocket.haschek.at/channel/pictshare)
+[![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/chrisiaut/pictshare/blob/master/LICENSE)
+
+
 ![PictShare](https://www.pictshare.net/39928d8239.gif)
 
 Table of contents
