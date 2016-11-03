@@ -1,4 +1,7 @@
 <?php
+session_cache_limiter("public");
+$expiry = 90; //days
+session_cache_expire($expiry * 24 * 60);
 session_start();
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', dirname(__FILE__));
