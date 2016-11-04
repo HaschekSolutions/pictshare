@@ -8,10 +8,10 @@
         <title><?php echo (defined('TITLE')?TITLE:'PictShare image hosting'); ?></title>
         
         <!-- Bootstrap -->
-        <link href="<?php echo PATH.'/'; ?>css/bootstrap.min.css" rel="stylesheet">
+        <link href="<?php echo PATH; ?>css/bootstrap.min.css" rel="stylesheet">
 
         <!-- PictShare overwrites -->
-        <link href="<?php echo PATH.'/'; ?>css/pictshare.css" rel="stylesheet">
+        <link href="<?php echo PATH; ?>css/pictshare.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -58,13 +58,13 @@
                 </div>
             </div>
             
-            <footer>(c)<?php echo date("y");?> by<br/><a href="https://haschek.solutions" target="_blank"><img height="30" src="<?php echo PATH.'/'; ?>css/imgs/hs_logo.png" /></a></footer>
+            <footer>(c)<?php echo date("y");?> by<br/><a href="https://haschek.solutions" target="_blank"><img height="30" src="<?php echo PATH; ?>css/imgs/hs_logo.png" /></a></footer>
       </div>
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="<?php echo PATH.'/'; ?>js/bootstrap.min.js"></script>
+        <script src="<?php echo PATH; ?>js/bootstrap.min.js"></script>
     </BODY>
 </HTML>
 
