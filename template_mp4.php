@@ -81,23 +81,6 @@
                         hadToResizeH = true;
                         $video.height($window.height());
                     }
-
-
-                        
-
-                    /*
-                    var height = $window.height();
-                    $video.css('height', height);
-                
-                    
-                    var videoWidth = $video.width(),
-                        windowWidth = $window.width(),
-                    marginLeftAdjust =   (windowWidth - videoWidth) / 2;
-                
-                    $video.css({
-                        'height': height, 
-                        'marginLeft' : marginLeftAdjust
-                    });*/
                 }
             </script>
 
