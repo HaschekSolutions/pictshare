@@ -296,7 +296,7 @@ class PictshareModel extends Model
 			<strong>'.$this->translate(4).': </strong><input class="input" type="file" name="pic[]" multiple><div class="clear"></div>
 			<div class="clear"></div><br>
 		</div>
-			<INPUT style="font-size:15px;font-weight:bold;background-color:#74BDDE;padding:3px;" type="submit" id="submit" name="submit" value="'.$this->translate(3).'" onClick="setTimeout(function(){document.getElementById(\'submit\').disabled = \'disabled\';}, 1);$(\'#movingBallG\').fadeIn()">
+			<INPUT class="btn" style="font-size:15px;font-weight:bold;background-color:#74BDDE;padding:3px;" type="submit" id="submit" name="submit" value="'.$this->translate(3).'" onClick="setTimeout(function(){document.getElementById(\'submit\').disabled = \'disabled\';}, 1);$(\'#movingBallG\').fadeIn()">
 			<div id="movingBallG" class="invisible">
 				<div class="movingBallLineG"></div>
 				<div id="movingBallG_1" class="movingBallG"></div>
@@ -401,7 +401,7 @@ class PictshareModel extends Model
 		
 			
 		if($dup_id)
-			return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
+			return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.PATH.$hash,'domain'=>DOMAINPATH);
 		
 		mkdir(ROOT.DS.'upload'.DS.$hash);
 		$file = ROOT.DS.'upload'.DS.$hash.DS.$hash;
@@ -422,7 +422,7 @@ class PictshareModel extends Model
 			fclose($fh);
 		}
 
-		return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
+		return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.PATH.$hash,'domain'=>DOMAINPATH);
 	}
 	
 	function uploadCodeExists($code)
@@ -496,9 +496,9 @@ class PictshareModel extends Model
 				if($data['status']=='OK')
 				{
 					if($data['type']=='mp4')
-						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.$data['hash'].'">'.$data['hash'].'</a><br/>';
+						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'">'.$data['hash'].'</a><br/>';
 					else
-						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.$data['hash'].'"><img src="'.DOMAINPATH.'300/'.$data['hash'].'" /></a><br/>';
+						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'"><img src="'.DOMAINPATH.PATH.'300/'.$data['hash'].'" /></a><br/>';
 
 					$hashes[] = $data['hash'];
 				}
@@ -507,7 +507,7 @@ class PictshareModel extends Model
 
 		if(count($hashes)>1)
 		{
-			$albumlink = DOMAINPATH.implode('/',$hashes);
+			$albumlink = DOMAINPATH.PATH.implode('/',$hashes);
 			$o.='<hr/><h1>Album link</h1><a href="'.$albumlink.'" >'.$albumlink.'</a>';
 
 			$iframe = '<iframe frameborder="0" width="100%" height="500" src="'.$albumlink.'/300x300/forcesize/embed" <p>iframes are not supported by your browser.</p> </iframe>';

@@ -11,23 +11,23 @@
             *{margin:0px;padding:0px;}
         </style>
         
-        <link rel="alternate" type="application/json+oembed" href="<?php echo DOMAINPATH; ?>backend.php?a=oembed&t=json&url=<?php echo rawurlencode(DOMAINPATH.$hash); ?>" title="PictShare" />
+        <link rel="alternate" type="application/json+oembed" href="<?php echo DOMAINPATH.PATH; ?>backend.php?a=oembed&t=json&url=<?php echo rawurlencode(DOMAINPATH.PATH.$hash); ?>" title="PictShare" />
                 
-        <link rel="canonical"                 href="<?php echo DOMAINPATH.$hash; ?>" />
+        <link rel="canonical"                 href="<?php echo DOMAINPATH.PATH.$hash; ?>" />
 
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
         <meta property="og:site_name"         content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?>" />
-        <meta property="og:url"               content="<?php echo DOMAINPATH.$hash; ?>" />
+        <meta property="og:url"               content="<?php echo DOMAINPATH.PATH.$hash; ?>" />
         <meta property="og:title"             content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?> MP4" />
         <meta property="og:type"              content="video.other" />
         
-        <meta property="og:image"             content="<?php echo DOMAINPATH.'preview/'.$hash; ?>" />
+        <meta property="og:image"             content="<?php echo DOMAINPATH.PATH.'preview/'.$hash; ?>" />
         <meta property="og:image:width"       content="<?php echo $width ?>" />
         <meta property="og:image:height"      content="<?php echo $height ?>" />
         <meta property="og:description"       content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?> MP4 Video" />
-        <meta property="og:video"             content="<?php echo DOMAINPATH.$hash; ?>" />
-        <meta property="og:video:secure_url"  content="<?php echo DOMAINPATH.$hash; ?>" />
+        <meta property="og:video"             content="<?php echo DOMAINPATH.PATH.$hash; ?>" />
+        <meta property="og:video:secure_url"  content="<?php echo DOMAINPATH.PATH.$hash; ?>" />
         <meta property="og:video:type"        content="application/x-shockwave-flash" />
         <meta property="og:video:width"       content="<?php echo $width ?>" />
         <meta property="og:video:height"      content="<?php echo $height ?>" />
@@ -38,10 +38,10 @@
     <body id="body">
 
         <div id="container">
-            <video id="video" poster="<?php echo DOMAINPATH.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>   
-                <source src="<?php echo DOMAINPATH.'raw/mp4/'.$hash; ?>" type="video/mp4">
-                <source src="<?php echo DOMAINPATH.'raw/webm/'.$hash; ?>" type="video/webm"> 
-                <source src="<?php echo DOMAINPATH.'raw/ogg/'.$hash; ?>" type="video/ogg">
+            <video id="video" poster="<?php echo DOMAINPATH.PATH.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>   
+                <source src="<?php echo DOMAINPATH.PATH.'raw/mp4/'.$hash; ?>" type="video/mp4">
+                <source src="<?php echo DOMAINPATH.PATH.'raw/webm/'.$hash; ?>" type="video/webm"> 
+                <source src="<?php echo DOMAINPATH.PATH.'raw/ogg/'.$hash; ?>" type="video/ogg">
             </video>
         </div>
             <small><?php echo $filesize; ?></small>

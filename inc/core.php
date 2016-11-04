@@ -80,7 +80,7 @@ function whatToDo($url)
     
     if(!is_array($data) || !$data['hash'])
     {
-        if((UPLOAD_FORM_LOCATION && $url==UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION && $url='/'))
+        if((UPLOAD_FORM_LOCATION && $url==UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION && $url==PATH))
         {
             $upload_answer = $pm->ProcessUploads();
             if($upload_answer)
@@ -126,7 +126,7 @@ function renderAlbum($data)
 
     foreach($data['album'] as $hash)
     {
-        $content.='<a href="/'.$filters.$hash.'"><img class="picture" src="/'.$size.$forcesize.$filters.$hash.'" /></a>';
+        $content.='<a href="'.PATH.$filters.$hash.'"><img class="picture" src="'.PATH.$size.$forcesize.$filters.$hash.'" /></a>';
     }
 
     if($data['embed']===true)
