@@ -40,8 +40,8 @@
         <div id="container">
             <video id="video" poster="<?php echo DOMAINPATH.PATH.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>   
                 <source src="<?php echo DOMAINPATH.PATH.'raw/mp4/'.$hash; ?>" type="video/mp4">
-                <!--<source src="<?php echo DOMAINPATH.PATH.'raw/webm/'.$hash; ?>" type="video/webm">--> 
-                <source src="<?php echo DOMAINPATH.PATH.'raw/ogg/'.$hash; ?>" type="video/ogg">
+                <!--<source src="<?php echo DOMAINPATH.PATH.'raw/webm/'.$hash; ?>" type="video/webm"> 
+                <source src="<?php echo DOMAINPATH.PATH.'raw/ogg/'.$hash; ?>" type="video/ogg">-->
             </video>
         </div>
             <small><?php echo $filesize; ?></small>
