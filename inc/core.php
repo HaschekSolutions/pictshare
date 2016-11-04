@@ -80,7 +80,7 @@ function whatToDo($url)
     
     if(!is_array($data) || !$data['hash'])
     {
-        if((UPLOAD_FORM_LOCATION && $url==UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION && $url==PATH))
+        if((UPLOAD_FORM_LOCATION && $url==UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION))
         {
             $upload_answer = $pm->ProcessUploads();
             if($upload_answer)
