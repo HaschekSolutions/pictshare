@@ -775,7 +775,7 @@ class PictshareModel extends Model
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
 		$source = escapeshellarg($source);
 		$target = escapeshellarg($target);
-		$h265 = "$bin -y -i $source -an -codec:v libtheora -qp 0 -f ogg $target";
+		$h265 = "$bin -y -i $source -vcodec libtheora -acodec libvorbis -qp 0 -f ogg $target";
 		system($h265);
 	}
 	
@@ -784,7 +784,7 @@ class PictshareModel extends Model
 		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
 		$source = escapeshellarg($source);
 		$target = escapeshellarg($target);
-		$webm = "$bin -y -i $source -an -vcodec libvpx -f webm $target";
+		$webm = "$bin -y -i $source -vcodec libvpx -acodec libvorbis -aq 5 -ac 2 -qmax 25 -f webm $target";
 		system($webm);
 	}
 
