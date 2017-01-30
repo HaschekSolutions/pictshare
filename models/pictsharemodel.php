@@ -142,7 +142,7 @@ class PictshareModel extends Model
 		fclose($fptemp);
 		unlink($csv);
 		rename($tmpname, $csv);
-		unlink($tmpname);
+		//unlink($tmpname);
 
 		//delete actual image
         $base_path = ROOT.DS.'upload'.DS.$hash.DS;
