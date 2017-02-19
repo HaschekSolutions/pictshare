@@ -2,5 +2,3 @@
 *
 # Except this file
 !.gitignore
-# And except deletecodes folder
-!deletecodes
