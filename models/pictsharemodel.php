@@ -104,12 +104,15 @@ class PictshareModel extends Model
 				$data['delete'] = true;
 			else if($el=='delete' && $this->mayDeleteImages()===true)
 				$data['delete'] = true;
+			else if((strlen(MASTER_DELETE_CODE)>10 && $el=='delete_'.MASTER_DELETE_CODE) || $this->deleteCodeExists($el))
+				$data['delete'] = $this->deleteCodeExists($el)?$el:true;
 				
 		}
 
 		if($data['delete'] && $data['hash'])
 		{
-			$this->deleteImage($data['hash']);
+			if($data['delete']===true || $this->isThisDeleteCodeForImage($data['delete'],$data['hash'],true))
+				$this->deleteImage($data['hash']);
 			return false;
 		}
 			
@@ -336,7 +339,7 @@ class PictshareModel extends Model
 	{
 		while(1)
 		{
-			$hash = substr(md5(time().$type.rand(1,1000000).microtime()),0,$length).'.'.$type;
+			$hash = getRandomString($length).'.'.$type;
 			if(!$this->hashExists($hash)) return $hash;
 		}
 	}
@@ -446,11 +449,47 @@ class PictshareModel extends Model
 		if(LOG_UPLOADER)
 		{
 			$fh = fopen(ROOT.DS.'upload'.DS.'uploads.txt', 'a');
-			fwrite($fh, time().';'.$url.';'.$hash.';'.$_SERVER['REMOTE_ADDR']."\n");
+			fwrite($fh, time().';'.$url.';'.$hash.';'.getUserIP()."\n");
 			fclose($fh);
 		}
 
-		return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.PATH.$hash,'domain'=>DOMAINPATH);
+		return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.PATH.$hash,'domain'=>DOMAINPATH,'deletecode'=>$this->generateDeleteCodeForImage($hash));
+	}
+
+	function generateDeleteCodeForImage($hash)
+	{
+		while(1)
+		{
+			$code = getRandomString(32);
+			$file = ROOT.DS.'upload'.DS.'deletecodes'.DS.$code;
+			if(file_exists($file)) continue;
+			file_put_contents($file,$hash);
+			return $code;
+		}
+	}
+
+	function deleteCodeExists($code)
+	{
+		if(strpos($code,'_')) $code = substr($code,strpos($code,'_')+1);
+		if(!$code || !ctype_alnum($code)) return false;
+		$file = ROOT.DS.'upload'.DS.'deletecodes'.DS.$code;
+		return file_exists($file);
+	}
+
+	function isThisDeleteCodeForImage($code,$hash,$deleteiftrue=false)
+	{
+		if(strpos($code,'_')) $code = substr($code,strpos($code,'_')+1);
+		if(!ctype_alnum($code) || !$hash) return false;
+		$file = ROOT.DS.'upload'.DS.'deletecodes'.DS.$code;
+		if(!file_exists($file)) return false;
+		$rhash = trim(file_get_contents($file));
+
+		$result = ($rhash==$hash)?true:false;
+
+		if($deleteiftrue===true && $result===true)
+			unlink($file);
+		
+		return $result;
 	}
 	
 	function uploadCodeExists($code)
@@ -498,7 +537,11 @@ class PictshareModel extends Model
 			if($data['status']=='OK')
 			{
 				$hash = $data['hash'];
-				return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
+				$o = array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
+				if($data['deletecode'])
+					$o['deletecode'] = $data['deletecode'];
+
+				return $o;
 			}
 		}
 
@@ -523,10 +566,13 @@ class PictshareModel extends Model
 
 				if($data['status']=='OK')
 				{
+					if($data['deletecode'])
+						$deletecode = '<br/><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'/delete_'.$data['deletecode'].'">Delete image</a>';
+					else $deletecode = '';
 					if($data['type']=='mp4')
-						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'">'.$data['hash'].'</a><br/>';
+						$o.= '<div><h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'">'.$data['hash'].'</a>'.$deletecode.'</div>';
 					else
-						$o.= '<h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'"><img src="'.DOMAINPATH.PATH.'300/'.$data['hash'].'" /></a><br/>';
+						$o.= '<div><h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'"><img src="'.DOMAINPATH.PATH.'300/'.$data['hash'].'" /></a>'.$deletecode.'</div>';
 
 					$hashes[] = $data['hash'];
 				}

@@ -14,7 +14,7 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 if(FORCE_DOMAIN)
 	define('DOMAINPATH',FORCE_DOMAIN);
 else
-	define('DOMAINPATH',(isset($_SERVER['HTTPS'])?'https':'http').'://'.$_SERVER['HTTP_HOST']);
+	define('DOMAINPATH',(($_SERVER['HTTPS'])?'https':'http').'://'.$_SERVER['HTTP_HOST']);
 error_reporting(E_ALL & ~E_NOTICE);
 if(SHOW_ERRORS)
 	ini_set('display_errors','On');

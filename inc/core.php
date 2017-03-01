@@ -14,13 +14,19 @@ function getUserIP()
 	$client  = @$_SERVER['HTTP_CLIENT_IP'];
 	$forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
 	$remote  = $_SERVER['REMOTE_ADDR'];
-	if(filter_var($client, FILTER_VALIDATE_IP))
-	{
-		$ip = $client;
-	}
-	elseif(filter_var($forward, FILTER_VALIDATE_IP))
+	
+    if(strpos($forward,','))
+    {
+        $a = explode(',',$forward);
+        $forward = trim($a[0]);
+    }
+	if(filter_var($forward, FILTER_VALIDATE_IP))
 	{
 		$ip = $forward;
+	}
+    elseif(filter_var($client, FILTER_VALIDATE_IP))
+	{
+		$ip = $client;
 	}
 	else
 	{
@@ -409,4 +415,14 @@ function cidr_match($ip, $range)
 function isIP($ip)
 {
     return filter_var($ip, FILTER_VALIDATE_IP);
+}
+
+function getRandomString($length=32, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyz')
+{
+    $str = '';
+    $max = mb_strlen($keyspace, '8bit') - 1;
+    for ($i = 0; $i < $length; ++$i) {
+        $str .= $keyspace[rand(0, $max)];
+    }
+    return $str;
 }
