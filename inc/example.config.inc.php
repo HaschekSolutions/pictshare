@@ -20,6 +20,17 @@ define('JPEG_COMPRESSION', 90);
 // Will render one last time, if refreshed won't be on the server anymore
 define('MASTER_DELETE_CODE', false);
 
+//if set, the IP, hostname or every device in the IP range (CIDR naming) will be allowed to delete images
+//by supplying the parameter "delete"
+//use multiple ips/hostnames/ranges: semicolon seperated
+//examples:
+//======
+//ip: define('MASTER_DELETE_IP', '8.8.8.8');
+//hostname: define('MASTER_DELETE_IP', 'home.example.com');
+//ip range: define('MASTER_DELETE_IP', '192.168.0.0/24'); //all IPs from 192.168.0.0 to 192.168.0.255 can delete
+//multiple: define('MASTER_DELETE_IP', '192.168.0.0/24;my.home.net;4.4.2.2');
+define('MASTER_DELETE_IP', false);
+
 //If set, upload form will only be shown on that location
 //eg: define('UPLOAD_FORM_LOCATION', 'secret/upload'); then the upload form will only be visible
 //from http://your.domain/secret/upload

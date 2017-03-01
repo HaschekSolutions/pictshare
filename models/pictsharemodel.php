@@ -102,9 +102,11 @@ class PictshareModel extends Model
 				$data['forcesize'] = true;
 			else if(strlen(MASTER_DELETE_CODE)>10 && $el=='delete_'.MASTER_DELETE_CODE)
 				$data['delete'] = true;
+			else if($el=='delete' && $this->mayDeleteImages()===true)
+				$data['delete'] = true;
 				
 		}
-		
+
 		if($data['delete'] && $data['hash'])
 		{
 			$this->deleteImage($data['hash']);
@@ -119,6 +121,32 @@ class PictshareModel extends Model
 		}
 		
 		return $data;
+	}
+
+	function mayDeleteImages()
+	{
+		if(!defined('MASTER_DELETE_IP') || !MASTER_DELETE_IP) return false;
+		$ip = getUserIP();
+		$parts = explode(';',MASTER_DELETE_IP);
+		foreach($parts as $part)
+		{
+			if(strpos($part,'/')!==false) 		//it's a CIDR address
+			{
+				if(cidr_match($ip, $part))
+					return true;
+			}
+			else if(isIP($part)) 		  		//it's an IP address
+			{
+				if($part==$ip) return true;
+			}
+			else if(gethostbyname($part)==$ip)	//must be a hostname
+			{
+				return true;
+			}
+
+		}
+
+		return false;
 	}
 	
 	function deleteImage($hash)
