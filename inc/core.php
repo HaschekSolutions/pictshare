@@ -150,13 +150,15 @@ function renderImage($data)
         unset($data['changecode']);
     }
     
-    
-        
     $pm = new PictshareModel();
     $base_path = ROOT.DS.'upload'.DS.$hash.DS;
     $path = $base_path.$hash;
     $type = $pm->isTypeAllowed($pm->getTypeOfFile($path));
     $cached = false;
+
+    //update last_rendered of this hash so we can later
+    //sort out old, unused images easier
+    @file_put_contents($base_path.'last_rendered.txt',time());
     
     $cachename = $pm->getCacheName($data);
     $cachepath = $base_path.$cachename;
