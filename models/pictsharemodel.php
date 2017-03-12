@@ -24,7 +24,7 @@ class PictshareModel extends Model
 	function getURLInfo($url,$ispath=false)
 	{
 		$url = rawurldecode($url);
-		$data = $this->urlToData($url);
+		$data = $this->urlToData($url);	
 		$hash = $data['hash'];
 		if(!$hash)
 			return array('status'=>'ERR','Reason'=>'Image not found');
@@ -33,12 +33,16 @@ class PictshareModel extends Model
 		$html = new HTML;
 		
 		$path = ROOT.DS.'upload'.DS.$hash.DS.$file;
+		if(!file_exists($path))
+			$path = ROOT.DS.'upload'.DS.$hash.DS.$hash;
 		if(file_exists($path))
 		{
 			$type = $this->getType($path);
 			if($ispath)
 				$byte = filesize($url);
 			else $byte = filesize($path);
+
+			
 			if($type=='mp4')
 			{
 				$info = $this->getSizeOfMP4($path);
