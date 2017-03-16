@@ -362,7 +362,7 @@ class PictshareModel extends Model
 	function getTypeOfFile($url)
 	{
 		$fi = new finfo(FILEINFO_MIME);
-		$type = $fi->buffer(file_get_contents($url));
+		$type = $fi->buffer(file_get_contents($url, false, null, -1, 1024));
 
 		$arr = explode(';', trim($type));
 		if(count($arr)>1)
