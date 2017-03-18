@@ -17,15 +17,15 @@
 
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-        <meta property="og:site_name"         content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?>" />
+        <meta property="og:site_name"         content="<?php echo (defined('TITLE')?TITLE:'PictShare mp4 hosting'); ?>" />
         <meta property="og:url"               content="<?php echo DOMAINPATH.PATH.$hash; ?>" />
-        <meta property="og:title"             content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?> MP4" />
+        <meta property="og:title"             content="<?php echo (defined('TITLE')?TITLE:'PictShare mp4 hosting'); ?> MP4" />
         <meta property="og:type"              content="video.other" />
         
         <meta property="og:image"             content="<?php echo DOMAINPATH.PATH.'preview/'.$hash; ?>" />
         <meta property="og:image:width"       content="<?php echo $width ?>" />
         <meta property="og:image:height"      content="<?php echo $height ?>" />
-        <meta property="og:description"       content="<?php echo (TITLE?TITLE:'PictShare image hosting'); ?> MP4 Video" />
+        <meta property="og:description"       content="MP4 Video" />
         <meta property="og:video"             content="<?php echo DOMAINPATH.PATH.$hash; ?>" />
         <meta property="og:video:secure_url"  content="<?php echo DOMAINPATH.PATH.$hash; ?>" />
         <meta property="og:video:type"        content="application/x-shockwave-flash" />
