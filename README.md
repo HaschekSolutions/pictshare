@@ -101,12 +101,13 @@ Original URL: ```https://www.pictshare.net/b260e36b60.jpg```
 Note: If an option needs a value it works like this: ```optionname_value```. Eg: ```pixelate_10```
 If there is some option that's not recognized by PictShare it's simply ignored, so this will work: https://www.pictshare.net/pictshare-is-awesome/b260e36b60.jpg and also even this will work: https://www.pictshare.net/b260e36b60.jpg/how-can-this-still/work/
 
-     Option    |      Paramter      |      Example URL       |      Result
--------------- | ------------------ | ---------------------- | ---------------
-**Resizing**   |  |  | 
-&lt;width&gt;**x**&lt;height&gt; | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg)
-forcesize      | -none-				| https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg)
-**Albums**   |  |  | 
+
+|     Option    |      Parameter      |      Example URL       |      Result |
+| ------------- | ------------------- | ---------------------- | ----------- |
+**Resizing**  | | | |
+&lt;width&gt;**x**&lt;height&gt; | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg) |
+forcesize      | -none-				| https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg) |
+**Albums**   |  |  | |
 just add multiple image hashes            | -none-             | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg | Takes the **images** you put in the URL and makes an album out of them. All filters are supported!
 embed        | -none-                     | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg/embed | Renders the album without CSS and with transparent background so you can embed them easily
 responsive        | -none-                | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg/responsive | Renders all images responsive (max-width 100%) according to screen size
