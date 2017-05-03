@@ -364,6 +364,15 @@ class PictshareModel extends Model
 		$fi = new finfo(FILEINFO_MIME);
 		$type = $fi->buffer(file_get_contents($url, false, null, -1, 1024));
 
+		//to catch a strange error for PHP7 and Alpine Linux
+		//if the file seems to be a stream, use unix file command
+		if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' && startsWith($type,'application/octet-stream'))
+		{
+			$content_type = exec("file -bi " . escapeshellarg($filepath));
+			if($content_type && $content_type!=$type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
+				$type = $content_type;
+		}
+
 		$arr = explode(';', trim($type));
 		if(count($arr)>1)
 		{

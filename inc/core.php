@@ -487,3 +487,16 @@ function getRandomString($length=32, $keyspace = '0123456789abcdefghijklmnopqrst
     }
     return $str;
 }
+
+function startsWith($haystack,$needle)
+{
+    $length = strlen($needle);
+    return (substr($haystack,0,$length) === $needle);
+}
+
+function endswith($string, $test) {
+    $strlen = strlen($string);
+    $testlen = strlen($test);
+    if ($testlen > $strlen) return false;
+    return substr_compare($string, $test, $strlen - $testlen, $testlen) === 0;
+}
