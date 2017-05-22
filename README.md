@@ -68,7 +68,7 @@ UPDATES
 - Oct. 10: [Album functionality](#smart-query-system) finally ready
 
 ## Why would I want to host my own images?
-If you own a server (even an home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
+If you own a server (even a home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
 
 If you're an **app developer** or **sysadmin** you can use it for a centralized image hosting. With the simple upload API you can upload images to your PictShare instance and get a nice short URL
 
@@ -239,6 +239,33 @@ server {
 
 }
 ```
+
+## Apache config
+This is a simple vHost config that should make PictShare work on Apache2. 
+
+- Install php5: ```apt-get install php5 libapache2-mod-php5```
+- Install php Graphics libraries: ```apt-get install php5-gd```
+- enable mod_rewrite
+
+```
+<VirtualHost *:80 >
+	ServerAdmin webmaster@sub.domain.tld
+	ServerName sub.domain.tld
+	ServerAlias sub.domain.tld
+	DocumentRoot /var/www/html
+
+	<Directory /var/www/html/>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride All
+		Order allow,deny
+		Allow from All
+	</Directory>
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	LogLevel warn
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
 
 ## Upgrading
 - Just re-download the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip) file and extract and overwrite existing pictshare files. Uploads and config won't be affected.
