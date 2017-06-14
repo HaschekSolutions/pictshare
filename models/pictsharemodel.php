@@ -368,7 +368,7 @@ class PictshareModel extends Model
 		//if the file seems to be a stream, use unix file command
 		if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' && startsWith($type,'application/octet-stream'))
 		{
-			$content_type = exec("file -bi " . escapeshellarg($filepath));
+			$content_type = exec("file -bi " . escapeshellarg($url));
 			if($content_type && $content_type!=$type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
 				$type = $content_type;
 		}
