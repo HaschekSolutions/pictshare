@@ -550,7 +550,7 @@ class PictshareModel extends Model
 			if($data['status']=='OK')
 			{
 				$hash = $data['hash'];
-				$o = array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.$hash,'domain'=>DOMAINPATH);
+				$o = array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.'/'.$hash,'domain'=>DOMAINPATH);
 				if($data['deletecode'])
 					$o['deletecode'] = $data['deletecode'];
 
