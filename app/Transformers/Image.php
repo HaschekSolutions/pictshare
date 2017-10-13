@@ -1,7 +1,13 @@
 <?php
 
+namespace App\Transformers;
+
 use App\Models\PictshareModel;
 
+/**
+ * Class Image
+ * @package App\Transformers
+ */
 class Image
 {
     /**

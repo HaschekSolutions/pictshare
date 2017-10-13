@@ -1,7 +1,20 @@
 <?php
 
+namespace App\Models;
+
+use App\Transformers\Image;
+
+/**
+ * Class PictshareModel
+ * @package App\Models
+ */
 class PictshareModel extends Model
 {
+    /**
+     * @param array $params
+     *
+     * @return array
+     */
     public function backend($params)
     {
         switch ($params[0]) {
@@ -18,9 +31,14 @@ class PictshareModel extends Model
                 break;
         }
 
-        return array('status' => 'ok');
+        return ['status' => 'ok'];
     }
 
+    /**
+     * @param string $hash
+     *
+     * @return bool
+     */
     public function isImage($hash)
     {
         if (!$hash) {

@@ -1,5 +1,11 @@
 <?php
 
+namespace App\Transformers;
+
+/**
+ * Class Filter
+ * @package App\Transformers
+ */
 class Filter
 {
     /**
