@@ -1,0 +1,16 @@
+{
+    "name": "chrisiaut/pictshare",
+    "description": "PictShare - multi lingual, open source hosting service",
+    "keywords": ["pictshare"],
+    "license": "Apache-2.0",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Christian Haschek",
+            "email": "christian@haschek-solutions.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^2.4"
+    }
+}
