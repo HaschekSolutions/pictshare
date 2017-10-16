@@ -1,9 +1,15 @@
 <?php
 
+namespace App\Support;
+
+/**
+ * Class HTML
+ * @package App\Support
+ */
 class HTML
 {
     /**
-     * @param $string
+     * @param string $string
      *
      * @return mixed
      */

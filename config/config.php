@@ -79,6 +79,10 @@ return [
 
     'session' => [
 
+    ],
+
+    'view' => [
+        'template_dir' => env('TEMPLATE_DIR', __DIR__.'/../resources/templates/')
     ]
 
 ];

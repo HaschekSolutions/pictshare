@@ -11,10 +11,35 @@ use App\Models\PictshareModel;
 class Image
 {
     /**
-     * @param resource $im
+     * @param resource $image
+     * @param array    $data
+     */
+    public function transform(&$image, $data)
+    {
+        foreach ($data as $action => $val) {
+            switch ($action) {
+                case 'rotate':
+                    $this->rotate($image, $val);
+                    break;
+                case 'size':
+                    if (isset($data['forcesize']) && $data['forcesize'] === true) {
+                        $this->forceResize($image, $val);
+                    } else {
+                        $this->resize($image, $val);
+                    }
+                    break;
+                case 'filter':
+                    $this->filter($image, $val);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * @param resource $image
      * @param string   $direction
      */
-    public function rotate(&$im, $direction)
+    public function rotate(&$image, $direction)
     {
         switch ($direction) {
             case 'upside':
@@ -31,14 +56,14 @@ class Image
                 break;
         }
 
-        $im = imagerotate($im, $angle, 0);
+        $image = imagerotate($image, $angle, 0);
     }
 
     /**
-     * @param resource  $img
+     * @param resource  $image
      * @param int|int[] $size
      */
-    public function forceResize(&$img, $size)
+    public function forceResize(&$image, $size)
     {
         $pm = new PictshareModel();
 
@@ -46,18 +71,18 @@ class Image
         $maxwidth  = $sd['width'];
         $maxheight = $sd['height'];
 
-        $width  = imagesx($img);
-        $height = imagesy($img);
+        $width  = imagesx($image);
+        $height = imagesy($image);
 
         $maxwidth  = ($maxwidth > $width ? $width : $maxwidth);
         $maxheight = ($maxheight > $height ? $height : $maxheight);
 
         $dst_img = imagecreatetruecolor($maxwidth, $maxheight);
-        $src_img = $img;
+        $src_img = $image;
 
-        $palsize = ImageColorsTotal($img);
+        $palsize = ImageColorsTotal($image);
         for ($i = 0; $i < $palsize; $i++) {
-            $colors = ImageColorsForIndex($img, $i);
+            $colors = ImageColorsForIndex($image, $i);
             ImageColorAllocate($dst_img, $colors['red'], $colors['green'], $colors['blue']);
         }
 
@@ -81,16 +106,16 @@ class Image
             imagecopyresampled($dst_img, $src_img, 0, 0, $w_point, 0, $maxwidth, $maxheight, $width_new, $height);
         }
 
-        $img = $dst_img;
+        $image = $dst_img;
     }
 
     /**
      * @see https://stackoverflow.com/questions/4590441/php-thumbnail-image-resizing-with-proportions
      *
-     * @param resource  $img
+     * @param resource  $image
      * @param int|int[] $size
      */
-    public function resize(&$img, $size)
+    public function resize(&$image, $size)
     {
         $pm = new PictshareModel();
 
@@ -98,8 +123,8 @@ class Image
         $maxwidth  = $sd['width'];
         $maxheight = $sd['height'];
 
-        $width  = imagesx($img);
-        $height = imagesy($img);
+        $width  = imagesx($image);
+        $height = imagesy($image);
 
         if (!ALLOW_BLOATING) {
             if ($maxwidth > $width) {
@@ -122,9 +147,9 @@ class Image
 
         $newimg = imagecreatetruecolor($newwidth, $newheight);
 
-        $palsize = ImageColorsTotal($img);
+        $palsize = ImageColorsTotal($image);
         for ($i = 0; $i < $palsize; $i++) {
-            $colors = ImageColorsForIndex($img, $i);
+            $colors = ImageColorsForIndex($image, $i);
             ImageColorAllocate($newimg, $colors['red'], $colors['green'], $colors['blue']);
         }
 
@@ -132,74 +157,77 @@ class Image
         imagesavealpha($newimg, true);
         imagealphablending($newimg, true);
 
-        imagecopyresampled($newimg, $img, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+        imagecopyresampled($newimg, $image, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
-        $img = $newimg;
+        $image = $newimg;
     }
 
     /**
-     * @param resource $im
+     * @param resource $image
      * @param array    $vars
      */
-    public function filter(&$im, $vars)
+    public function filter(&$image, $vars)
     {
         foreach ($vars as $var) {
+            $val = null;
+
             if (strpos($var, '_')) {
                 $a   = explode('_', $var);
                 $var = $a[0];
                 $val = $a[1];
             }
+
             switch ($var) {
                 case 'negative':
-                    imagefilter($im, IMG_FILTER_NEGATE);
+                    imagefilter($image, IMG_FILTER_NEGATE);
                     break;
                 case 'grayscale':
-                    imagefilter($im, IMG_FILTER_GRAYSCALE);
+                    imagefilter($image, IMG_FILTER_GRAYSCALE);
                     break;
                 case 'brightness':
-                    imagefilter($im, IMG_FILTER_BRIGHTNESS, $val);
+                    imagefilter($image, IMG_FILTER_BRIGHTNESS, $val);
                     break;
                 case 'edgedetect':
-                    imagefilter($im, IMG_FILTER_EDGEDETECT);
+                    imagefilter($image, IMG_FILTER_EDGEDETECT);
                     break;
                 case 'smooth':
-                    imagefilter($im, IMG_FILTER_SMOOTH, $val);
+                    imagefilter($image, IMG_FILTER_SMOOTH, $val);
                     break;
                 case 'contrast':
-                    imagefilter($im, IMG_FILTER_CONTRAST, $val);
+                    imagefilter($image, IMG_FILTER_CONTRAST, $val);
                     break;
                 case 'pixelate':
-                    imagefilter($im, IMG_FILTER_PIXELATE, $val);
+                    imagefilter($image, IMG_FILTER_PIXELATE, $val);
                     break;
                 case 'blur':
-                    $this->blur($im, $val);
+                    $this->blur($image, $val);
                     break;
                 case 'sepia':
-                    ( new Filter($im) )->sepia()->getImage();
+                    ( new Filter($image) )->sepia()->getImage();
                     break;
                 case 'sharpen':
-                    ( new Filter($im) )->sharpen()->getImage();
+                    ( new Filter($image) )->sharpen()->getImage();
                     break;
                 case 'emboss':
-                    ( new Filter($im) )->emboss()->getImage();
+                    ( new Filter($image) )->emboss()->getImage();
                     break;
                 case 'cool':
-                    ( new Filter($im) )->cool()->getImage();
+                    ( new Filter($image) )->cool()->getImage();
                     break;
                 case 'light':
-                    ( new Filter($im) )->light()->getImage();
+                    ( new Filter($image) )->light()->getImage();
                     break;
                 case 'aqua':
-                    ( new Filter($im) )->aqua()->getImage();
+                    ( new Filter($image) )->aqua()->getImage();
                     break;
                 case 'fuzzy':
-                    ( new Filter($im) )->fuzzy()->getImage();
+                    ( new Filter($image) )->fuzzy()->getImage();
                     break;
                 case 'boost':
-                    ( new Filter($im) )->boost()->getImage();
+                    ( new Filter($image) )->boost()->getImage();
                     break;
                 case 'gray':
-                    ( new Filter($im) )->gray()->getImage();
+                    ( new Filter($image) )->gray()->getImage();
                     break;
             }
         }
@@ -272,19 +300,21 @@ class Image
             $prevHeight = $nextHeight;
         }
 
-        // scale back to original size and blur one more time
-        imagecopyresized(
-            $gdImageResource,
-            $nextImage,
-            0,
-            0,
-            0,
-            0,
-            $originalWidth,
-            $originalHeight,
-            $nextWidth,
-            $nextHeight
-        );
+        if (isset($nextImage, $nextWidth, $nextHeight)) {
+            // scale back to original size and blur one more time
+            imagecopyresized(
+                $gdImageResource,
+                $nextImage,
+                0,
+                0,
+                0,
+                0,
+                $originalWidth,
+                $originalHeight,
+                $nextWidth,
+                $nextHeight
+            );
+        }
         imagefilter($gdImageResource, IMG_FILTER_GAUSSIAN_BLUR);
 
         // clean up

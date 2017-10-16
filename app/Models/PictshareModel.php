@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\HTML;
+use App\Support\String;
+use App\Support\Utils;
 use App\Transformers\Image;
 
 /**
@@ -47,11 +50,20 @@ class PictshareModel extends Model
         return $this->hashExists($hash);
     }
 
+    /**
+     * @param string $hash
+     *
+     * @return bool
+     */
     public function hashExists($hash)
     {
         return is_dir(ROOT . DS . 'upload' . DS . $hash);
     }
 
+    /**
+     * @param string $source
+     * @param string $target
+     */
     public function saveAsMP4($source, $target)
     {
         $bin    = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
@@ -61,6 +73,11 @@ class PictshareModel extends Model
         system($h265);
     }
 
+    /**
+     * @param string $path
+     *
+     * @return bool
+     */
     public function renderLegacyResized($path)
     {
         $a = explode('_', $path);
@@ -75,14 +92,21 @@ class PictshareModel extends Model
             return false;
         }
 
-
-        renderResizedImage($size, $hash);
+        if (function_exists('renderResizedImage')) {
+            return renderResizedImage($size, $hash);
+        } else {
+            return false;
+        }
     }
 
+    /**
+     * @return string
+     */
     public function renderUploadForm()
     {
         $maxfilesize = (int) (ini_get('upload_max_filesize'));
 
+        $upload_code_form = '';
         if (UPLOAD_CODE) {
             $upload_code_form = '<strong>' . $this->translate(20) .
                                 ': </strong><input class="input" type="password" name="upload_code" value="' .
@@ -90,25 +114,37 @@ class PictshareModel extends Model
         }
 
         return '
-		<div class="clear"></div>
-		<strong>' . $this->translate(0) . ': ' . $maxfilesize . 'MB / File</strong><br>
-		<strong>' . $this->translate(1) . '</strong>
-		<br><br>
-		<FORM id="form" enctype="multipart/form-data" method="post">
-		<div id="formular">
-			' . $upload_code_form . '
-			<strong>' . $this->translate(4) . ': </strong><input class="input" type="file" name="pic[]" multiple><div class="clear"></div>
-			<div class="clear"></div><br>
-		</div>
-			<INPUT class="btn" style="font-size:15px;font-weight:bold;background-color:#74BDDE;padding:3px;" type="submit" id="submit" name="submit" value="' .
-               $this->translate(3) . '" onClick="setTimeout(function(){document.getElementById(\'submit\').disabled = \'disabled\';}, 1);$(\'#movingBallG\').fadeIn()">
-			<div id="movingBallG" class="invisible">
-				<div class="movingBallLineG"></div>
-				<div id="movingBallG_1" class="movingBallG"></div>
-			</div>
-		</FORM>';
+        <div class="clear"></div>
+        <strong>' . $this->translate(0) . ': ' . $maxfilesize . 'MB / File</strong><br>
+        <strong>' . $this->translate(1) . '</strong>
+        <br><br>
+        <form id="form" enctype="multipart/form-data" method="post">
+            <div id="formular">
+                ' . $upload_code_form . '
+                <strong>' . $this->translate(4) . ': </strong>
+                <input class="input" type="file" name="pic[]" multiple>
+                <div class="clear"></div>
+                <div class="clear"></div><br>
+            </div>
+            <input class="btn" style="font-size:15px;font-weight:bold;background-color:#74BDDE;padding:3px;" 
+                   type="submit" id="submit" name="submit" value="' . $this->translate(3) . '" 
+                   onClick="setTimeout(function() {
+                                document.getElementById(\'submit\').disabled = \'disabled\';
+                            }, 1);
+                            $(\'#movingBallG\').fadeIn()">
+            <div id="movingBallG" class="invisible">
+                <div class="movingBallLineG"></div>
+                <div id="movingBallG_1" class="movingBallG"></div>
+            </div>
+        </form>';
     }
 
+    /**
+     * @param int    $index
+     * @param string $params
+     *
+     * @return mixed
+     */
     public function translate($index, $params = "")
     {
         $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
@@ -172,12 +208,22 @@ class PictshareModel extends Model
         return $words[$index];
     }
 
+    /**
+     * @param string $hash
+     *
+     * @return int
+     */
     public function countResizedImages($hash)
     {
-        $fi = new FilesystemIterator(ROOT . DS . 'upload' . DS . $hash . DS, FilesystemIterator::SKIP_DOTS);
+        $fi = new \FilesystemIterator(ROOT . DS . 'upload' . DS . $hash . DS, \FilesystemIterator::SKIP_DOTS);
         return iterator_count($fi);
     }
 
+    /**
+     * @param string $code
+     *
+     * @return bool
+     */
     public function changeCodeExists($code)
     {
         if (!IMAGE_CHANGE_CODE) {
@@ -199,30 +245,38 @@ class PictshareModel extends Model
         return false;
     }
 
+    /**
+     * @param $file
+     * @param $name
+     *
+     * @return array
+     */
     public function processSingleUpload($file, $name)
     {
         if (UPLOAD_CODE && !$this->uploadCodeExists($_REQUEST['upload_code'])) {
-            exit(json_encode(array('status' => 'ERR', 'reason' => $this->translate(21))));
+            exit(json_encode(['status' => 'ERR', 'reason' => $this->translate(21)]));
         }
 
         $im = new Image();
+        $o  = [];
+
         if ($_FILES[$name]["error"] == UPLOAD_ERR_OK) {
             $type = $this->getTypeOfFile($_FILES[$name]["tmp_name"]);
             $type = $this->isTypeAllowed($type);
             if (!$type) {
-                exit(json_encode(array('status' => 'ERR', 'reason' => 'Unsupported type')));
+                exit(json_encode(['status' => 'ERR', 'reason' => 'Unsupported type']));
             }
 
             $data = $this->uploadImageFromURL($_FILES[$name]["tmp_name"]);
             if ($data['status'] == 'OK') {
                 $hash = $data['hash'];
-                $o    = array(
+                $o    = [
                     'status' => 'OK',
                     'type'   => $type,
                     'hash'   => $hash,
                     'url'    => DOMAINPATH . '/' . $hash,
                     'domain' => DOMAINPATH
-                );
+                ];
                 if ($data['deletecode']) {
                     $o['deletecode'] = $data['deletecode'];
                 }
@@ -235,6 +289,11 @@ class PictshareModel extends Model
         return $o;
     }
 
+    /**
+     * @param string $code
+     *
+     * @return bool
+     */
     public function uploadCodeExists($code)
     {
         if (strpos(UPLOAD_CODE, ';')) {
@@ -253,14 +312,21 @@ class PictshareModel extends Model
         return false;
     }
 
+    /**
+     * @param string $url
+     *
+     * @return bool|string
+     */
     public function getTypeOfFile($url)
     {
-        $fi   = new finfo(FILEINFO_MIME);
+        $fi   = new \finfo(FILEINFO_MIME);
         $type = $fi->buffer(file_get_contents($url, false, null, -1, 1024));
 
         //to catch a strange error for PHP7 and Alpine Linux
         //if the file seems to be a stream, use unix file command
-        if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' && startsWith($type, 'application/octet-stream')) {
+        if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' &&
+            String::startsWith($type, 'application/octet-stream')
+        ) {
             $content_type = exec("file -bi " . escapeshellarg($url));
             if ($content_type && $content_type != $type && strpos($content_type, '/') !== false &&
                 strpos($content_type, ';') !== false) {
@@ -288,6 +354,11 @@ class PictshareModel extends Model
         return $type;
     }
 
+    /**
+     * @param string $filename
+     *
+     * @return bool
+     */
     public function isProperMP4($filename)
     {
         $file = escapeshellarg($filename);
@@ -316,6 +387,11 @@ class PictshareModel extends Model
         return $ismp4;
     }
 
+    /**
+     * @param string $type
+     *
+     * @return bool|string
+     */
     public function isTypeAllowed($type)
     {
         switch ($type) {
@@ -348,13 +424,18 @@ class PictshareModel extends Model
         }
     }
 
+    /**
+     * @param string $url
+     *
+     * @return array
+     */
     public function uploadImageFromURL($url)
     {
         $type = $this->getTypeOfFile($url);
         $type = $this->isTypeAllowed($type);
 
         if (!$type) {
-            return array('status' => 'ERR', 'reason' => 'wrong filetype');
+            return ['status' => 'ERR', 'reason' => 'wrong filetype'];
         }
 
         $dup_id = $this->isDuplicate($url);
@@ -368,13 +449,13 @@ class PictshareModel extends Model
 
 
         if ($dup_id) {
-            return array(
+            return [
                 'status' => 'OK',
                 'type'   => $type,
                 'hash'   => $hash,
                 'url'    => DOMAINPATH . PATH . $hash,
                 'domain' => DOMAINPATH
-            );
+            ];
         }
 
         mkdir(ROOT . DS . 'upload' . DS . $hash);
@@ -384,26 +465,31 @@ class PictshareModel extends Model
 
         //remove all exif data from jpeg
         if ($type == 'jpg') {
-            $res = imagecreatefromjpeg($file);
-            imagejpeg($res, $file, (defined('JPEG_COMPRESSION') ? JPEG_COMPRESSION : 90));
+            $res = \imagecreatefromjpeg($file);
+            \imagejpeg($res, $file, (defined('JPEG_COMPRESSION') ? JPEG_COMPRESSION : 90));
         }
 
         if (LOG_UPLOADER) {
             $fh = fopen(ROOT . DS . 'upload' . DS . 'uploads.txt', 'a');
-            fwrite($fh, time() . ';' . $url . ';' . $hash . ';' . getUserIP() . "\n");
+            fwrite($fh, time() . ';' . $url . ';' . $hash . ';' . Utils::getUserIP() . "\n");
             fclose($fh);
         }
 
-        return array(
+        return [
             'status'     => 'OK',
             'type'       => $type,
             'hash'       => $hash,
             'url'        => DOMAINPATH . PATH . $hash,
             'domain'     => DOMAINPATH,
             'deletecode' => $this->generateDeleteCodeForImage($hash)
-        );
+        ];
     }
 
+    /**
+     * @param string $file
+     *
+     * @return bool|string
+     */
     public function isDuplicate($file)
     {
         $sha_file = ROOT . DS . 'upload' . DS . 'hashes.csv';
@@ -415,7 +501,7 @@ class PictshareModel extends Model
         while (($line = fgets($fp)) !== false) {
             $line = trim($line);
             if (!$line) {
-                contine;
+                continue;
             }
             $sha_upload = substr($line, 0, 40);
             if ($sha_upload == $sha) { //when it's a duplicate return the hash of the original file
@@ -429,16 +515,26 @@ class PictshareModel extends Model
         return false;
     }
 
+    /**
+     * @param string $type
+     * @param int    $length
+     *
+     * @return string
+     */
     public function getNewHash($type, $length = 10)
     {
         while (1) {
-            $hash = getRandomString($length) . '.' . $type;
+            $hash = String::getRandomString($length) . '.' . $type;
             if (!$this->hashExists($hash)) {
                 return $hash;
             }
         }
     }
 
+    /**
+     * @param string $filepath
+     * @param string $hash
+     */
     public function saveSHAOfFile($filepath, $hash)
     {
         $sha_file = ROOT . DS . 'upload' . DS . 'hashes.csv';
@@ -448,10 +544,15 @@ class PictshareModel extends Model
         fclose($fp);
     }
 
+    /**
+     * @param string $hash
+     *
+     * @return string
+     */
     public function generateDeleteCodeForImage($hash)
     {
         while (1) {
-            $code = getRandomString(32);
+            $code = String::getRandomString(32);
             $file = ROOT . DS . 'upload' . DS . 'deletecodes' . DS . $code;
             if (file_exists($file)) {
                 continue;
@@ -461,7 +562,10 @@ class PictshareModel extends Model
         }
     }
 
-    public function ProcessUploads()
+    /**
+     * @return bool|string
+     */
+    public function processUploads()
     {
         if ($_POST['submit'] != $this->translate(3)) {
             return false;
@@ -472,7 +576,9 @@ class PictshareModel extends Model
         }
 
         $im = new Image();
+        $o  = '';
         $i  = 0;
+
         foreach ($_FILES["pic"]["error"] as $key => $error) {
             if ($error == UPLOAD_ERR_OK) {
                 $data = $this->uploadImageFromURL($_FILES["pic"]["tmp_name"][$key]);
@@ -499,7 +605,7 @@ class PictshareModel extends Model
             }
         }
 
-        if (count($hashes) > 1) {
+        if (isset($hashes) && count($hashes) > 1) {
             $albumlink = DOMAINPATH . PATH . implode('/', $hashes);
             $o         .= '<hr/><h1>Album link</h1><a href="' . $albumlink . '" >' . $albumlink . '</a>';
 
@@ -512,21 +618,36 @@ class PictshareModel extends Model
         return $o;
     }
 
+    /**
+     * @param string $data
+     * @param bool  $type
+     *
+     * @return array
+     */
     public function uploadImageFromBase64($data, $type = false)
     {
-        $type = $this->base64_to_type($data);
+        $type = $this->base64ToType($data);
         if (!$type) {
-            return array('status' => 'ERR', 'reason' => 'wrong filetype', 'type' => $type);
+            return [
+                'status' => 'ERR',
+                'reason' => 'wrong filetype',
+                'type'   => $type
+            ];
         }
         $hash    = $this->getNewHash($type);
         $picname = $hash;
         $file    = ROOT . DS . 'tmp' . DS . $hash;
-        $this->base64_to_image($data, $file, $type);
+        $this->base64ToImage($data, $file, $type);
 
         return $this->uploadImageFromURL($file);
     }
 
-    public function base64_to_type($base64_string)
+    /**
+     * @param string $base64_string
+     *
+     * @return bool|string
+     */
+    public function base64ToType($base64_string)
     {
         $data = explode(',', $base64_string);
         $data = $data[1];
@@ -536,9 +657,7 @@ class PictshareModel extends Model
 
         $info = getimagesizefromstring($data);
 
-
         trigger_error("########## FILETYPE: " . $info['mime']);
-
 
         $f    = finfo_open();
         $type = $this->isTypeAllowed(finfo_buffer($f, $data, FILEINFO_MIME_TYPE));
@@ -546,7 +665,14 @@ class PictshareModel extends Model
         return $type;
     }
 
-    public function base64_to_image($base64_string, $output_file, $type)
+    /**
+     * @param string $base64_string
+     * @param string $output_file
+     * @param string $type
+     *
+     * @return mixed
+     */
+    public function base64ToImage($base64_string, $output_file, $type)
     {
         $data = explode(',', $base64_string);
         $data = $data[1];
@@ -583,6 +709,13 @@ class PictshareModel extends Model
         return $type;
     }
 
+    /**
+     * @param array  $data
+     * @param string $cachepath
+     * @param string $type
+     *
+     * @return string
+     */
     public function resizeFFMPEG($data, $cachepath, $type = 'mp4')
     {
         $file = ROOT . DS . 'upload' . DS . $data['hash'] . DS . $data['hash'];
@@ -598,15 +731,15 @@ class PictshareModel extends Model
 
         $sd        = $this->sizeStringToWidthHeight($size);
         $maxwidth  = $sd['width'];
-        $maxheight = $sd['height'];
+        //$maxheight = $sd['height'];
+        $maxheight = 'trunc(ow/a/2)*2';
+        $addition  = '';
 
         switch ($type) {
             case 'mp4':
                 $addition = '-c:v libx264';
                 break;
         }
-
-        $maxheight = 'trunc(ow/a/2)*2';
 
         $cmd = "$bin -i $file -y -vf scale=\"$maxwidth:$maxheight\" $addition -f $type $cachepath";
 
@@ -615,6 +748,11 @@ class PictshareModel extends Model
         return $cachepath;
     }
 
+    /**
+     * @param int|string $size
+     *
+     * @return array|bool
+     */
     public function sizeStringToWidthHeight($size)
     {
         if (!$size || !$this->isSize($size)) {
@@ -623,6 +761,9 @@ class PictshareModel extends Model
         if (!is_numeric($size)) {
             $size = explode('x', $size);
         }
+
+        $maxheight = 0;
+        $maxwidth  = 0;
 
         if (is_array($size)) {
             $maxwidth  = $size[0];
@@ -634,9 +775,14 @@ class PictshareModel extends Model
             }
         }
 
-        return array('width' => $maxwidth, 'height' => $maxheight);
+        return ['width' => $maxwidth, 'height' => $maxheight];
     }
 
+    /**
+     * @param mixed $var
+     *
+     * @return bool
+     */
     public function isSize($var)
     {
         if (is_numeric($var)) {
@@ -650,6 +796,12 @@ class PictshareModel extends Model
         return true;
     }
 
+    /**
+     * @param string $gifpath
+     * @param string $target
+     *
+     * @return mixed
+     */
     public function gifToMP4($gifpath, $target)
     {
         $bin  = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
@@ -664,6 +816,10 @@ class PictshareModel extends Model
         return $target;
     }
 
+    /**
+     * @param string $source
+     * @param string $target
+     */
     public function saveAsOGG($source, $target)
     {
         $bin    = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
@@ -673,16 +829,26 @@ class PictshareModel extends Model
         system($h265);
     }
 
+    /**
+     * @param string $source
+     * @param string $target
+     *
+     * @return bool
+     */
     public function saveAsWebm($source, $target)
     {
         return false;
-        $bin    = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
-        $source = escapeshellarg($source);
-        $target = escapeshellarg($target);
-        $webm   = "$bin -y -i $source -vcodec libvpx -acodec libvorbis -aq 5 -ac 2 -qmax 25 -f webm $target";
-        system($webm);
+        //$bin    = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        //$source = escapeshellarg($source);
+        //$target = escapeshellarg($target);
+        //$webm   = "$bin -y -i $source -vcodec libvpx -acodec libvorbis -aq 5 -ac 2 -qmax 25 -f webm $target";
+        //system($webm);
     }
 
+    /**
+     * @param string $path
+     * @param string $target
+     */
     public function saveFirstFrameOfMP4($path, $target)
     {
         $bin  = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
@@ -692,14 +858,21 @@ class PictshareModel extends Model
         system($cmd);
     }
 
+    /**
+     * @param string $url
+     * @param string $type
+     *
+     * @return array
+     */
     public function oembed($url, $type)
     {
         $data   = $this->getURLInfo($url);
         $rawurl = $url . '/raw';
+
         switch ($type) {
             case 'json':
                 header('Content-Type: application/json');
-                return array(
+                return [
                     "version"          => "1.0",
                     "type"             => "video",
                     "thumbnail_url"    => $url . '/preview',
@@ -710,25 +883,34 @@ class PictshareModel extends Model
                     "title"            => "PictShare",
                     "provider_name"    => "PictShare",
                     "provider_url"     => DOMAINPATH,
-                    "html"             => '<video id="video" poster="' . $url . '/preview' . '" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>
-							                <source src="' . $rawurl . '" type="video/mp4">
-            							  </video>'
-                );
+                    "html"             => '<video id="video" poster="' . $url . '/preview' . '" 
+                                                  preload="auto" autoplay="autoplay" muted="muted" 
+                                                  loop="loop" webkit-playsinline>
+                                            <source src="' . $rawurl . '" type="video/mp4">
+                                          </video>'
+                ];
                 break;
 
             case 'xml':
-
                 break;
         }
+
+        return [];
     }
 
+    /**
+     * @param string $url
+     * @param bool   $ispath
+     *
+     * @return array
+     */
     public function getURLInfo($url, $ispath = false)
     {
         $url  = rawurldecode($url);
         $data = $this->urlToData($url);
         $hash = $data['hash'];
         if (!$hash) {
-            return array('status' => 'ERR', 'Reason' => 'Image not found');
+            return ['status' => 'ERR', 'Reason' => 'Image not found'];
         }
 
         $file = $this->getCacheName($data);
@@ -754,7 +936,7 @@ class PictshareModel extends Model
             } else {
                 list($width, $height) = getimagesize($path);
             }
-            return array(
+            return [
                 'status'    => 'ok',
                 'hash'      => $hash,
                 'cachename' => $file,
@@ -763,16 +945,23 @@ class PictshareModel extends Model
                 'width'     => $width,
                 'height'    => $height,
                 'type'      => $type
-            );
+            ];
         } else {
-            return array('status' => 'ERR', 'Reason' => 'Image not found');
+            return ['status' => 'ERR', 'Reason' => 'Image not found'];
         }
     }
 
+    /**
+     * @param string $url
+     *
+     * @return array|bool
+     */
     public function urlToData($url)
     {
         $html = new HTML;
         $url  = explode("/", $url);
+        $data = [];
+
         foreach ($url as $el) {
             $el = $html->sanatizeString($el);
             $el = strtolower($el);
@@ -845,14 +1034,14 @@ class PictshareModel extends Model
             }
         }
 
-        if ($data['delete'] && $data['hash']) {
+        if (isset($data['delete'], $data['hash']) && $data['delete'] && $data['hash']) {
             if ($data['delete'] === true || $this->isThisDeleteCodeForImage($data['delete'], $data['hash'], true)) {
                 $this->deleteImage($data['hash']);
             }
             return false;
         }
 
-        if ($data['mp4']) {
+        if (isset($data['mp4']) && $data['mp4']) {
             $hash = $data['hash'];
             if (!$hash || $this->getTypeOfHash($hash) != 'gif') {
                 unset($data['mp4']);
@@ -862,6 +1051,11 @@ class PictshareModel extends Model
         return $data;
     }
 
+    /**
+     * @param string $var
+     *
+     * @return bool
+     */
     public function isRotation($var)
     {
         switch ($var) {
@@ -875,6 +1069,11 @@ class PictshareModel extends Model
         }
     }
 
+    /**
+     * @param string $var
+     *
+     * @return bool
+     */
     public function isFilter($var)
     {
         if (strpos($var, '_')) {
@@ -911,6 +1110,11 @@ class PictshareModel extends Model
         }
     }
 
+    /**
+     * @param string $val
+     *
+     * @return array|bool
+     */
     public function isLegacyThumbnail($val)
     {
         if (strpos($val, '_')) {
@@ -921,26 +1125,29 @@ class PictshareModel extends Model
                 return false;
             }
 
-            return array('hash' => $hash, 'size' => $size);
+            return ['hash' => $hash, 'size' => $size];
         } else {
             return false;
         }
     }
 
+    /**
+     * @return bool
+     */
     public function mayDeleteImages()
     {
         if (!defined('MASTER_DELETE_IP') || !MASTER_DELETE_IP) {
             return false;
         }
-        $ip    = getUserIP();
+        $ip    = Utils::getUserIP();
         $parts = explode(';', MASTER_DELETE_IP);
         foreach ($parts as $part) {
             if (strpos($part, '/') !== false) {   //it's a CIDR address
-                if (cidr_match($ip, $part)) {
+                if (Utils::cidrMatch($ip, $part)) {
                     return true;
                 }
             } else {
-                if (isIP($part)) {       //it's an IP address
+                if (Utils::isIP($part)) {       //it's an IP address
                     if ($part == $ip) {
                         return true;
                     }
@@ -955,6 +1162,11 @@ class PictshareModel extends Model
         return false;
     }
 
+    /**
+     * @param string $code
+     *
+     * @return bool
+     */
     public function deleteCodeExists($code)
     {
         if (strpos($code, '_')) {
@@ -967,6 +1179,13 @@ class PictshareModel extends Model
         return file_exists($file);
     }
 
+    /**
+     * @param string $code
+     * @param string $hash
+     * @param bool   $deleteiftrue
+     *
+     * @return bool
+     */
     public function isThisDeleteCodeForImage($code, $hash, $deleteiftrue = false)
     {
         if (strpos($code, '_')) {
@@ -990,6 +1209,11 @@ class PictshareModel extends Model
         return $result;
     }
 
+    /**
+     * @param string $hash
+     *
+     * @return bool
+     */
     public function deleteImage($hash)
     {
         //delete hash from hashes.csv
@@ -1029,6 +1253,11 @@ class PictshareModel extends Model
         return true;
     }
 
+    /**
+     * @param string $hash
+     *
+     * @return bool|string
+     */
     public function getTypeOfHash($hash)
     {
         $base_path = ROOT . DS . 'upload' . DS . $hash . DS;
@@ -1038,8 +1267,14 @@ class PictshareModel extends Model
         return $type;
     }
 
+    // TODO: ???
     //from https://stackoverflow.com/questions/4847752/how-to-get-video-duration-dimension-and-size-in-php
 
+    /**
+     * @param array $data
+     *
+     * @return string
+     */
     public function getCacheName($data)
     {
         ksort($data);
@@ -1065,11 +1300,21 @@ class PictshareModel extends Model
         return ($name ? $name . '.' : '') . $data['hash'];
     }
 
+    /**
+     * @param string $url
+     *
+     * @return bool|string
+     */
     public function getType($url)
     {
         return $this->isTypeAllowed($this->getTypeOfFile($url));
     }
 
+    /**
+     * @param string $video
+     *
+     * @return array
+     */
     public function getSizeOfMP4($video)
     {
         $video   = escapeshellarg($video);
@@ -1077,22 +1322,30 @@ class PictshareModel extends Model
         $command = $bin . ' -i ' . $video . ' -vstats 2>&1';
         $output  = shell_exec($command);
 
+        $codec  = null;
+        $width  = null;
+        $height = null;
+        $hours  = null;
+        $mins   = null;
+        $secs   = null;
+        $ms     = null;
+
         $regex_sizes = "/Video: ([^,]*), ([^,]*), ([0-9]{1,4})x([0-9]{1,4})/";
         if (preg_match($regex_sizes, $output, $regs)) {
-            $codec  = $regs [1] ? $regs [1] : null;
-            $width  = $regs [3] ? $regs [3] : null;
-            $height = $regs [4] ? $regs [4] : null;
+            $codec  = $regs [1] ? $regs [1] : $codec;
+            $width  = $regs [3] ? $regs [3] : $width;
+            $height = $regs [4] ? $regs [4] : $height;
         }
 
         $regex_duration = "/Duration: ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}).([0-9]{1,2})/";
         if (preg_match($regex_duration, $output, $regs)) {
-            $hours = $regs [1] ? $regs [1] : null;
-            $mins  = $regs [2] ? $regs [2] : null;
-            $secs  = $regs [3] ? $regs [3] : null;
-            $ms    = $regs [4] ? $regs [4] : null;
+            $hours = $regs [1] ? $regs [1] : $hours;
+            $mins  = $regs [2] ? $regs [2] : $mins;
+            $secs  = $regs [3] ? $regs [3] : $secs;
+            $ms    = $regs [4] ? $regs [4] : $ms;
         }
 
-        return array(
+        return [
             'codec'  => $codec,
             'width'  => $width,
             'height' => $height,
@@ -1100,6 +1353,6 @@ class PictshareModel extends Model
             'mins'   => $mins,
             'secs'   => $secs,
             'ms'     => $ms
-        );
+        ];
     }
 }

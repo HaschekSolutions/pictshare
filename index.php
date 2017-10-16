@@ -6,7 +6,7 @@
  *
  */
 
-require __DIR__.'app/bootstrap.php';
+require __DIR__.'/app/bootstrap.php';
 
 
 
@@ -24,7 +24,6 @@ $path = ((dirname($_SERVER['PHP_SELF']) == '/' ||
           dirname($_SERVER['PHP_SELF']) == '/backend.php') ? '/' : dirname($_SERVER['PHP_SELF']) . '/');
 define('PATH', $path);
 
-// TODO: Load phpdotenv here
 if (!file_exists(ROOT . DS . 'inc' . DS . 'config.inc.php')) {
     exit('Rename /inc/example.config.inc.php to /inc/config.inc.php first!');
 }
@@ -33,7 +32,8 @@ include_once(ROOT . DS . 'inc' . DS . 'config.inc.php');
 if (FORCE_DOMAIN) {
     define('DOMAINPATH', FORCE_DOMAIN);
 } else {
-    define('DOMAINPATH', (($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST']);
+    define('DOMAINPATH', ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https' : 'http') .
+                         '://' . $_SERVER['HTTP_HOST']);
 }
 
 error_reporting(E_ALL & ~E_NOTICE);
@@ -45,6 +45,6 @@ if (SHOW_ERRORS) {
 
 include_once(ROOT . DS . 'inc' . DS . 'core.php');
 $url = $_GET['url'];
-removeMagicQuotes();
+\App\Support\Utils::removeMagicQuotes();
 $GLOBALS['params'] = explode('/', $_GET['url']);
-callHook();
+callHook($url);
