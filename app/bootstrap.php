@@ -24,4 +24,9 @@ if (file_exists($envFile)) {
  * ----------------------
  *
  */
-$config = require_once __DIR__ . '/../config/config.php';
+$config = new \App\Support\Config(require_once __DIR__ . '/../config/config.php');
+
+// this is support for "old" configuration through 'config.inc.php' file
+if (file_exists(__DIR__.'/../inc/config.inc.php')) {
+    $config->setFromConstants();
+}

@@ -15,6 +15,7 @@ session_cache_limiter("public");
 $expiry = 90; //days
 session_cache_expire($expiry * 24 * 60);
 session_start();
+
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', dirname(__FILE__));
 $path = ((dirname($_SERVER['PHP_SELF']) == '/' ||
@@ -34,6 +35,7 @@ if (FORCE_DOMAIN) {
     define('DOMAINPATH', ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https' : 'http') .
                          '://' . $_SERVER['HTTP_HOST']);
 }
+
 error_reporting(E_ALL & ~E_NOTICE);
 if (SHOW_ERRORS) {
     ini_set('display_errors', 'On');
@@ -46,7 +48,7 @@ include_once(ROOT . DS . 'inc' . DS . 'core.php');
 $pm = new \App\Models\PictshareModel();
 
 if (UPLOAD_CODE != false && !$pm->uploadCodeExists($_REQUEST['upload_code'])) {
-    exit(json_encode(array('status' => 'ERR', 'reason' => 'Wrong upload code provided')));
+    exit(json_encode(['status' => 'ERR', 'reason' => 'Wrong upload code provided']));
 }
 
 if ($_REQUEST['getimage']) {
@@ -56,7 +58,7 @@ if ($_REQUEST['getimage']) {
 } else {
     if ($_FILES['postimage']) {
         $image = $_FILES['postimage'];
-        echo json_encode($pm->processSingleUpload($file, 'postimage'));
+        echo json_encode($pm->processSingleUpload($image, 'postimage'));
     } else {
         if ($_REQUEST['base64']) {
             $data   = $_REQUEST['base64'];
@@ -69,7 +71,7 @@ if ($_REQUEST['getimage']) {
                 if ($_REQUEST['a'] == 'oembed') {
                     echo json_encode($pm->oembed($_REQUEST['url'], $_REQUEST['t']));
                 } else {
-                    echo json_encode(array('status' => 'ERR', 'reason' => 'NO_VALID_COMMAND'));
+                    echo json_encode(['status' => 'ERR', 'reason' => 'NO_VALID_COMMAND']);
                 }
             }
         }
