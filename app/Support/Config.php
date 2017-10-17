@@ -68,12 +68,14 @@ class Config
             return true;
         }
 
+        $tmp = &$this->configuration;
+
         foreach (explode('.', $key) as $segment) {
-            if (! is_array($this->configuration) || ! array_key_exists($segment, $this->configuration)) {
+            if (! is_array($tmp) || ! array_key_exists($segment, $tmp)) {
                 return false;
             }
 
-            $this->configuration = $this->configuration[$segment];
+            $tmp = &$tmp[$segment];
         }
 
         return true;
@@ -97,15 +99,17 @@ class Config
             return $this->configuration[$key];
         }
 
+        $tmp = $this->configuration;
+
         foreach (explode('.', $key) as $segment) {
-            if (! is_array($this->configuration) || ! array_key_exists($segment, $this->configuration)) {
+            if (! is_array($tmp) || ! array_key_exists($segment, $tmp)) {
                 return value($default);
             }
 
-            $this->configuration = $this->configuration[$segment];
+            $tmp = $tmp[$segment];
         }
 
-        return $this->configuration;
+        return $tmp;
     }
 
     /**

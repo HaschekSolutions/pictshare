@@ -21,7 +21,7 @@ class View
         if (is_array($variables)) {
             extract($variables);
         }
-        include(ROOT . DS . 'resources' . DS . 'templates' . DS . 'template.php');
+        include(ROOT . '/resources/templates/template.php');
     }
 
     /**
@@ -55,9 +55,9 @@ class View
         }
 
         if ($data['embed'] === true) {
-            include(ROOT . DS . 'resources' . DS . 'templates' . DS . 'template_album_embed.php');
+            include(ROOT . '/resources/templates/template_album_embed.php');
         } else {
-            include(ROOT . DS . 'resources' . DS . 'templates' . DS . 'template_album.php');
+            include(ROOT . '/resources/templates/template_album.php');
         }
     }
 
@@ -78,7 +78,7 @@ class View
 
         $pm             = new PictshareModel();
         $imgTransformer = new Image();
-        $base_path      = ROOT . DS . 'upload' . DS . $hash . DS;
+        $base_path      = ROOT . '/upload/' . $hash . '/';
         $path           = $base_path . $hash;
         $type           = $pm->isTypeAllowed($pm->getTypeOfFile($path));
         $cached         = false;
@@ -95,7 +95,7 @@ class View
         } else {
             // if the number of max resized images is reached, just show the real one
             if (MAX_RESIZED_IMAGES > -1 && $pm->countResizedImages($hash) > MAX_RESIZED_IMAGES) {
-                $path = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+                $path = ROOT . '/upload/' . $hash . '/' . $hash;
             }
         }
 
@@ -188,15 +188,15 @@ class View
 
                 if (file_exists($cachepath) &&
                     filesize($cachepath) == 0) { //if there was an error and the file is 0 bytes, use the original
-                    $cachepath = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+                    $cachepath = ROOT . '/upload/' . $hash . '/' . $hash;
                 }
 
                 if ($data['webm']) {
-                    $pm->saveAsWebm(ROOT . DS . 'upload' . DS . $hash . DS . $hash, $cachepath);
+                    $pm->saveAsWebm(ROOT . '/upload/' . $hash . '/' . $hash, $cachepath);
                 }
 
                 if ($data['ogg']) {
-                    $pm->saveAsOGG(ROOT . DS . 'upload' . DS . $hash . DS . $hash, $cachepath);
+                    $pm->saveAsOGG(ROOT . '/upload/' . $hash . '/' . $hash, $cachepath);
                 }
 
                 if ($data['raw']) {
@@ -237,7 +237,7 @@ class View
         $width    = $info['width'];
         $height   = $info['height'];
         $filesize = $urldata['humansize'];
-        include(ROOT . DS . 'resources' . DS . 'templates' . DS . 'template_mp4.php');
+        include(ROOT . '/resources/templates/template_mp4.php');
     }
 
 

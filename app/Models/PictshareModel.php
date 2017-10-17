@@ -57,7 +57,7 @@ class PictshareModel extends Model
      */
     public function hashExists($hash)
     {
-        return is_dir(ROOT . DS . 'upload' . DS . $hash);
+        return is_dir(ROOT . '/upload/' . $hash);
     }
 
     /**
@@ -66,7 +66,7 @@ class PictshareModel extends Model
      */
     public function saveAsMP4($source, $target)
     {
-        $bin    = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin    = escapeshellcmd(ROOT . '/bin/ffmpeg');
         $source = escapeshellarg($source);
         $target = escapeshellarg($target);
         $h265   = "$bin -y -i $source -an -c:v libx264 -qp 0 -f mp4 $target";
@@ -215,7 +215,7 @@ class PictshareModel extends Model
      */
     public function countResizedImages($hash)
     {
-        $fi = new \FilesystemIterator(ROOT . DS . 'upload' . DS . $hash . DS, \FilesystemIterator::SKIP_DOTS);
+        $fi = new \FilesystemIterator(ROOT . '/upload/' . $hash . '/', \FilesystemIterator::SKIP_DOTS);
         return iterator_count($fi);
     }
 
@@ -362,8 +362,8 @@ class PictshareModel extends Model
     public function isProperMP4($filename)
     {
         $file = escapeshellarg($filename);
-        $tmp  = ROOT . DS . 'tmp' . DS . md5(time() + rand(1, 10000)) . '.' . rand(1, 10000) . '.log';
-        $bin  = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $tmp  = ROOT . '/tmp/' . md5(time() + rand(1, 10000)) . '.' . rand(1, 10000) . '.log';
+        $bin  = escapeshellcmd(ROOT . '/bin/ffmpeg');
 
         $cmd = "$bin -i $file > $tmp 2>> $tmp";
 
@@ -441,7 +441,7 @@ class PictshareModel extends Model
         $dup_id = $this->isDuplicate($url);
         if ($dup_id) {
             $hash = $dup_id;
-            $url  = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+            $url  = ROOT . '/upload/' . $hash . '/' . $hash;
         } else {
             $hash = $this->getNewHash($type);
             $this->saveSHAOfFile($url, $hash);
@@ -458,8 +458,8 @@ class PictshareModel extends Model
             ];
         }
 
-        mkdir(ROOT . DS . 'upload' . DS . $hash);
-        $file = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+        mkdir(ROOT . '/upload/' . $hash);
+        $file = ROOT . '/upload/' . $hash . '/' . $hash;
 
         file_put_contents($file, file_get_contents($url));
 
@@ -470,7 +470,7 @@ class PictshareModel extends Model
         }
 
         if (LOG_UPLOADER) {
-            $fh = fopen(ROOT . DS . 'upload' . DS . 'uploads.txt', 'a');
+            $fh = fopen(ROOT . '/upload/uploads.txt', 'a');
             fwrite($fh, time() . ';' . $url . ';' . $hash . ';' . Utils::getUserIP() . "\n");
             fclose($fh);
         }
@@ -492,7 +492,7 @@ class PictshareModel extends Model
      */
     public function isDuplicate($file)
     {
-        $sha_file = ROOT . DS . 'upload' . DS . 'hashes.csv';
+        $sha_file = ROOT . '/upload/hashes.csv';
         $sha      = sha1_file($file);
         if (!file_exists($sha_file)) {
             return false;
@@ -537,7 +537,7 @@ class PictshareModel extends Model
      */
     public function saveSHAOfFile($filepath, $hash)
     {
-        $sha_file = ROOT . DS . 'upload' . DS . 'hashes.csv';
+        $sha_file = ROOT . '/upload/hashes.csv';
         $sha      = sha1_file($filepath);
         $fp       = fopen($sha_file, 'a');
         fwrite($fp, "$sha;$hash\n");
@@ -553,7 +553,7 @@ class PictshareModel extends Model
     {
         while (1) {
             $code = String::getRandomString(32);
-            $file = ROOT . DS . 'upload' . DS . 'deletecodes' . DS . $code;
+            $file = ROOT . '/upload/deletecodes/' . $code;
             if (file_exists($file)) {
                 continue;
             }
@@ -636,7 +636,7 @@ class PictshareModel extends Model
         }
         $hash    = $this->getNewHash($type);
         $picname = $hash;
-        $file    = ROOT . DS . 'tmp' . DS . $hash;
+        $file    = ROOT . '/tmp/' . $hash;
         $this->base64ToImage($data, $file, $type);
 
         return $this->uploadImageFromURL($file);
@@ -718,10 +718,10 @@ class PictshareModel extends Model
      */
     public function resizeFFMPEG($data, $cachepath, $type = 'mp4')
     {
-        $file = ROOT . DS . 'upload' . DS . $data['hash'] . DS . $data['hash'];
+        $file = ROOT . '/upload/' . $data['hash'] . '/' . $data['hash'];
         $file = escapeshellarg($file);
         $tmp  = '/dev/null';
-        $bin  = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin  = escapeshellcmd(ROOT . '/bin/ffmpeg');
 
         $size = $data['size'];
 
@@ -804,7 +804,7 @@ class PictshareModel extends Model
      */
     public function gifToMP4($gifpath, $target)
     {
-        $bin  = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin  = escapeshellcmd(ROOT . '/bin/ffmpeg');
         $file = escapeshellarg($gifpath);
 
         if (!file_exists($target)) { //simple caching.. have to think of something better
@@ -822,7 +822,7 @@ class PictshareModel extends Model
      */
     public function saveAsOGG($source, $target)
     {
-        $bin    = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin    = escapeshellcmd(ROOT . '/bin/ffmpeg');
         $source = escapeshellarg($source);
         $target = escapeshellarg($target);
         $h265   = "$bin -y -i $source -vcodec libtheora -acodec libvorbis -qp 0 -f ogg $target";
@@ -838,7 +838,7 @@ class PictshareModel extends Model
     public function saveAsWebm($source, $target)
     {
         return false;
-        //$bin    = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        //$bin    = escapeshellcmd(ROOT . '/bin/ffmpeg');
         //$source = escapeshellarg($source);
         //$target = escapeshellarg($target);
         //$webm   = "$bin -y -i $source -vcodec libvpx -acodec libvorbis -aq 5 -ac 2 -qmax 25 -f webm $target";
@@ -851,7 +851,7 @@ class PictshareModel extends Model
      */
     public function saveFirstFrameOfMP4($path, $target)
     {
-        $bin  = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin  = escapeshellcmd(ROOT . '/bin/ffmpeg');
         $file = escapeshellarg($path);
         $cmd  = "$bin -y -i $file -vframes 1 -f image2 $target";
 
@@ -916,9 +916,9 @@ class PictshareModel extends Model
         $file = $this->getCacheName($data);
         $html = new HTML;
 
-        $path = ROOT . DS . 'upload' . DS . $hash . DS . $file;
+        $path = ROOT . '/upload/' . $hash . '/' . $file;
         if (!file_exists($path)) {
-            $path = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+            $path = ROOT . '/upload/' . $hash . '/' . $hash;
         }
         if (file_exists($path)) {
             $type = $this->getType($path);
@@ -1175,7 +1175,7 @@ class PictshareModel extends Model
         if (!$code || !ctype_alnum($code)) {
             return false;
         }
-        $file = ROOT . DS . 'upload' . DS . 'deletecodes' . DS . $code;
+        $file = ROOT . '/upload/deletecodes/' . $code;
         return file_exists($file);
     }
 
@@ -1194,7 +1194,7 @@ class PictshareModel extends Model
         if (!ctype_alnum($code) || !$hash) {
             return false;
         }
-        $file = ROOT . DS . 'upload' . DS . 'deletecodes' . DS . $code;
+        $file = ROOT . '/upload/deletecodes/' . $code;
         if (!file_exists($file)) {
             return false;
         }
@@ -1217,8 +1217,8 @@ class PictshareModel extends Model
     public function deleteImage($hash)
     {
         //delete hash from hashes.csv
-        $tmpname = ROOT . DS . 'upload' . DS . 'delete_temp.csv';
-        $csv     = ROOT . DS . 'upload' . DS . 'hashes.csv';
+        $tmpname = ROOT . '/upload/delete_temp.csv';
+        $csv     = ROOT . '/upload/hashes.csv';
         $fptemp  = fopen($tmpname, "w");
         if (($handle = fopen($csv, "r")) !== false) {
             while (($line = fgets($handle)) !== false) {
@@ -1235,7 +1235,7 @@ class PictshareModel extends Model
         //unlink($tmpname);
 
         //delete actual image
-        $base_path = ROOT . DS . 'upload' . DS . $hash . DS;
+        $base_path = ROOT . '/upload/' . $hash . '/';
         if (!is_dir($base_path)) {
             return false;
         }
@@ -1260,7 +1260,7 @@ class PictshareModel extends Model
      */
     public function getTypeOfHash($hash)
     {
-        $base_path = ROOT . DS . 'upload' . DS . $hash . DS;
+        $base_path = ROOT . '/upload/' . $hash . '/';
         $path      = $base_path . $hash;
         $type      = $this->isTypeAllowed($this->getTypeOfFile($path));
 
@@ -1318,7 +1318,7 @@ class PictshareModel extends Model
     public function getSizeOfMP4($video)
     {
         $video   = escapeshellarg($video);
-        $bin     = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin     = escapeshellcmd(ROOT . '/bin/ffmpeg');
         $command = $bin . ' -i ' . $video . ' -vstats 2>&1';
         $output  = shell_exec($command);
 

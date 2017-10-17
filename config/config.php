@@ -78,7 +78,12 @@ return [
     ],
 
     'session' => [
+        // Defines which cache control HTTP headers are sent to the client.
+        // Possible values: public, private_no_expire, private, nocache
+        'cache_limiter' => env('SESSION_CACHE_LIMITER', 'public'),
 
+        // Session cache expiry in days
+        'cache_expire'  => env('SESSION_CACHE_EXPIRE', 90)
     ],
 
     'view' => [
