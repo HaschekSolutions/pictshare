@@ -1,0 +1,4 @@
+- Configurable upload directory location (path)
+- Get rid of so many constants and switch to configuration / Application
+- Some things are not named and placed properly (eg. PictshareModel - which is not a model)
+- Routing could be better, and so could controllers
