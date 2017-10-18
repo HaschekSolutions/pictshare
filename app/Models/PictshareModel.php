@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Config;
 use App\Support\HTML;
 use App\Support\String;
 use App\Support\Utils;
@@ -10,9 +11,33 @@ use App\Transformers\Image;
 /**
  * Class PictshareModel
  * @package App\Models
+ *
+ * @todo This is not a model, this is a God class!
  */
-class PictshareModel extends Model
+class PictshareModel
 {
+    /**
+     * @var Config
+     */
+    protected $config;
+
+    /**
+     * @var HTML
+     */
+    protected $html;
+
+    /**
+     * Model constructor.
+     *
+     * @param Config $config
+     * @param HTML   $html
+     */
+    public function __construct(Config $config, HTML $html)
+    {
+        $this->config = $config;
+        $this->html   = $html;
+    }
+
     /**
      * @param array $params
      *
@@ -107,7 +132,7 @@ class PictshareModel extends Model
         $maxfilesize = (int) (ini_get('upload_max_filesize'));
 
         $upload_code_form = '';
-        if (UPLOAD_CODE) {
+        if ($this->config->get('app.upload_code', false)) {
             $upload_code_form = '<strong>' . $this->translate(20) .
                                 ': </strong><input class="input" type="password" name="upload_code" value="' .
                                 $_REQUEST['upload_code'] . '"><div class="clear"></div>';
@@ -226,11 +251,12 @@ class PictshareModel extends Model
      */
     public function changeCodeExists($code)
     {
-        if (!IMAGE_CHANGE_CODE) {
+        $imageChangeCode = $this->config->get('app.image_change_code', false);
+        if (!$imageChangeCode) {
             return true;
         }
-        if (strpos(IMAGE_CHANGE_CODE, ';')) {
-            $codes = explode(';', IMAGE_CHANGE_CODE);
+        if (strpos($imageChangeCode, ';')) {
+            $codes = explode(';', $imageChangeCode);
             foreach ($codes as $ucode) {
                 if ($code == $ucode) {
                     return true;
@@ -238,7 +264,7 @@ class PictshareModel extends Model
             }
         }
 
-        if ($code == IMAGE_CHANGE_CODE) {
+        if ($code == $imageChangeCode) {
             return true;
         }
 
@@ -253,11 +279,11 @@ class PictshareModel extends Model
      */
     public function processSingleUpload($file, $name)
     {
-        if (UPLOAD_CODE && !$this->uploadCodeExists($_REQUEST['upload_code'])) {
+        if ($this->config->get('app.upload_code', false) && !$this->uploadCodeExists($_REQUEST['upload_code'])) {
             exit(json_encode(['status' => 'ERR', 'reason' => $this->translate(21)]));
         }
 
-        $im = new Image();
+        $im = new Image($this->config, $this);
         $o  = [];
 
         if ($_FILES[$name]["error"] == UPLOAD_ERR_OK) {
@@ -296,8 +322,9 @@ class PictshareModel extends Model
      */
     public function uploadCodeExists($code)
     {
-        if (strpos(UPLOAD_CODE, ';')) {
-            $codes = explode(';', UPLOAD_CODE);
+        $uploadCode = $this->config->get('app.upload_code', false);
+        if (strpos($uploadCode, ';')) {
+            $codes = explode(';', $uploadCode);
             foreach ($codes as $ucode) {
                 if ($code == $ucode) {
                     return true;
@@ -305,7 +332,7 @@ class PictshareModel extends Model
             }
         }
 
-        if ($code == UPLOAD_CODE) {
+        if ($code == $uploadCode) {
             return true;
         }
 
@@ -466,10 +493,14 @@ class PictshareModel extends Model
         //remove all exif data from jpeg
         if ($type == 'jpg') {
             $res = \imagecreatefromjpeg($file);
-            \imagejpeg($res, $file, (defined('JPEG_COMPRESSION') ? JPEG_COMPRESSION : 90));
+            \imagejpeg(
+                $res,
+                $file,
+                ($this->config !== null ? $this->config->get('app.jpeg_compression') : 90)
+            );
         }
 
-        if (LOG_UPLOADER) {
+        if ($this->config->get('log_uploader', true)) {
             $fh = fopen(ROOT . '/upload/uploads.txt', 'a');
             fwrite($fh, time() . ';' . $url . ';' . $hash . ';' . Utils::getUserIP() . "\n");
             fclose($fh);
@@ -571,11 +602,11 @@ class PictshareModel extends Model
             return false;
         }
 
-        if (UPLOAD_CODE && !$this->uploadCodeExists($_REQUEST['upload_code'])) {
+        if ($this->config->get('app.upload_code', false) && !$this->uploadCodeExists($_REQUEST['upload_code'])) {
             return '<span class="error">' . $this->translate(21) . '</span>';
         }
 
-        $im = new Image();
+        $im = new Image($this->config, $this);
         $o  = '';
         $i  = 0;
 
@@ -684,12 +715,20 @@ class PictshareModel extends Model
         $source = imagecreatefromstring($data);
         switch ($type) {
             case 'jpg':
-                imagejpeg($source, $output_file, (defined('JPEG_COMPRESSION') ? JPEG_COMPRESSION : 90));
+                imagejpeg(
+                    $source,
+                    $output_file,
+                    ($this->config !== null ? $this->config->get('app.jpeg_compression') : 90)
+                );
                 trigger_error("========= SAVING AS " . $type . " TO " . $output_file);
                 break;
 
             case 'png':
-                imagepng($source, $output_file, (defined('PNG_COMPRESSION') ? PNG_COMPRESSION : 6));
+                imagepng(
+                    $source,
+                    $output_file,
+                    ($this->config !== null ? $this->config->get('app.png_compression') : 6)
+                );
                 trigger_error("========= SAVING AS " . $type . " TO " . $output_file);
                 break;
 
@@ -699,7 +738,11 @@ class PictshareModel extends Model
                 break;
 
             default:
-                imagepng($source, $output_file, (defined('PNG_COMPRESSION') ? PNG_COMPRESSION : 6));
+                imagepng(
+                    $source,
+                    $output_file,
+                    ($this->config !== null ? $this->config->get('app.png_compression') : 6)
+                );
                 break;
         }
 
@@ -768,11 +811,9 @@ class PictshareModel extends Model
         if (is_array($size)) {
             $maxwidth  = $size[0];
             $maxheight = $size[1];
-        } else {
-            if ($size) {
-                $maxwidth  = $size;
-                $maxheight = $size;
-            }
+        } elseif ($size) {
+            $maxwidth  = $size;
+            $maxheight = $size;
         }
 
         return ['width' => $maxwidth, 'height' => $maxheight];
@@ -914,7 +955,6 @@ class PictshareModel extends Model
         }
 
         $file = $this->getCacheName($data);
-        $html = new HTML;
 
         $path = ROOT . '/upload/' . $hash . '/' . $file;
         if (!file_exists($path)) {
@@ -941,7 +981,7 @@ class PictshareModel extends Model
                 'hash'      => $hash,
                 'cachename' => $file,
                 'size'      => $byte,
-                'humansize' => $html->renderSize($byte),
+                'humansize' => $this->html->renderSize($byte),
                 'width'     => $width,
                 'height'    => $height,
                 'type'      => $type
@@ -958,20 +998,21 @@ class PictshareModel extends Model
      */
     public function urlToData($url)
     {
-        $html = new HTML;
         $url  = explode("/", $url);
         $data = [];
 
         foreach ($url as $el) {
-            $el = $html->sanatizeString($el);
+            $el = $this->html->sanatizeString($el);
             $el = strtolower($el);
             if (!$el) {
                 continue;
             }
 
-            if (IMAGE_CHANGE_CODE && substr($el, 0, 10) == 'changecode') {
+            if ($this->config->get('app.image_change_code', false) && substr($el, 0, 10) == 'changecode') {
                 $data['changecode'] = substr($el, 11);
             }
+
+            $masterDeleteCode = $this->config->get('app.master_delete_code');
 
             if ($this->isImage($el)) {
                 //if there are mor than one hashes in url
@@ -983,54 +1024,41 @@ class PictshareModel extends Model
                     $data['album'][] = $el;
                 }
                 $data['hash'] = $el;
-            } else {
-                if ($el == 'mp4' || $el == 'raw' || $el == 'preview' || $el == 'webm' || $el == 'ogg') {
-                    $data[$el] = 1;
-                } else {
-                    if ($this->isSize($el)) {
-                        $data['size'] = $el;
-                    } else {
-                        if ($el == 'embed') {
-                            $data['embed'] = true;
-                        } else {
-                            if ($el == 'responsive') {
-                                $data['responsive'] = true;
-                            } else {
-                                if ($this->isRotation($el)) {
-                                    $data['rotate'] = $el;
-                                } else {
-                                    if ($this->isFilter($el)) {
-                                        $data['filter'][] = $el;
-                                    } else {
-                                        if ($legacy = $this->isLegacyThumbnail($el)) { //so old uploads will still work
-                                            $data['hash'] = $legacy['hash'];
-                                            $data['size'] = $legacy['size'];
-                                        } else {
-                                            if ($el == 'forcesize') {
-                                                $data['forcesize'] = true;
-                                            } else {
-                                                if (strlen(MASTER_DELETE_CODE) > 10 &&
-                                                    $el == 'delete_' . MASTER_DELETE_CODE) {
-                                                    $data['delete'] = true;
-                                                } else {
-                                                    if ($el == 'delete' && $this->mayDeleteImages() === true) {
-                                                        $data['delete'] = true;
-                                                    } else {
-                                                        if ((strlen(MASTER_DELETE_CODE) > 10 &&
-                                                              $el == 'delete_' . MASTER_DELETE_CODE) ||
-                                                            $this->deleteCodeExists($el)) {
-                                                            $data['delete'] = $this->deleteCodeExists($el) ? $el : true;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+
+            } elseif ($el == 'mp4' || $el == 'raw' || $el == 'preview' || $el == 'webm' || $el == 'ogg') {
+                $data[$el] = 1;
+
+            } elseif ($this->isSize($el)) {
+                $data['size'] = $el;
+
+            } elseif ($el == 'embed') {
+                $data['embed'] = true;
+
+            } elseif ($el == 'responsive') {
+                $data['responsive'] = true;
+
+            } elseif ($this->isRotation($el)) {
+                $data['rotate'] = $el;
+
+            } elseif ($this->isFilter($el)) {
+                $data['filter'][] = $el;
+
+            } elseif ($legacy = $this->isLegacyThumbnail($el)) { //so old uploads will still work
+                $data['hash'] = $legacy['hash'];
+                $data['size'] = $legacy['size'];
+
+            } elseif ($el == 'forcesize') {
+                $data['forcesize'] = true;
+
+            } elseif (strlen($masterDeleteCode) > 10 && $el == 'delete_' . $masterDeleteCode) {
+                $data['delete'] = true;
+
+            } elseif ($el == 'delete' && $this->mayDeleteImages() === true) {
+                $data['delete'] = true;
+
+            } elseif ((strlen($masterDeleteCode) > 10 && $el == 'delete_' . $masterDeleteCode) ||
+                $this->deleteCodeExists($el)) {
+                $data['delete'] = $this->deleteCodeExists($el) ? $el : true;
             }
         }
 
@@ -1136,26 +1164,27 @@ class PictshareModel extends Model
      */
     public function mayDeleteImages()
     {
-        if (!defined('MASTER_DELETE_IP') || !MASTER_DELETE_IP) {
+        $masterDeleteIp = $this->config->get('app.master_delete_ip');
+        if (!$masterDeleteIp) {
             return false;
         }
+
         $ip    = Utils::getUserIP();
-        $parts = explode(';', MASTER_DELETE_IP);
+        $parts = explode(';', $masterDeleteIp);
+
         foreach ($parts as $part) {
             if (strpos($part, '/') !== false) {   //it's a CIDR address
                 if (Utils::cidrMatch($ip, $part)) {
                     return true;
                 }
-            } else {
-                if (Utils::isIP($part)) {       //it's an IP address
-                    if ($part == $ip) {
-                        return true;
-                    }
-                } else {
-                    if (gethostbyname($part) == $ip) { //must be a hostname
-                        return true;
-                    }
+
+            } elseif (Utils::isIP($part)) {       //it's an IP address
+                if ($part == $ip) {
+                    return true;
                 }
+
+            } elseif (gethostbyname($part) == $ip) { //must be a hostname
+                return true;
             }
         }
 

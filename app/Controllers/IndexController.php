@@ -3,8 +3,9 @@
 namespace App\Controllers;
 
 use App\Models\PictshareModel;
+use App\Support\ConfigInterface;
 use App\Support\Utils;
-use App\Support\View;
+use App\Views\View;
 
 /**
  * Class IndexController
@@ -12,6 +13,11 @@ use App\Support\View;
  */
 class IndexController
 {
+    /**
+     * @var ConfigInterface
+     */
+    protected $config;
+
     /**
      * @var PictshareModel
      */
@@ -25,11 +31,13 @@ class IndexController
     /**
      * CliController constructor.
      *
-     * @param PictshareModel $pictshareModel
-     * @param View           $view
+     * @param ConfigInterface $config
+     * @param PictshareModel  $pictshareModel
+     * @param View            $view
      */
-    public function __construct(PictshareModel $pictshareModel, View $view)
+    public function __construct(ConfigInterface $config, PictshareModel $pictshareModel, View $view)
     {
+        $this->config         = $config;
         $this->pictshareModel = $pictshareModel;
         $this->view           = $view;
     }
@@ -46,7 +54,9 @@ class IndexController
         $data = $this->pictshareModel->urlToData($url);
 
         if (!is_array($data) || !$data['hash']) {
-            if ((UPLOAD_FORM_LOCATION && $url == UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION)) {
+            $uploadFormLocation = $this->config->get('app.upload_form_location');
+
+            if (($uploadFormLocation && $url == $uploadFormLocation) || (!$uploadFormLocation)) {
                 $upload_answer = $this->pictshareModel->processUploads();
                 if ($upload_answer) {
                     $o = $upload_answer;
@@ -58,23 +68,19 @@ class IndexController
                 $vars['slogan']  = $this->pictshareModel->translate(2);
             }
 
-            if (!isset($vars) && LOW_PROFILE) {
+            if (!isset($vars) && $this->config->get('app.low_profile', false)) {
                 header('HTTP/1.0 404 Not Found');
                 exit();
-            } else {
-                if (!isset($vars)) {
-                    $vars['content'] = $this->pictshareModel->translate(12);
-                    $vars['slogan']  = $this->pictshareModel->translate(2);
-                }
+            } elseif (!isset($vars)) {
+                $vars['content'] = $this->pictshareModel->translate(12);
+                $vars['slogan']  = $this->pictshareModel->translate(2);
             }
 
             $this->view->render($vars);
+        } elseif (isset($data['album']) && $data['album']) {
+            $this->view->renderAlbum($data);
         } else {
-            if (isset($data['album']) && $data['album']) {
-                $this->view->renderAlbum($data);
-            } else {
-                $this->view->renderImage($data);
-            }
+            $this->view->renderImage($data);
         }
     }
 }

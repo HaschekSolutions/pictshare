@@ -21,7 +21,7 @@ $path = ((dirname($_SERVER['PHP_SELF']) == '/' ||
           dirname($_SERVER['PHP_SELF']) == '/backend.php') ? '/' : dirname($_SERVER['PHP_SELF']) . '/');
 define('PATH', $path);
 
-if ($forceDomain = $config->get('app.force_domain')) {
+if ($forceDomain = $app->getContainer()->get(\App\Support\ConfigInterface::class)->get('app.force_domain')) {
     define('DOMAINPATH', $forceDomain);
 } else {
     define('DOMAINPATH', ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https' : 'http') .
@@ -29,5 +29,5 @@ if ($forceDomain = $config->get('app.force_domain')) {
 }
 
 
-$backendController = new \App\Controllers\BackendController(new \App\Models\PictshareModel());
+$backendController = $app->getContainer()->get(\App\Controllers\BackendController::class);
 $backendController->processRequest($_REQUEST);

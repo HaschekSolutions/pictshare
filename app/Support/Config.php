@@ -6,7 +6,7 @@ namespace App\Support;
  * Class Config
  * @package App\Support
  */
-class Config
+class Config implements ConfigInterface
 {
     /**
      * @var array
@@ -24,12 +24,7 @@ class Config
     }
 
     /**
-     * Set a setting.
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return array
+     * @inheritdoc
      */
     public function set($key, $value)
     {
@@ -52,11 +47,7 @@ class Config
     }
 
     /**
-     * Check if an item exists by key.
-     *
-     * @param string $key
-     *
-     * @return bool
+     * @inheritdoc
      */
     public function has($key)
     {
@@ -82,12 +73,7 @@ class Config
     }
 
     /**
-     * Get a configuration value.
-     *
-     * @param string $key
-     * @param mixed  $default
-     *
-     * @return mixed config value or default when not found
+     * @inheritdoc
      */
     public function get($key, $default = null)
     {

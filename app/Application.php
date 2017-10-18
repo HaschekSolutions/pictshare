@@ -2,13 +2,15 @@
 
 namespace App;
 
-use App\Support\Config;
+use App\Support\ConfigInterface;
+use League\Container\ContainerAwareInterface;
+use League\Container\ContainerInterface;
 
 /**
  * Class Application
  * @package App
  */
-class Application
+class Application implements ContainerAwareInterface
 {
     /**
      * @var string
@@ -16,20 +18,26 @@ class Application
     protected $rootPath;
 
     /**
-     * @var Config
+     * @var ContainerInterface
+     */
+    protected $container;
+
+    /**
+     * @var ConfigInterface
      */
     protected $config;
 
     /**
      * App constructor.
      *
-     * @param string $rootPath
-     * @param Config $config
+     * @param string             $rootPath
+     * @param ContainerInterface $container
      */
-    public function __construct($rootPath, Config $config)
+    public function __construct($rootPath, ContainerInterface $container)
     {
-        $this->rootPath = $rootPath;
-        $this->config   = $config;
+        $this->rootPath  = $rootPath;
+        $this->container = $container;
+        $this->config    = $container->get(ConfigInterface::class);
 
         $this->configureErrorReporting();
     }
@@ -42,6 +50,22 @@ class Application
     public function getRootPath()
     {
         return $this->rootPath;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setContainer(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getContainer()
+    {
+        return $this->container;
     }
 
     /**

@@ -5,7 +5,7 @@
 <html class="no-js"> <!--<![endif]-->
 <head>
     <meta charset="utf-8">
-    <title>Album - <?php echo( defined('TITLE') ? TITLE : 'PictShare image hosting' ); ?></title>
+    <title>Album - {{ title }}</title>
     <meta name="description" content="">
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
@@ -26,23 +26,23 @@
             background: none transparent;
         }
 
-        .picture {
-        <?php
-        if (isset($data) && $data['responsive'] === true) {
-            echo '  display: block;
-                    max-width: 100%;
-                    height: auto;
-                    padding-bottom:10px;';
-        } else {
-            echo 'padding:7px;';
-        }
-        ?>
-        }
-
+        {{ #responsive }}
+            .picture {
+                display: block;
+                max-width: 100%;
+                height: auto;
+                padding-bottom: 10px;
+            }
+        {{ /responsive }}
+        {{ ^responsive }}
+            .picture {
+                padding:7px;
+            }
+        {{ /responsive }}
     </style>
 
 </HEAD>
 <BODY>
-<?php echo isset($content) ? $content : '' ?>
+{{{ content }}}
 </BODY>
 </HTML>

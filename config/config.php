@@ -27,15 +27,15 @@ return [
         // ips/hostnames/ranges: semicolon seperated
         // Examples:
         // ======
-        // ip: define('MASTER_DELETE_IP', '8.8.8.8');
-        // hostname: define('MASTER_DELETE_IP', 'home.example.com');
-        // ip range: define('MASTER_DELETE_IP', '192.168.0.0/24'); // IPs from 192.168.0.0 to 192.168.0.255 can delete
-        // multiple: define('MASTER_DELETE_IP', '192.168.0.0/24;my.home.net;4.4.2.2');
+        // ip: '8.8.8.8';
+        // hostname: 'home.example.com';
+        // ip range: '192.168.0.0/24'; // IPs from 192.168.0.0 to 192.168.0.255 can delete
+        // multiple: '192.168.0.0/24;my.home.net;4.4.2.2';
         'master_delete_ip' => env('MASTER_DELETE_IP', false),
 
         // If set, upload form will only be shown on that location.
-        // eg: define('UPLOAD_FORM_LOCATION', 'secret/upload'); then the upload form will
-        // only be visible from http://your.domain/secret/upload
+        // eg: 'secret/upload'; then the upload form will only be
+        // visible from http://your.domain/secret/upload
         'upload_form_location' => env('UPLOAD_FORM_LOCATION', false),
 
         // If set to true, the only page that will be rendered is the upload form. If a
@@ -66,7 +66,7 @@ return [
         'max_resized_images' => env('MAX_RESIZED_IMAGES', 20),
 
         // When the user requests a resize. Can the resized image be bigger than the original?
-        'allow_bloating' => env('ALLOW_BLOATING', 'false'),
+        'allow_bloating' => env('ALLOW_BLOATING', false),
 
         // Force a specific domain for this server. If set to false, will autodetect.
         // Format: https://your.domain.name/

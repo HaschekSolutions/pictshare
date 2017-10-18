@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\PictshareModel;
+use App\Support\Config;
 
 /**
  * Class Image
@@ -10,6 +11,28 @@ use App\Models\PictshareModel;
  */
 class Image
 {
+    /**
+     * @var Config
+     */
+    protected $config;
+
+    /**
+     * @var PictshareModel
+     */
+    protected $pictshareModel;
+
+    /**
+     * Image constructor.
+     *
+     * @param Config         $config
+     * @param PictshareModel $pictshareModel
+     */
+    public function __construct(Config $config, PictshareModel $pictshareModel)
+    {
+        $this->config         = $config;
+        $this->pictshareModel = $pictshareModel;
+    }
+
     /**
      * @param resource $image
      * @param array    $data
@@ -65,9 +88,7 @@ class Image
      */
     public function forceResize(&$image, $size)
     {
-        $pm = new PictshareModel();
-
-        $sd        = $pm->sizeStringToWidthHeight($size);
+        $sd        = $this->pictshareModel->sizeStringToWidthHeight($size);
         $maxwidth  = $sd['width'];
         $maxheight = $sd['height'];
 
@@ -117,16 +138,14 @@ class Image
      */
     public function resize(&$image, $size)
     {
-        $pm = new PictshareModel();
-
-        $sd        = $pm->sizeStringToWidthHeight($size);
+        $sd        = $this->pictshareModel->sizeStringToWidthHeight($size);
         $maxwidth  = $sd['width'];
         $maxheight = $sd['height'];
 
         $width  = imagesx($image);
         $height = imagesy($image);
 
-        if (!ALLOW_BLOATING) {
+        if (!$this->config->get('app.allow_bloating', false)) {
             if ($maxwidth > $width) {
                 $maxwidth = $width;
             }
@@ -251,10 +270,8 @@ class Image
         }
         if ($blurFactor > 6) {
             $blurFactor = 6;
-        } else {
-            if ($blurFactor < 0) {
-                $blurFactor = 0;
-            }
+        } elseif ($blurFactor < 0) {
+            $blurFactor = 0;
         }
         // blurFactor has to be an integer
         $blurFactor = round($blurFactor);

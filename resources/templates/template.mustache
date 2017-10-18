@@ -7,13 +7,13 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo( defined('TITLE') ? TITLE : 'PictShare image hosting' ); ?></title>
+    <title>{{ title }}</title>
 
     <!-- Bootstrap -->
-    <link href="<?php echo PATH; ?>resources/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ path }}resources/assets/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- PictShare overwrites -->
-    <link href="<?php echo PATH; ?>resources/assets/css/pictshare.css" rel="stylesheet">
+    <link href="{{ path }}resources/assets/css/pictshare.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -37,18 +37,18 @@
 <div class="container" id="headcontainer">
     <div class="row">
         <div class="col-md-8">
-            <a href="<?php echo PATH; ?>"><img src="<?php echo PATH; ?>resources/assets/css/imgs/logo.png"/></a>
-            <h4><?php echo isset($slogan) ? $slogan : ''; ?></h4>
+            <a href="{{ path }}"><img src="{{ path }}resources/assets/css/imgs/logo.png"/></a>
+            <h4>{{ slogan }}</h4>
             <div class="well">
-                <?php echo isset($content) ? $content : '' ?>
+                {{{ content }}}
             </div>
         </div>
     </div>
 
     <footer>
-        (c)<?php echo date("y"); ?> by<br/>
+        (c) {{ year }} by<br/>
         <a href="https://haschek.solutions" target="_blank">
-            <img height="30" src="<?php echo PATH; ?>resources/assets/css/imgs/hs_logo.png"/>
+            <img height="30" src="{{ path }}resources/assets/css/imgs/hs_logo.png"/>
         </a>
     </footer>
 </div>
@@ -60,6 +60,6 @@
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="<?php echo PATH; ?>resources/assets/js/bootstrap.min.js"></script>
+<script src="{{ path }}resources/assets/js/bootstrap.min.js"></script>
 </BODY>
 </HTML>

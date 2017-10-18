@@ -85,7 +85,7 @@ If you're a blogger like myself, you can use it as storage for your images so th
 - Smart [resize, filter and rotation](#smart-query-system) features
 - Duplicates don't take up space. If the exact same images is uploaded twice, the second upload will link to the first
 - You can control who can upload images or use filters/resizes by defining an [upload-code](#restriction-settings)
-- You can set a code in your ```/inc/config.inc.php``` (MASTER_DELETE_CODE) that, if appended to any URL of an Image, will delete the image and all cached versions of it from the server
+- You can set a code in your ```.env``` or ```/inc/config.inc.php``` (MASTER_DELETE_CODE) that, if appended to any URL of an Image, will delete the image and all cached versions of it from the server
 - Detailed traffic and view statistics of your images via [Pictshare stats](https://github.com/chrisiaut/pictshare_stats)
 
 ## Smart query system
@@ -180,7 +180,7 @@ Just send a POST request to ```https://pictshare.net/backend.php``` and send you
 Server will automatically try to guess the file type (which should work in 90% of the cases) and if it can't figure it out it'll just upload it as png.
 
 ## Restriction settings
-In your ```config.inc.php``` there are two values to be set: ```UPLOAD_CODE``` and ```IMAGE_CHANGE_CODE```
+In your ```.env``` or ```config.inc.php``` there are two values to be set: ```UPLOAD_CODE``` and ```IMAGE_CHANGE_CODE```
 
 Both can be set to strings or multiple strings semi;colon;separated. If there is a semicolon in the string, any of the elements will work
 

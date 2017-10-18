@@ -28,7 +28,7 @@ class Model
      *
      * @param int $id
      */
-    public function __construct($id = 0)
+    public function __construct($id)
     {
         $this->model = substr(get_class($this), 0, -5);
         $this->table = strtolower($this->model);

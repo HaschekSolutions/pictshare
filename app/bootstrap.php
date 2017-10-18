@@ -22,18 +22,20 @@ if (file_exists($envFile)) {
 
 
 /*
- * Load the configuration
- * ----------------------
+ * Prepare IoC container
+ * ---------------------
  *
  */
 
-$config = new \App\Support\Config(require_once __DIR__ . '/../config/config.php');
+$container = new League\Container\Container;
 
-// this is support for "old" configuration through 'config.inc.php' file
-if (file_exists(__DIR__.'/../inc/config.inc.php')) {
-    include_once __DIR__.'/../inc/config.inc.php';
-    $config->setFromConstants();
-}
+// register the reflection container as a delegate to enable auto wiring
+$container->delegate(
+    new League\Container\ReflectionContainer
+);
+
+// add the service provider to container
+$container->addServiceProvider(\App\Providers\ServiceProvider::class);
 
 
 /*
@@ -42,6 +44,6 @@ if (file_exists(__DIR__.'/../inc/config.inc.php')) {
  *
  */
 
-$app = new \App\Application(realpath(__DIR__.'/../'), $config);
+$app = new \App\Application(realpath(__DIR__.'/../'), $container);
 
 return $app;
