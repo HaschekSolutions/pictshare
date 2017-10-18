@@ -4,7 +4,7 @@ namespace App\Views;
 
 use App\Models\PictshareModel;
 use App\Support\ConfigInterface;
-use App\Transformers\Image;
+use App\Transformers\Image as ImageTransformer;
 use Mustache_Engine;
 use Mustache_Loader_FilesystemLoader;
 
@@ -25,6 +25,11 @@ class View
     protected $pictshareModel;
 
     /**
+     * @var ImageTransformer
+     */
+    protected $imageTransformer;
+
+    /**
      * @var Mustache_Engine
      */
     protected $mustache;
@@ -32,15 +37,21 @@ class View
     /**
      * View constructor.
      *
-     * @param ConfigInterface $config
-     * @param PictshareModel  $pictshareModel
-     * @param Mustache_Engine $mustache
+     * @param ConfigInterface  $config
+     * @param PictshareModel   $pictshareModel
+     * @param ImageTransformer $imageTransformer
+     * @param Mustache_Engine  $mustache
      */
-    public function __construct(ConfigInterface $config, PictshareModel $pictshareModel, Mustache_Engine $mustache)
-    {
-        $this->config         = $config;
-        $this->pictshareModel = $pictshareModel;
-        $this->mustache       = $mustache;
+    public function __construct(
+        ConfigInterface $config,
+        PictshareModel $pictshareModel,
+        ImageTransformer $imageTransformer,
+        Mustache_Engine $mustache
+    ) {
+        $this->config           = $config;
+        $this->pictshareModel   = $pictshareModel;
+        $this->imageTransformer = $imageTransformer;
+        $this->mustache         = $mustache;
 
         $this->mustache->setLoader(new Mustache_Loader_FilesystemLoader(__DIR__ . '/../../resources/templates'));
     }
@@ -121,11 +132,10 @@ class View
             unset($data['changecode']);
         }
 
-        $imgTransformer = new Image($this->config, $this->pictshareModel);
-        $base_path      = ROOT . '/upload/' . $hash . '/';
-        $path           = $base_path . $hash;
-        $type           = $this->pictshareModel->isTypeAllowed($this->pictshareModel->getTypeOfFile($path));
-        $cached         = false;
+        $base_path = ROOT . '/upload/' . $hash . '/';
+        $path      = $base_path . $hash;
+        $type      = $this->pictshareModel->isTypeAllowed($this->pictshareModel->getTypeOfFile($path));
+        $cached    = false;
 
         //update last_rendered of this hash so we can later
         //sort out old, unused images easier
@@ -149,7 +159,7 @@ class View
                 $im = imagecreatefromjpeg($path);
                 if (!$cached) {
                     if ($this->pictshareModel->changeCodeExists($changecode)) {
-                        $imgTransformer->transform($im, $data);
+                        $this->imageTransformer->transform($im, $data);
                         imagejpeg(
                             $im,
                             $cachepath,
@@ -165,7 +175,7 @@ class View
                 $im = imagecreatefrompng($path);
                 if (!$cached) {
                     if ($this->pictshareModel->changeCodeExists($changecode)) {
-                        $imgTransformer->transform($im, $data);
+                        $this->imageTransformer->transform($im, $data);
                         imagepng(
                             $im,
                             $cachepath,

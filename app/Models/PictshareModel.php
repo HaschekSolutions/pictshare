@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use App\Support\Config;
+use App\Support\ConfigInterface;
 use App\Support\HTML;
 use App\Support\String;
 use App\Support\Utils;
-use App\Transformers\Image;
+use App\Transformers\Image as ImageTransformer;
 
 /**
  * Class PictshareModel
@@ -17,7 +17,7 @@ use App\Transformers\Image;
 class PictshareModel
 {
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     protected $config;
 
@@ -27,15 +27,22 @@ class PictshareModel
     protected $html;
 
     /**
+     * @var ImageTransformer
+     */
+    protected $imageTransformer;
+
+    /**
      * Model constructor.
      *
-     * @param Config $config
-     * @param HTML   $html
+     * @param ConfigInterface  $config
+     * @param HTML             $html
+     * @param ImageTransformer $imageTransformer
      */
-    public function __construct(Config $config, HTML $html)
+    public function __construct(ConfigInterface $config, HTML $html, ImageTransformer $imageTransformer)
     {
-        $this->config = $config;
-        $this->html   = $html;
+        $this->config           = $config;
+        $this->html             = $html;
+        $this->imageTransformer = $imageTransformer;
     }
 
     /**
@@ -283,7 +290,7 @@ class PictshareModel
             exit(json_encode(['status' => 'ERR', 'reason' => $this->translate(21)]));
         }
 
-        $im = new Image($this->config, $this);
+        //$im = $this->imageTransformer;
         $o  = [];
 
         if ($_FILES[$name]["error"] == UPLOAD_ERR_OK) {
@@ -606,7 +613,7 @@ class PictshareModel
             return '<span class="error">' . $this->translate(21) . '</span>';
         }
 
-        $im = new Image($this->config, $this);
+        //$im = $this->imageTransformer;
         $o  = '';
         $i  = 0;
 

@@ -3,7 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\PictshareModel;
-use App\Support\Config;
+use App\Support\ConfigInterface;
 
 /**
  * Class Image
@@ -12,7 +12,7 @@ use App\Support\Config;
 class Image
 {
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     protected $config;
 
@@ -24,10 +24,10 @@ class Image
     /**
      * Image constructor.
      *
-     * @param Config         $config
-     * @param PictshareModel $pictshareModel
+     * @param ConfigInterface $config
+     * @param PictshareModel  $pictshareModel
      */
-    public function __construct(Config $config, PictshareModel $pictshareModel)
+    public function __construct(ConfigInterface $config, PictshareModel $pictshareModel)
     {
         $this->config         = $config;
         $this->pictshareModel = $pictshareModel;

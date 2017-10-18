@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Controllers\BackendController;
 use App\Controllers\CliController;
 use App\Controllers\IndexController;
+use App\Factories\ImageFactory;
 use App\Models\PictshareModel;
 use App\Support\ConfigInterface;
 use App\Support\HTML;
+use App\Transformers\Image;
 use App\Views\View;
 use League\Container\ServiceProvider\AbstractServiceProvider;
 
@@ -33,6 +35,8 @@ class ServiceProvider extends AbstractServiceProvider
         CliController::class,
         PictshareModel::class,
         View::class,
+        Image::class,
+        //ImageFactory::class
     ];
 
     /**
@@ -63,6 +67,8 @@ class ServiceProvider extends AbstractServiceProvider
         $this->registerControllers();
         $this->registerModels();
         $this->registerViews();
+        $this->registerTransformers();
+        //$this->registerFactories();
     }
 
     /**
@@ -100,6 +106,26 @@ class ServiceProvider extends AbstractServiceProvider
     {
         $this->getContainer()
             ->add(View::class)
-            ->withArguments([ConfigInterface::class, PictshareModel::class, \Mustache_Engine::class]);
+            ->withArguments([ConfigInterface::class, Image::class, PictshareModel::class, \Mustache_Engine::class]);
+    }
+
+    /**
+     * Register transformers.
+     */
+    protected function registerTransformers()
+    {
+        $this->getContainer()
+            ->add(Image::class)
+            ->withArguments([ConfigInterface::class, PictshareModel::class]);
+    }
+
+    /**
+     * Register factories.
+     */
+    protected function registerFactories()
+    {
+        $this->getContainer()
+            ->add(ImageFactory::class)
+            ->withArguments([ConfigInterface::class, PictshareModel::class]);
     }
 }
