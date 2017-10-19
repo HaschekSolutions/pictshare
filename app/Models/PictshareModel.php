@@ -170,7 +170,7 @@ class PictshareModel
                 exit(json_encode(['status' => 'ERR', 'reason' => 'Unsupported type']));
             }
 
-            $data = $this->uploadImageFromURL($_FILES[$name]["tmp_name"]);
+            $data = $this->uploadImageFromURL($_FILES[$name]["tmp_name"], $type);
             if ($data['status'] == 'OK') {
                 $hash   = $data['hash'];
                 $domain = domain_path();
@@ -227,8 +227,8 @@ class PictshareModel
         $fi   = new \finfo(FILEINFO_MIME);
         $type = $fi->buffer(file_get_contents($url, false, null, -1, 1024));
 
-        //to catch a strange error for PHP7 and Alpine Linux
-        //if the file seems to be a stream, use unix file command
+        // to catch a strange error for PHP7 and Alpine Linux
+        // if the file seems to be a stream, use unix file command
         if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' &&
             String::startsWith($type, 'application/octet-stream')
         ) {
@@ -269,8 +269,8 @@ class PictshareModel
         $rootPath = root_path();
 
         $file = escapeshellarg($filename);
-        $tmp  = $rootPath . 'tmp/' . md5(time() + rand(1, 10000)) . '.' . rand(1, 10000) . '.log';
-        $bin  = escapeshellcmd($rootPath . 'bin/ffmpeg');
+        $tmp  = $rootPath . '/tmp/' . md5(time() + rand(1, 10000)) . '.' . rand(1, 10000) . '.log';
+        $bin  = escapeshellcmd($rootPath . '/bin/ffmpeg');
 
         $cmd = "$bin -i $file > $tmp 2>> $tmp";
 
@@ -332,14 +332,17 @@ class PictshareModel
     }
 
     /**
-     * @param string $url
+     * @param string           $url
+     * @param null|string|bool $type
      *
      * @return array
      */
-    public function uploadImageFromURL($url)
+    public function uploadImageFromURL($url, $type = null)
     {
-        $type = $this->getTypeOfFile($url);
-        $type = $this->isTypeAllowed($type);
+        if ($type === null) {
+            $type = $this->getTypeOfFile($url);
+            $type = $this->isTypeAllowed($type);
+        }
 
         $rootPath     = root_path();
         $relativePath = relative_path();
@@ -349,15 +352,20 @@ class PictshareModel
             return ['status' => 'ERR', 'reason' => 'wrong filetype'];
         }
 
+        $filename = isset($_REQUEST['filename']) ? $_REQUEST['filename'] : null;
+
         $dup_id = $this->isDuplicate($url);
         if ($dup_id) {
             $hash = $dup_id;
-            $url  = $rootPath . 'upload/' . $hash . '/' . $hash;
+            $url  = $rootPath . '/upload/' . $hash . '/' . $hash;
         } else {
-            $hash = File::getNewHash($type);
+            if ($filename !== null) {
+                $hash = $filename;
+            } else {
+                $hash = File::getNewHash($type);
+            }
             $this->saveSHAOfFile($url, $hash);
         }
-
 
         if ($dup_id) {
             return [
@@ -369,8 +377,8 @@ class PictshareModel
             ];
         }
 
-        mkdir($rootPath . 'upload/' . $hash);
-        $file = $rootPath . 'upload/' . $hash . '/' . $hash;
+        mkdir($rootPath . '/upload/' . $hash);
+        $file = $rootPath . '/upload/' . $hash . '/' . $hash;
 
         file_put_contents($file, file_get_contents($url));
 
@@ -385,7 +393,7 @@ class PictshareModel
         }
 
         if ($this->config->get('log_uploader', true)) {
-            $fh = fopen($rootPath . 'upload/uploads.txt', 'a');
+            $fh = fopen($rootPath . '/upload/uploads.txt', 'a');
             fwrite($fh, time() . ';' . $url . ';' . $hash . ';' . Utils::getUserIP() . "\n");
             fclose($fh);
         }
@@ -541,7 +549,7 @@ class PictshareModel
         $file    = root_path('tmp/' . $hash);
         $this->base64ToImage($data, $file, $type);
 
-        return $this->uploadImageFromURL($file);
+        return $this->uploadImageFromURL($file, $type);
     }
 
     /**
@@ -743,9 +751,9 @@ class PictshareModel
         $rootPath = root_path();
         $file     = $this->getCacheName($data);
 
-        $path = $rootPath . 'upload/' . $hash . '/' . $file;
+        $path = $rootPath . '/upload/' . $hash . '/' . $file;
         if (!file_exists($path)) {
-            $path = $rootPath . 'upload/' . $hash . '/' . $hash;
+            $path = $rootPath . '/upload/' . $hash . '/' . $hash;
         }
         if (file_exists($path)) {
             $type = $this->getType($path);
@@ -789,8 +797,9 @@ class PictshareModel
         $data = [];
 
         foreach ($url as $el) {
-            $el = $this->html->sanatizeString($el);
-            $el = strtolower($el);
+            $el   = $this->html->sanatizeString($el);
+            $orig = $el;
+            $el   = strtolower($el);
             if (!$el) {
                 continue;
             }
@@ -801,16 +810,16 @@ class PictshareModel
 
             $masterDeleteCode = $this->config->get('app.master_delete_code');
 
-            if (File::isImage($el)) {
-                //if there are mor than one hashes in url
-                //make an album from them
+            if (File::isImage($orig)) {
+                // if there are more than one hashes in url
+                // make an album from them
                 if ($data['hash']) {
                     if (!$data['album']) {
                         $data['album'][] = $data['hash'];
                     }
-                    $data['album'][] = $el;
+                    $data['album'][] = $orig;
                 }
-                $data['hash'] = $el;
+                $data['hash'] = $orig;
             } elseif ($el == 'mp4' || $el == 'raw' || $el == 'preview' || $el == 'webm' || $el == 'ogg') {
                 $data[$el] = 1;
             } elseif (File::isSize($el)) {
@@ -942,8 +951,8 @@ class PictshareModel
         $rootPath = root_path();
 
         //delete hash from hashes.csv
-        $tmpname = $rootPath . 'upload/delete_temp.csv';
-        $csv     = $rootPath . 'upload/hashes.csv';
+        $tmpname = $rootPath . '/upload/delete_temp.csv';
+        $csv     = $rootPath . '/upload/hashes.csv';
         $fptemp  = fopen($tmpname, "w");
         if (($handle = fopen($csv, "r")) !== false) {
             while (($line = fgets($handle)) !== false) {
@@ -960,7 +969,7 @@ class PictshareModel
         //unlink($tmpname);
 
         //delete actual image
-        $base_path = $rootPath . 'upload/' . $hash . '/';
+        $base_path = $rootPath . '/upload/' . $hash . '/';
         if (!is_dir($base_path)) {
             return false;
         }

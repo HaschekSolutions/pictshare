@@ -182,6 +182,10 @@ Just send a POST request to ```https://pictshare.net/backend.php``` and send you
 
 Server will automatically try to guess the file type (which should work in 90% of the cases) and if it can't figure it out it'll just upload it as png.
 
+### Defining filenames
+
+By default PictShare will store images under randomly generated hashkeys. If you wish to store an image under specific name you can do so by sending the value as request parameter ```filename```.
+
 ## Restriction settings
 In your ```.env``` or ```config.inc.php``` there are two values to be set: ```UPLOAD_CODE``` and ```IMAGE_CHANGE_CODE```
 
