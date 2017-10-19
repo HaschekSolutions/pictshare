@@ -30,9 +30,9 @@ if (file_exists($envFile)) {
 $container = new League\Container\Container;
 
 // register the reflection container as a delegate to enable auto wiring
-$container->delegate(
-    new League\Container\ReflectionContainer
-);
+//$container->delegate(
+//    new League\Container\ReflectionContainer
+//);
 
 // add the service provider to container
 $container->addServiceProvider(\App\Providers\ServiceProvider::class);

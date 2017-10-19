@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\PictshareModel;
-use App\Support\ConfigInterface;
+use App\Support\Translator;
 use App\Support\Utils;
 use App\Views\View;
 
@@ -13,11 +13,6 @@ use App\Views\View;
  */
 class IndexController
 {
-    /**
-     * @var ConfigInterface
-     */
-    protected $config;
-
     /**
      * @var PictshareModel
      */
@@ -31,13 +26,11 @@ class IndexController
     /**
      * CliController constructor.
      *
-     * @param ConfigInterface $config
-     * @param PictshareModel  $pictshareModel
-     * @param View            $view
+     * @param PictshareModel $pictshareModel
+     * @param View           $view
      */
-    public function __construct(ConfigInterface $config, PictshareModel $pictshareModel, View $view)
+    public function __construct(PictshareModel $pictshareModel, View $view)
     {
-        $this->config         = $config;
         $this->pictshareModel = $pictshareModel;
         $this->view           = $view;
     }
@@ -54,26 +47,26 @@ class IndexController
         $data = $this->pictshareModel->urlToData($url);
 
         if (!is_array($data) || !$data['hash']) {
-            $uploadFormLocation = $this->config->get('app.upload_form_location');
+            $uploadFormLocation = config('app.upload_form_location');
 
             if (($uploadFormLocation && $url == $uploadFormLocation) || (!$uploadFormLocation)) {
                 $upload_answer = $this->pictshareModel->processUploads();
                 if ($upload_answer) {
                     $o = $upload_answer;
                 } else {
-                    $o = $this->pictshareModel->renderUploadForm();
+                    $o = $this->view->renderUploadForm();
                 }
 
                 $vars['content'] = $o;
-                $vars['slogan']  = $this->pictshareModel->translate(2);
+                $vars['slogan']  = Translator::translate(2);
             }
 
-            if (!isset($vars) && $this->config->get('app.low_profile', false)) {
+            if (!isset($vars) && config('app.low_profile', false)) {
                 header('HTTP/1.0 404 Not Found');
                 exit();
             } elseif (!isset($vars)) {
-                $vars['content'] = $this->pictshareModel->translate(12);
-                $vars['slogan']  = $this->pictshareModel->translate(2);
+                $vars['content'] = Translator::translate(12);
+                $vars['slogan']  = Translator::translate(2);
             }
 
             $this->view->render($vars);

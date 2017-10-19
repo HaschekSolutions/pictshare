@@ -1,11 +1,116 @@
 <?php
 
+if (! function_exists('app')) {
+    /**
+     * Get the available Application instance.
+     *
+     * @return \App\Application
+     */
+    function app()
+    {
+        return \App\Application::getInstance();
+    }
+}
+
+if (! function_exists('root_path')) {
+    /**
+     * Get the path to the root of the project.
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    function root_path($path = '')
+    {
+        $rootPath = app()->getRootPath();
+
+        if ($path !== '') {
+            if (in_array($path[0], ['/', DIRECTORY_SEPARATOR], true)) {
+                $path = substr($path, 1);
+            }
+            $rootPath .= '/'.$path;
+        }
+
+        return $rootPath;
+    }
+}
+
+if (! function_exists('relative_path')) {
+    /**
+     * Get the path relative to the currently executing script.
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    function relative_path($path = '')
+    {
+        $relativePath = app()->getRelativePath();
+
+        if ($path !== '') {
+            if (in_array($path[0], ['/', DIRECTORY_SEPARATOR], true)) {
+                $path = substr($path, 1);
+            }
+            $relativePath .= $path;
+        }
+
+        return $relativePath;
+    }
+}
+
+if (! function_exists('domain_path')) {
+    /**
+     * Get the domain "path" (wether forced or actual).
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    function domain_path($path = '')
+    {
+        $domainPath = app()->getDomainPath();
+
+        if (substr($domainPath, -1) === '/') {
+            $domainPath = substr($domainPath, 0, -1);
+        }
+
+        if ($path !== '') {
+            if (in_array($path[0], ['/', DIRECTORY_SEPARATOR], true)) {
+                $path = substr($path, 1);
+            }
+            $domainPath .= '/'.$path;
+        }
+
+        return $domainPath;
+    }
+}
+
+if (! function_exists('config')) {
+    /**
+     * Get / set the specified configuration value.
+     *
+     * @param string $key
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    function config($key = null, $default = null)
+    {
+        if (is_null($key)) {
+            return app()->getConfig();
+        }
+
+        return app()->getConfig()->get($key, $default);
+    }
+}
+
 if (! function_exists('env')) {
     /**
      * Gets the value of an environment variable. Supports boolean, empty and null.
      *
-     * @param  string  $key
-     * @param  mixed   $default
+     * @param string $key
+     * @param mixed  $default
+     *
      * @return mixed
      */
     function env($key, $default = null)
@@ -47,11 +152,24 @@ if (! function_exists('value')) {
     /**
      * Return the default value of the given value.
      *
-     * @param  mixed  $value
+     * @param mixed $value
+     *
      * @return mixed
      */
     function value($value)
     {
         return $value instanceof Closure ? $value() : $value;
+    }
+}
+
+if (! function_exists('is_cli')) {
+    /**
+     * Determine whether script is running in CLI.
+     *
+     * @return bool
+     */
+    function is_cli()
+    {
+        return php_sapi_name() == 'cli';
     }
 }

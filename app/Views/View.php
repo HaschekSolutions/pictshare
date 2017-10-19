@@ -4,6 +4,7 @@ namespace App\Views;
 
 use App\Models\PictshareModel;
 use App\Support\ConfigInterface;
+use App\Support\Translator;
 use App\Transformers\Image as ImageTransformer;
 use Mustache_Engine;
 use Mustache_Loader_FilesystemLoader;
@@ -66,7 +67,7 @@ class View
         $tpl = $this->mustache->loadTemplate('template');
         echo $tpl->render([
             'title'   => $this->config->get('app.title'),
-            'path'    => PATH,
+            'path'    => relative_path(),
             'year'    => date("Y"),
             'slogan'  => isset($variables['slogan']) ? $variables['slogan'] : '',
             'content' => isset($variables['content']) ? $variables['content'] : ''
@@ -80,10 +81,11 @@ class View
      */
     public function renderAlbum($data)
     {
-        $content   = '';
-        $filters   = '';
-        $size      = '';
-        $forcesize = isset($data['forcesize']) && $data['forcesize'] ? 'forcesize/' : '';
+        $content      = '';
+        $filters      = '';
+        $size         = '';
+        $forcesize    = isset($data['forcesize']) && $data['forcesize'] ? 'forcesize/' : '';
+        $relativePath = relative_path();
 
         if (isset($data['filter']) && $data['filter']) {
             $filters = implode('/', $data['filter']) . '/';
@@ -96,8 +98,8 @@ class View
         }
 
         foreach ($data['album'] as $hash) {
-            $content .= '<a href="' . PATH . $filters . $hash . '">
-                            <img class="picture" src="' . PATH . $size . $forcesize . $filters . $hash . '" />
+            $content .= '<a href="' . $relativePath . $filters . $hash . '">
+                            <img class="picture" src="' . $relativePath . $size . $forcesize . $filters . $hash . '" />
                         </a>';
         }
 
@@ -109,7 +111,7 @@ class View
 
         echo $tpl->render([
             'title'      => $this->config->get('app.title'),
-            'path'       => PATH,
+            'path'       => $relativePath,
             'year'       => date("Y"),
             'slogan'     => isset($data['slogan']) ? $data['slogan'] : '',
             'content'    => $content,
@@ -132,7 +134,7 @@ class View
             unset($data['changecode']);
         }
 
-        $base_path = ROOT . '/upload/' . $hash . '/';
+        $base_path = root_path('upload/' . $hash . '/');
         $path      = $base_path . $hash;
         $type      = $this->pictshareModel->isTypeAllowed($this->pictshareModel->getTypeOfFile($path));
         $cached    = false;
@@ -150,7 +152,7 @@ class View
             $cached = true;
         } elseif ($maxResizedImages > -1 && $this->pictshareModel->countResizedImages($hash) > $maxResizedImages) {
             // if the number of max resized images is reached, just show the real one
-            $path = ROOT . '/upload/' . $hash . '/' . $hash;
+            $path = root_path('upload/' . $hash . '/' . $hash);
         }
 
         switch ($type) {
@@ -230,7 +232,7 @@ class View
                     }
                 } else { //user wants gif
                     if (!$cached && $data['size']) {
-                        $this->pictshareModel->resizeFFMPEG($data, $cachepath, 'gif');
+                        $this->imageTransformer->resizeFFMPEG($data, $cachepath, 'gif');
                     }
                     header("Content-type: image/gif");
                     if (file_exists($cachepath)) {
@@ -244,33 +246,31 @@ class View
 
             case 'mp4':
                 if (!$cached && !$data['preview']) {
-                    $this->pictshareModel->resizeFFMPEG($data, $cachepath, 'mp4');
+                    $this->imageTransformer->resizeFFMPEG($data, $cachepath, 'mp4');
                     $path = $cachepath;
                 }
 
                 if (file_exists($cachepath) &&
                     filesize($cachepath) == 0) { //if there was an error and the file is 0 bytes, use the original
-                    $cachepath = ROOT . '/upload/' . $hash . '/' . $hash;
+                    $cachepath = root_path('upload/' . $hash . '/' . $hash);
                 }
 
                 if ($data['webm']) {
-                    $this->pictshareModel->saveAsWebm(ROOT . '/upload/' . $hash . '/' . $hash, $cachepath);
+                    $this->pictshareModel->saveAsWebm(root_path('upload/' . $hash . '/' . $hash), $cachepath);
                 }
 
                 if ($data['ogg']) {
-                    $this->pictshareModel->saveAsOGG(ROOT . '/upload/' . $hash . '/' . $hash, $cachepath);
+                    $this->pictshareModel->saveAsOGG(root_path('upload/' . $hash . '/' . $hash), $cachepath);
                 }
 
                 if ($data['raw']) {
                     $this->serveMP4($cachepath, $hash, 'video/mp4');
-
                 } elseif ($data['preview']) {
                     if (!file_exists($cachepath)) {
                         $this->pictshareModel->saveFirstFrameOfMP4($path, $cachepath);
                     }
                     header("Content-type: image/jpeg");
                     readfile($cachepath);
-
                 } else {
                     $this->renderMP4($path, $data);
                 }
@@ -298,12 +298,15 @@ class View
         $height   = $info['height'];
         $filesize = $urldata['humansize'];
 
+        $domain       = domain_path();
+        $relativePath = relative_path();
+
         $tpl = $this->mustache->loadTemplate('template_mp4');
         echo $tpl->render([
             'title'      => $this->config->get('app.title'),
-            'path'       => PATH,
-            'domain'     => DOMAINPATH,
-            'rawurlpath' => rawurlencode(DOMAINPATH . PATH . $hash),
+            'path'       => $relativePath,
+            'domain'     => $domain,
+            'rawurlpath' => rawurlencode($domain . $relativePath . $hash),
             'year'       => date("Y"),
             'hash'       => $hash,
             'width'      => $width,
@@ -312,6 +315,45 @@ class View
         ]);
     }
 
+    /**
+     * @return string
+     */
+    public function renderUploadForm()
+    {
+        $maxfilesize = (int) (ini_get('upload_max_filesize'));
+
+        $upload_code_form = '';
+        if ($this->config->get('app.upload_code', false)) {
+            $upload_code_form = '<strong>' . Translator::translate(20) .
+                                ': </strong><input class="input" type="password" name="upload_code" value="' .
+                                $_REQUEST['upload_code'] . '"><div class="clear"></div>';
+        }
+
+        return '
+        <div class="clear"></div>
+        <strong>' . Translator::translate(0) . ': ' . $maxfilesize . 'MB / File</strong><br>
+        <strong>' . Translator::translate(1) . '</strong>
+        <br><br>
+        <form id="form" enctype="multipart/form-data" method="post">
+            <div id="formular">
+                ' . $upload_code_form . '
+                <strong>' . Translator::translate(4) . ': </strong>
+                <input class="input" type="file" name="pic[]" multiple>
+                <div class="clear"></div>
+                <div class="clear"></div><br>
+            </div>
+            <input class="btn" style="font-size:15px;font-weight:bold;background-color:#74BDDE;padding:3px;" 
+                   type="submit" id="submit" name="submit" value="' . Translator::translate(3) . '" 
+                   onClick="setTimeout(function() {
+                                document.getElementById(\'submit\').disabled = \'disabled\';
+                            }, 1);
+                            $(\'#movingBallG\').fadeIn()">
+            <div id="movingBallG" class="invisible">
+                <div class="movingBallLineG"></div>
+                <div id="movingBallG_1" class="movingBallG"></div>
+            </div>
+        </form>';
+    }
 
     /**
      * @see https://stackoverflow.com/questions/25975943/php-serve-mp4-chrome-provisional-headers-are-shown-request-is-not-finished-ye

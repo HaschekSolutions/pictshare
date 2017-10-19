@@ -5,13 +5,13 @@ namespace App\Providers;
 use App\Controllers\BackendController;
 use App\Controllers\CliController;
 use App\Controllers\IndexController;
-use App\Factories\ImageFactory;
 use App\Models\PictshareModel;
 use App\Support\ConfigInterface;
 use App\Support\HTML;
 use App\Transformers\Image;
 use App\Views\View;
 use League\Container\ServiceProvider\AbstractServiceProvider;
+use Mustache_Engine;
 
 /**
  * Class ServiceProvider
@@ -36,7 +36,8 @@ class ServiceProvider extends AbstractServiceProvider
         PictshareModel::class,
         View::class,
         Image::class,
-        //ImageFactory::class
+        HTML::class,
+        Mustache_Engine::class,
     ];
 
     /**
@@ -64,11 +65,20 @@ class ServiceProvider extends AbstractServiceProvider
             return $config;
         });
 
+        $this->registerVendor();
         $this->registerControllers();
         $this->registerModels();
         $this->registerViews();
         $this->registerTransformers();
-        //$this->registerFactories();
+        $this->registerHelpers();
+    }
+
+    /**
+     * Register vendor classes.
+     */
+    protected function registerVendor()
+    {
+        $this->getContainer()->add(Mustache_Engine::class);
     }
 
     /**
@@ -78,11 +88,11 @@ class ServiceProvider extends AbstractServiceProvider
     {
         $this->getContainer()
             ->add(IndexController::class)
-            ->withArguments([ConfigInterface::class, PictshareModel::class, View::class]);
+            ->withArguments([PictshareModel::class, View::class]);
 
         $this->getContainer()
             ->add(BackendController::class)
-            ->withArguments([ConfigInterface::class, PictshareModel::class]);
+            ->withArgument(PictshareModel::class);
 
         $this->getContainer()
             ->add(CliController::class)
@@ -95,8 +105,8 @@ class ServiceProvider extends AbstractServiceProvider
     protected function registerModels()
     {
         $this->getContainer()
-            ->add(PictshareModel::class)
-            ->withArguments([ConfigInterface::class, HTML::class]);
+            ->share(PictshareModel::class)
+            ->withArguments([ConfigInterface::class, HTML::class, Image::class]);
     }
 
     /**
@@ -105,8 +115,8 @@ class ServiceProvider extends AbstractServiceProvider
     protected function registerViews()
     {
         $this->getContainer()
-            ->add(View::class)
-            ->withArguments([ConfigInterface::class, Image::class, PictshareModel::class, \Mustache_Engine::class]);
+            ->share(View::class)
+            ->withArguments([ConfigInterface::class, PictshareModel::class, Image::class, Mustache_Engine::class]);
     }
 
     /**
@@ -114,18 +124,14 @@ class ServiceProvider extends AbstractServiceProvider
      */
     protected function registerTransformers()
     {
-        $this->getContainer()
-            ->add(Image::class)
-            ->withArguments([ConfigInterface::class, PictshareModel::class]);
+        $this->getContainer()->share(Image::class);
     }
 
     /**
-     * Register factories.
+     * Register helpers.
      */
-    protected function registerFactories()
+    protected function registerHelpers()
     {
-        $this->getContainer()
-            ->add(ImageFactory::class)
-            ->withArguments([ConfigInterface::class, PictshareModel::class]);
+        $this->getContainer()->share(HTML::class);
     }
 }

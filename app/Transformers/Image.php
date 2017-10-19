@@ -2,8 +2,7 @@
 
 namespace App\Transformers;
 
-use App\Models\PictshareModel;
-use App\Support\ConfigInterface;
+use App\Support\File;
 
 /**
  * Class Image
@@ -12,25 +11,10 @@ use App\Support\ConfigInterface;
 class Image
 {
     /**
-     * @var ConfigInterface
-     */
-    protected $config;
-
-    /**
-     * @var PictshareModel
-     */
-    protected $pictshareModel;
-
-    /**
      * Image constructor.
-     *
-     * @param ConfigInterface $config
-     * @param PictshareModel  $pictshareModel
      */
-    public function __construct(ConfigInterface $config, PictshareModel $pictshareModel)
+    public function __construct()
     {
-        $this->config         = $config;
-        $this->pictshareModel = $pictshareModel;
     }
 
     /**
@@ -88,7 +72,7 @@ class Image
      */
     public function forceResize(&$image, $size)
     {
-        $sd        = $this->pictshareModel->sizeStringToWidthHeight($size);
+        $sd        = $this->sizeStringToWidthHeight($size);
         $maxwidth  = $sd['width'];
         $maxheight = $sd['height'];
 
@@ -138,14 +122,14 @@ class Image
      */
     public function resize(&$image, $size)
     {
-        $sd        = $this->pictshareModel->sizeStringToWidthHeight($size);
+        $sd        = $this->sizeStringToWidthHeight($size);
         $maxwidth  = $sd['width'];
         $maxheight = $sd['height'];
 
         $width  = imagesx($image);
         $height = imagesy($image);
 
-        if (!$this->config->get('app.allow_bloating', false)) {
+        if (! config('app.allow_bloating', false)) {
             if ($maxwidth > $width) {
                 $maxwidth = $width;
             }
@@ -179,6 +163,47 @@ class Image
         imagecopyresampled($newimg, $image, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
         $image = $newimg;
+    }
+
+    /**
+     * @param array  $data
+     * @param string $cachepath
+     * @param string $type
+     *
+     * @return string
+     */
+    public function resizeFFMPEG($data, $cachepath, $type = 'mp4')
+    {
+        $rootPath = root_path();
+
+        $file = $rootPath . 'upload/' . $data['hash'] . '/' . $data['hash'];
+        $file = escapeshellarg($file);
+        $tmp  = '/dev/null';
+        $bin  = escapeshellcmd($rootPath . 'bin/ffmpeg');
+
+        $size = $data['size'];
+
+        if (!$size) {
+            return $file;
+        }
+
+        $sd        = $this->sizeStringToWidthHeight($size);
+        $maxwidth  = $sd['width'];
+        //$maxheight = $sd['height'];
+        $maxheight = 'trunc(ow/a/2)*2';
+        $addition  = '';
+
+        switch ($type) {
+            case 'mp4':
+                $addition = '-c:v libx264';
+                break;
+        }
+
+        $cmd = "$bin -i $file -y -vf scale=\"$maxwidth:$maxheight\" $addition -f $type $cachepath";
+
+        system($cmd);
+
+        return $cachepath;
     }
 
     /**
@@ -339,5 +364,35 @@ class Image
 
         // return result
         return $gdImageResource;
+    }
+
+
+
+    /**
+     * @param int|string $size
+     *
+     * @return array|bool
+     */
+    protected function sizeStringToWidthHeight($size)
+    {
+        if (!$size || !File::isSize($size)) {
+            return false;
+        }
+        if (!is_numeric($size)) {
+            $size = explode('x', $size);
+        }
+
+        $maxheight = 0;
+        $maxwidth  = 0;
+
+        if (is_array($size)) {
+            $maxwidth  = $size[0];
+            $maxheight = $size[1];
+        } elseif ($size) {
+            $maxwidth  = $size;
+            $maxheight = $size;
+        }
+
+        return ['width' => $maxwidth, 'height' => $maxheight];
     }
 }

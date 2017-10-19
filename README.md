@@ -50,7 +50,10 @@ docker run -d -p 80:80 -e "TITLE=My own PictShare" hascheksolutions/pictshare
 
 - Make sure you have PHP5 GD libraries installed: ```apt-get install php5-gd```
 - Unpack the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip)
-- Rename /inc/example.config.inc.php to /inc/config.inc.php
+- Clone .env.example as .env and edit configuraiton options to your specific needs (NEW)
+    - Rename /inc/example.config.inc.php to /inc/config.inc.php (OLD)
+- From the root of the project run command ```composer install```
+  - If you do not have Composer install check offical [documentation](https://getcomposer.org/)
 - ```chmod +x bin/ffmpeg``` if you want to be able to use mp4 uploads
  - The provided ffmpeg binary (bin/ffmpeg) is from [here](http://johnvansickle.com/ffmpeg/) and it's a 64bit linux executable. If you need a different one, load yours and overwrite the one provided
 - (optional) You can and should put a [nginx](https://www.nginx.com/) proxy before the Apache server. That thing is just insanely fast with static content like images.
