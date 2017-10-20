@@ -13,7 +13,7 @@ Table of contents
 =================
 * [Installation](#installation)
   * [Docker](#docker)
-  * [On nginx](#on-nginx)
+  * [Without Docker](#without-docker)
 * [Why would I want to host my own images?](#why-would-i-want-to-host-my-own-images)
 * [Features](#features)
 * [Smart query system](#smart-query-system)
@@ -108,8 +108,8 @@ If there is some option that's not recognized by PictShare it's simply ignored, 
 |     Option    |      Parameter      |      Example URL       |      Result |
 | ------------- | ------------------- | ---------------------- | ----------- |
 **Resizing**  | | | |
-&lt;width&gt;**x**&lt;height&gt; | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg) |
-forcesize      | -none-				| https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg) |
+&lt;width&gt;**x**&lt;height&gt; | -none-            | https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg) |
+forcesize      | -none-                | https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg) |
 **Albums**   |  |  | |
 just add multiple image hashes            | -none-             | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg | Takes the **images** you put in the URL and makes an album out of them. All filters are supported!
 embed        | -none-                     | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg/embed | Renders the album without CSS and with transparent background so you can embed them easily
@@ -125,27 +125,27 @@ preview        | -none-             | https://www.pictshare.net/mp4/preview/1026
 raw            | -none-             | https://www.pictshare.net/raw/65714d22f0.mp4 | Renders the mp4 video directly so you can link it
 preview        | -none-             | https://www.pictshare.net/preview/65714d22f0.mp4 | Renders the first frame of the MP4 as an JPEG image
 **Rotating**   |  |  | 
-left		   | -none-				| https://pictshare.net/left/b260e36b60.jpg | ![Rotated left](https://pictshare.net/200/left/b260e36b60.jpg)
-right		   | -none-				| https://pictshare.net/right/b260e36b60.jpg | ![Rotated right](https://pictshare.net/200/right/b260e36b60.jpg)
-upside		   | -none-				| https://pictshare.net/upside/b260e36b60.jpg | ![Upside down](https://pictshare.net/200/upside/b260e36b60.jpg)
+left           | -none-                | https://pictshare.net/left/b260e36b60.jpg | ![Rotated left](https://pictshare.net/200/left/b260e36b60.jpg)
+right           | -none-                | https://pictshare.net/right/b260e36b60.jpg | ![Rotated right](https://pictshare.net/200/right/b260e36b60.jpg)
+upside           | -none-                | https://pictshare.net/upside/b260e36b60.jpg | ![Upside down](https://pictshare.net/200/upside/b260e36b60.jpg)
 **Filters**    |  |  | 
 negative       | -none-              | https://pictshare.net/negative/b260e36b60.jpg         | ![Negative](https://pictshare.net/negative/200/b260e36b60.jpg)
-grayscale      | -none-              | https://pictshare.net/grayscale/b260e36b60.jpg 		    | ![grayscale](https://pictshare.net/grayscale/200/b260e36b60.jpg)
-brightness     | -255 to 255         | https://pictshare.net/brightness_100/b260e36b60.jpg 	| ![brightness](https://pictshare.net/brightness_100/200/b260e36b60.jpg)
-edgedetect     | -none-              | https://pictshare.net/edgedetect/b260e36b60.jpg 		  | ![edgedetect](https://pictshare.net/edgedetect/200/b260e36b60.jpg)
-smooth         | -10 to 2048         | https://pictshare.net/smooth_3/b260e36b60.jpg 		    | ![smooth](https://pictshare.net/smooth_3/200/b260e36b60.jpg)
+grayscale      | -none-              | https://pictshare.net/grayscale/b260e36b60.jpg             | ![grayscale](https://pictshare.net/grayscale/200/b260e36b60.jpg)
+brightness     | -255 to 255         | https://pictshare.net/brightness_100/b260e36b60.jpg     | ![brightness](https://pictshare.net/brightness_100/200/b260e36b60.jpg)
+edgedetect     | -none-              | https://pictshare.net/edgedetect/b260e36b60.jpg           | ![edgedetect](https://pictshare.net/edgedetect/200/b260e36b60.jpg)
+smooth         | -10 to 2048         | https://pictshare.net/smooth_3/b260e36b60.jpg             | ![smooth](https://pictshare.net/smooth_3/200/b260e36b60.jpg)
 contrast       | -100 to 100         | https://pictshare.net/contrast_40/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_40/200/b260e36b60.jpg)
 pixelate       | 0 to 100            | https://pictshare.net/pixelate_10/b260e36b60.jpg      | ![pixelate](https://pictshare.net/pixelate_10/200/b260e36b60.jpg)
 blur           | -none- or 0 to 5    | https://pictshare.net/blur/b260e36b60.jpg      | ![pixelate](https://pictshare.net/blur/200/b260e36b60.jpg)
-sepia			| -none-				| https://pictshare.net/sepia/b260e36b60.jpg	| ![instagram filter sepia](https://pictshare.net/200/sepia/b260e36b60.jpg)
-sharpen			| -none-				| https://pictshare.net/sharpen/b260e36b60.jpg	| ![instagram filter sharpen](https://pictshare.net/200/sharpen/b260e36b60.jpg)
-emboss			| -none-				| https://pictshare.net/emboss/b260e36b60.jpg	| ![instagram filter emboss](https://pictshare.net/200/emboss/b260e36b60.jpg)
-cool			| -none-				| https://pictshare.net/cool/b260e36b60.jpg		| ![instagram filter cool](https://pictshare.net/200/cool/b260e36b60.jpg)	
-light			| -none-				| https://pictshare.net/light/b260e36b60.jpg	| ![instagram filter light](https://pictshare.net/200/light/b260e36b60.jpg)
-aqua			| -none-				| https://pictshare.net/aqua/b260e36b60.jpg		| ![instagram filter aqua](https://pictshare.net/200/aqua/b260e36b60.jpg)	
-fuzzy			| -none-				| https://pictshare.net/fuzzy/b260e36b60.jpg	| ![instagram filter fuzzy](https://pictshare.net/200/fuzzy/b260e36b60.jpg)
-boost			| -none-				| https://pictshare.net/boost/b260e36b60.jpg	| ![instagram filter boost](https://pictshare.net/200/boost/b260e36b60.jpg)
-gray			| -none-				| https://pictshare.net/gray/b260e36b60.jpg		| ![instagram filter gray](https://pictshare.net/200/gray/b260e36b60.jpg)	
+sepia            | -none-                | https://pictshare.net/sepia/b260e36b60.jpg    | ![instagram filter sepia](https://pictshare.net/200/sepia/b260e36b60.jpg)
+sharpen            | -none-                | https://pictshare.net/sharpen/b260e36b60.jpg    | ![instagram filter sharpen](https://pictshare.net/200/sharpen/b260e36b60.jpg)
+emboss            | -none-                | https://pictshare.net/emboss/b260e36b60.jpg    | ![instagram filter emboss](https://pictshare.net/200/emboss/b260e36b60.jpg)
+cool            | -none-                | https://pictshare.net/cool/b260e36b60.jpg        | ![instagram filter cool](https://pictshare.net/200/cool/b260e36b60.jpg)    
+light            | -none-                | https://pictshare.net/light/b260e36b60.jpg    | ![instagram filter light](https://pictshare.net/200/light/b260e36b60.jpg)
+aqua            | -none-                | https://pictshare.net/aqua/b260e36b60.jpg        | ![instagram filter aqua](https://pictshare.net/200/aqua/b260e36b60.jpg)    
+fuzzy            | -none-                | https://pictshare.net/fuzzy/b260e36b60.jpg    | ![instagram filter fuzzy](https://pictshare.net/200/fuzzy/b260e36b60.jpg)
+boost            | -none-                | https://pictshare.net/boost/b260e36b60.jpg    | ![instagram filter boost](https://pictshare.net/200/boost/b260e36b60.jpg)
+gray            | -none-                | https://pictshare.net/gray/b260e36b60.jpg        | ![instagram filter gray](https://pictshare.net/200/gray/b260e36b60.jpg)    
 
 You can also combine as many options as you want. Even multiple times! Want your image to be negative, resized, grayscale , with increased brightness and negate it again? No problem: https://pictshare.net/500x500/grayscale/negative/brightness_100/negative/b260e36b60.jpg
 
@@ -175,6 +175,7 @@ Server will return JSON of uploaded data like this:
 ```json
 {"status":"OK","type":"png","hash":"2f18a052c4.png","url":"https:\/\/pictshare.net\/2f18a052c4.png","domain":"https:\/\/pictshare.net\/"}
 ```
+You may also want to upload other file types - which is possible if defined in configuration (check [Restriction settings](#restriction-setting)), by sending a POST request to ```https://pictshare.net/backend.php```and the file in variable ```postfile```.
 
 ### Upload from base64 string
 
@@ -187,9 +188,9 @@ Server will automatically try to guess the file type (which should work in 90% o
 By default PictShare will store images under randomly generated hashkeys. If you wish to store an image under specific name you can do so by sending the value as request parameter ```filename```.
 
 ## Restriction settings
-In your ```.env``` or ```config.inc.php``` there are two values to be set: ```UPLOAD_CODE``` and ```IMAGE_CHANGE_CODE```
+In your ```.env``` or ```config.inc.php``` there are three values to be set: ```UPLOAD_CODE```, ```IMAGE_CHANGE_CODE``` and ```ADDITIONAL_FILE_TYPES```
 
-Both can be set to strings or multiple strings semi;colon;separated. If there is a semicolon in the string, any of the elements will work
+All the settings can be set to strings or multiple strings semi;colon;separated. If there is a semicolon in the string, any of the elements will work
 
 ### UPLOAD_CODE
 If set, will show users a code field in the upload form. If it doesn't match your setting, files won't be uploaded.
@@ -197,10 +198,15 @@ If set, will show users a code field in the upload form. If it doesn't match you
 If enabled, the Upload API will need the variable ```upload_code``` via GET (eg: ```https://pictshare.net/backend.php?getimage=https://www.0xf.at/css/imgs/logo.png&upload_code=YourUploadCodeHere```)
 
 ### IMAGE_CHANGE_CODE
-If set,the [options](#available-options) will only work if the URL got the code in it. You can provide the code as option ```changecode_YourChangeCode```
+If set, the [options](#available-options) will only work if the URL got the code in it. You can provide the code as option ```changecode_YourChangeCode```
 
 For example: If enabled the image ```https://www.pictshare.net/negative/b260e36b60.jpg``` won't show the negative version but the original.
 If you access the image with the code like this: ```https://www.pictshare.net/changecode_YourChangeCode/b260e36b60.jpg``` it gets cached on the server so the next time someone requests the link without providing the change-code, they'll see the inverted image (because you just created it before by accessing the image with the code)
+
+### ADDITIONAL_FILE_TYPES
+If set, allows the files of set type(s) to be uploaded via REST API.
+
+When requested by the URL provided in response, these files (for additionally defined types) will be offered for download.
 
 ## Security and privacy
 - By hosting your own images you can delete them any time you want
@@ -221,11 +227,11 @@ This is a simple config file that should make PictShare work on nginx
 
 ```
 server {
-        listen 80 default_server;
-        server_name your.awesome.domain.name;
+    listen 80 default_server;
+    server_name your.awesome.domain.name;
 
-        root /var/www/pictshare; # or where ever you put it
-        index index.php;
+    root /var/www/pictshare; # or where ever you put it
+    index index.php;
 
     location / {
         try_files $uri $uri/ /index.php?url=$request_uri; # instead of htaccess mod_rewrite
@@ -243,7 +249,6 @@ server {
        deny all;
        return 404;
     }
-
 }
 ```
 
@@ -256,20 +261,20 @@ This is a simple vHost config that should make PictShare work on Apache2.
 
 ```
 <VirtualHost *:80 >
-	ServerAdmin webmaster@sub.domain.tld
-	ServerName sub.domain.tld
-	ServerAlias sub.domain.tld
-	DocumentRoot /var/www/html
+    ServerAdmin webmaster@sub.domain.tld
+    ServerName sub.domain.tld
+    ServerAlias sub.domain.tld
+    DocumentRoot /var/www/html
 
-	<Directory /var/www/html/>
-		Options Indexes FollowSymLinks MultiViews
-		AllowOverride All
-		Order allow,deny
-		Allow from All
-	</Directory>
-	ErrorLog ${APACHE_LOG_DIR}/error.log
-	LogLevel warn
-	CustomLog ${APACHE_LOG_DIR}/access.log combined
+    <Directory /var/www/html/>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Order allow,deny
+        Allow from All
+    </Directory>
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    LogLevel warn
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 ```
 

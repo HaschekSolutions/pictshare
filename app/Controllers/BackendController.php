@@ -40,10 +40,11 @@ class BackendController
 
         if ($reqParams['getimage']) {
             $url = $reqParams['getimage'];
-            echo json_encode($this->pictshareModel->uploadImageFromURL($url));
+            echo json_encode($this->pictshareModel->uploadFileFromURL($url));
         } elseif ($_FILES['postimage']) {
-            $image = $_FILES['postimage'];
-            echo json_encode($this->pictshareModel->processSingleUpload($image, 'postimage'));
+            echo json_encode($this->pictshareModel->processSingleUpload('postimage'));
+        } elseif ($_FILES['postfile']) {
+            echo json_encode($this->pictshareModel->processSingleUpload('postfile'));
         } elseif ($reqParams['base64']) {
             $data   = $reqParams['base64'];
             $format = $reqParams['format'];

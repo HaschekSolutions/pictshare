@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\ConfigInterface;
 use App\Support\File;
 use App\Support\HTML;
+use App\Support\MIMEType;
 use App\Support\String;
 use App\Support\Translator;
 use App\Support\Utils;
@@ -59,7 +60,7 @@ class PictshareModel
                 $hash   = $params[1];
                 $path   = $params[2];
                 $source = $path . $hash;
-                if (!File::isImage($hash)) {
+                if (!File::isFile($hash)) {
                     exit('[x] Hash not found' . "\n");
                 }
                 echo "[i] Converting $hash to mp4\n";
@@ -149,12 +150,11 @@ class PictshareModel
     }
 
     /**
-     * @param $file
      * @param $name
      *
      * @return array
      */
-    public function processSingleUpload($file, $name)
+    public function processSingleUpload($name)
     {
         if ($this->config->get('app.upload_code', false) && !$this->uploadCodeExists($_REQUEST['upload_code'])) {
             exit(json_encode(['status' => 'ERR', 'reason' => Translator::translate(21)]));
@@ -164,13 +164,13 @@ class PictshareModel
         $o  = [];
 
         if ($_FILES[$name]["error"] == UPLOAD_ERR_OK) {
-            $type = $this->getTypeOfFile($_FILES[$name]["tmp_name"]);
+            $type = $this->getTypeOfFile($_FILES[$name]["tmp_name"], $_FILES[$name]['name'], $_FILES[$name]['type']);
             $type = $this->isTypeAllowed($type);
             if (!$type) {
                 exit(json_encode(['status' => 'ERR', 'reason' => 'Unsupported type']));
             }
 
-            $data = $this->uploadImageFromURL($_FILES[$name]["tmp_name"], $type);
+            $data = $this->uploadFileFromURL($_FILES[$name]["tmp_name"], $type);
             if ($data['status'] == 'OK') {
                 $hash   = $data['hash'];
                 $domain = domain_path();
@@ -218,14 +218,47 @@ class PictshareModel
     }
 
     /**
-     * @param string $url
+     * @param string      $url
+     * @param string|null $filename
+     * @param string|null $mimeType
      *
      * @return bool|string
      */
-    public function getTypeOfFile($url)
+    public function getTypeOfFile($url, $filename = null, $mimeType = null)
     {
         $fi   = new \finfo(FILEINFO_MIME);
         $type = $fi->buffer(file_get_contents($url, false, null, -1, 1024));
+
+        // some files (like .docx) are actually zip files, but we still want to
+        // save them with proper extension so we need to calculate it somehow
+        if (strpos($type, 'application/zip') !== false) {
+            $typeTmp = null;
+
+            // we first try to extract the "type" from the MIME type (if available)
+            if ($mimeType !== null) {
+                $typeFromMime = MIMEType::getExtensionFromMimeType($mimeType);
+                if ($typeFromMime !== null) {
+                    $typeTmp = $typeFromMime;
+                }
+            }
+
+            // if MIME type is no available or didn't work, we try with filenames
+            if ($typeTmp === null) {
+                if ($filename !== null) {
+                    $extension = File::getExtension($filename);
+                } else {
+                    $extension = File::getExtension($url);
+                }
+                if (MIMEType::isValidExtension($extension)) {
+                    $typeTmp = substr($extension, 1);
+                }
+            }
+
+            if ($typeTmp !== null) {
+                // this is so it properly works with splitting below
+                $type = 'type/' . $typeTmp;
+            }
+        }
 
         // to catch a strange error for PHP7 and Alpine Linux
         // if the file seems to be a stream, use unix file command
@@ -327,6 +360,16 @@ class PictshareModel
                 return 'mp4';
 
             default:
+                $additionalTypes = $this->config->get('app.additional_file_types');
+                if ($additionalTypes !== false) {
+                    $additionalTypes = explode(',', $additionalTypes);
+
+                    foreach ($additionalTypes as $additionalType) {
+                        if ($type === $additionalType) {
+                            return $type;
+                        }
+                    }
+                }
                 return false;
         }
     }
@@ -337,7 +380,7 @@ class PictshareModel
      *
      * @return array
      */
-    public function uploadImageFromURL($url, $type = null)
+    public function uploadFileFromURL($url, $type = null)
     {
         if ($type === null) {
             $type = $this->getTypeOfFile($url);
@@ -491,7 +534,7 @@ class PictshareModel
 
         foreach ($_FILES["pic"]["error"] as $key => $error) {
             if ($error == UPLOAD_ERR_OK) {
-                $data = $this->uploadImageFromURL($_FILES["pic"]["tmp_name"][$key]);
+                $data = $this->uploadFileFromURL($_FILES["pic"]["tmp_name"][$key]);
 
                 if ($data['status'] == 'OK') {
                     if ($data['deletecode']) {
@@ -549,7 +592,7 @@ class PictshareModel
         $file    = root_path('tmp/' . $hash);
         $this->base64ToImage($data, $file, $type);
 
-        return $this->uploadImageFromURL($file, $type);
+        return $this->uploadFileFromURL($file, $type);
     }
 
     /**
@@ -810,7 +853,7 @@ class PictshareModel
 
             $masterDeleteCode = $this->config->get('app.master_delete_code');
 
-            if (File::isImage($orig)) {
+            if (File::isFile($orig)) {
                 // if there are more than one hashes in url
                 // make an album from them
                 if ($data['hash']) {

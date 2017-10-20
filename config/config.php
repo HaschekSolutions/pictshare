@@ -75,6 +75,10 @@ return [
         // Shall errors be displayed to the user?
         // For dev environments: true, in production: false
         'show_errors' => env('SHOW_ERRORS', false),
+
+        // List of additionally supported file types (eg. pdf, docx, xls, etc.)
+        // defined as comma separated value string
+        'additional_file_types' => env('ADDITIONAL_FILE_TYPES', false)
     ],
 
     'session' => [

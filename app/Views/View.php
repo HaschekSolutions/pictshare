@@ -4,6 +4,7 @@ namespace App\Views;
 
 use App\Models\PictshareModel;
 use App\Support\ConfigInterface;
+use App\Support\MIMEType;
 use App\Support\Translator;
 use App\Transformers\Image as ImageTransformer;
 use Mustache_Engine;
@@ -124,7 +125,7 @@ class View
      *
      * @return void
      */
-    public function renderImage($data)
+    public function renderFile($data)
     {
         $hash = isset($data['hash']) ? $data['hash'] : '';
 
@@ -135,12 +136,12 @@ class View
         }
 
         $base_path = root_path('upload/' . $hash . '/');
-        $path      = $base_path . $hash;
-        $type      = $this->pictshareModel->isTypeAllowed($this->pictshareModel->getTypeOfFile($path));
+        $full_path = $base_path . $hash;
+        $type      = $this->pictshareModel->isTypeAllowed($this->pictshareModel->getTypeOfFile($full_path));
         $cached    = false;
 
-        //update last_rendered of this hash so we can later
-        //sort out old, unused images easier
+        // update last_rendered of this hash so we can later
+        // sort out old, unused images easier
         @file_put_contents($base_path . 'last_rendered.txt', time());
 
         $cachename        = $this->pictshareModel->getCacheName($data);
@@ -148,17 +149,17 @@ class View
         $maxResizedImages = $this->config->get('app.max_resized_images', 20);
 
         if (file_exists($cachepath)) {
-            $path   = $cachepath;
-            $cached = true;
+            $full_path = $cachepath;
+            $cached    = true;
         } elseif ($maxResizedImages > -1 && $this->pictshareModel->countResizedImages($hash) > $maxResizedImages) {
             // if the number of max resized images is reached, just show the real one
-            $path = root_path('upload/' . $hash . '/' . $hash);
+            $full_path = root_path('upload/' . $hash . '/' . $hash);
         }
 
         switch ($type) {
             case 'jpg':
                 header("Content-type: image/jpeg");
-                $im = imagecreatefromjpeg($path);
+                $im = imagecreatefromjpeg($full_path);
                 if (!$cached) {
                     if ($this->pictshareModel->changeCodeExists($changecode)) {
                         $this->imageTransformer->transform($im, $data);
@@ -174,7 +175,7 @@ class View
 
             case 'png':
                 header("Content-type: image/png");
-                $im = imagecreatefrompng($path);
+                $im = imagecreatefrompng($full_path);
                 if (!$cached) {
                     if ($this->pictshareModel->changeCodeExists($changecode)) {
                         $this->imageTransformer->transform($im, $data);
@@ -192,7 +193,7 @@ class View
 
             case 'gif':
                 if ($data['mp4'] || $data['webm'] || $data['ogg']) { //user wants mp4 or webm or ogg
-                    $gifpath  = $path;
+                    $gifpath  = $full_path;
                     $mp4path  = $base_path . 'mp4_1.' . $hash; //workaround.. find a better solution!
                     $webmpath = $base_path . 'webm_1.' . $hash;
                     $oggpath  = $base_path . 'ogg_1.' . $hash;
@@ -238,7 +239,7 @@ class View
                     if (file_exists($cachepath)) {
                         readfile($cachepath);
                     } else {
-                        readfile($path);
+                        readfile($full_path);
                     }
                 }
 
@@ -247,7 +248,7 @@ class View
             case 'mp4':
                 if (!$cached && !$data['preview']) {
                     $this->imageTransformer->resizeFFMPEG($data, $cachepath, 'mp4');
-                    $path = $cachepath;
+                    $full_path = $cachepath;
                 }
 
                 if (file_exists($cachepath) &&
@@ -267,13 +268,26 @@ class View
                     $this->serveMP4($cachepath, $hash, 'video/mp4');
                 } elseif ($data['preview']) {
                     if (!file_exists($cachepath)) {
-                        $this->pictshareModel->saveFirstFrameOfMP4($path, $cachepath);
+                        $this->pictshareModel->saveFirstFrameOfMP4($full_path, $cachepath);
                     }
                     header("Content-type: image/jpeg");
                     readfile($cachepath);
                 } else {
-                    $this->renderMP4($path, $data);
+                    $this->renderMP4($full_path, $data);
                 }
+                break;
+
+            default:
+                $fileMIMEType = MIMEType::getMimeTypeFromExtension($type);
+
+                header('Content-Description: File Transfer');
+                header("Content-Type: " . $fileMIMEType);
+                header('Content-Disposition: attachment; filename=' . $hash);
+                header('Expires: 0');
+                header('Cache-Control: must-revalidate');
+                header('Pragma: public');
+                header('Content-Length: ' . filesize($full_path));
+                readfile($full_path);
                 break;
         }
 

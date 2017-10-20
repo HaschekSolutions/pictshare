@@ -73,7 +73,7 @@ class IndexController
         } elseif (isset($data['album']) && $data['album']) {
             $this->view->renderAlbum($data);
         } else {
-            $this->view->renderImage($data);
+            $this->view->renderFile($data);
         }
     }
 }

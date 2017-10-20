@@ -15,7 +15,7 @@ class File
      *
      * @return bool
      */
-    public static function isImage($hash)
+    public static function isFile($hash)
     {
         if (!$hash) {
             return false;
@@ -111,7 +111,7 @@ class File
             $a    = explode('_', $val);
             $size = $a[0];
             $hash = $a[1];
-            if (! static::isSize($size) || ! static::isImage($hash)) {
+            if (! static::isSize($size) || ! static::isFile($hash)) {
                 return false;
             }
 
@@ -145,5 +145,29 @@ class File
                 return $hash;
             }
         }
+    }
+
+    /**
+     * @param $hash
+     *
+     * @return string
+     */
+    public static function getType($hash)
+    {
+        if ($hash && static::hashExists($hash)) {
+            return mime_content_type($hash);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $filename
+     *
+     * @return bool|string
+     */
+    public static function getExtension($filename)
+    {
+        return substr($filename, strrpos($filename, '.'));
     }
 }
