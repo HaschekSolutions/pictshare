@@ -3,10 +3,10 @@
 namespace App\Support;
 
 /**
- * Class String
+ * Class Str
  * @package App\Support
  */
-class String
+class Str
 {
     /**
      * @param int    $length
@@ -50,5 +50,19 @@ class String
             return false;
         }
         return substr_compare($haystack, $needle, $strlen - $testlen, $testlen) === 0;
+    }
+
+    /**
+     * @param string $string
+     *
+     * @return mixed
+     */
+    public static function sanitize($string)
+    {
+        /*
+         * Characters that will pass:
+         * a-z A-Z 0-9 . _ -
+         */
+        return preg_replace("/[^a-zA-Z0-9._\-]+/", "", $string);
     }
 }

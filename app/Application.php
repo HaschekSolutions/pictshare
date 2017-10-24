@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Support\ConfigInterface;
+use App\Config\ConfigInterface;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerInterface;
 

@@ -2,12 +2,11 @@
 
 namespace App\Providers;
 
+use App\Config\ConfigInterface;
 use App\Controllers\BackendController;
 use App\Controllers\CliController;
 use App\Controllers\IndexController;
 use App\Models\PictshareModel;
-use App\Support\ConfigInterface;
-use App\Support\HTML;
 use App\Transformers\Image;
 use App\Views\View;
 use League\Container\ServiceProvider\AbstractServiceProvider;
@@ -36,7 +35,6 @@ class ServiceProvider extends AbstractServiceProvider
         PictshareModel::class,
         View::class,
         Image::class,
-        HTML::class,
         Mustache_Engine::class,
     ];
 
@@ -54,7 +52,7 @@ class ServiceProvider extends AbstractServiceProvider
              * ----------------------
              *
              */
-            $config = new \App\Support\Config(require_once __DIR__ . '/../../config/config.php');
+            $config = new \App\Config\Config(require_once __DIR__ . '/../../config/config.php');
 
             // this is support for "old" configuration through 'config.inc.php' file
             if (file_exists(__DIR__.'/../../inc/config.inc.php')) {
@@ -106,7 +104,7 @@ class ServiceProvider extends AbstractServiceProvider
     {
         $this->getContainer()
             ->share(PictshareModel::class)
-            ->withArguments([ConfigInterface::class, HTML::class, Image::class]);
+            ->withArguments([ConfigInterface::class, Image::class]);
     }
 
     /**
@@ -132,6 +130,6 @@ class ServiceProvider extends AbstractServiceProvider
      */
     protected function registerHelpers()
     {
-        $this->getContainer()->share(HTML::class);
+        ;
     }
 }

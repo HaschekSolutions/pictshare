@@ -2,8 +2,8 @@
 
 namespace App\Views;
 
+use App\Config\ConfigInterface;
 use App\Models\PictshareModel;
-use App\Support\ConfigInterface;
 use App\Support\MIMEType;
 use App\Support\Translator;
 use App\Transformers\Image as ImageTransformer;

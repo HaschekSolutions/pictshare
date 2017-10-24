@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use App\Support\ConfigInterface;
+use App\Config\ConfigInterface;
 use App\Support\File;
-use App\Support\HTML;
 use App\Support\MIMEType;
-use App\Support\String;
+use App\Support\Str;
 use App\Support\Translator;
 use App\Support\Utils;
 use App\Transformers\Image as ImageTransformer;
@@ -25,11 +24,6 @@ class PictshareModel
     protected $config;
 
     /**
-     * @var HTML
-     */
-    protected $html;
-
-    /**
      * @var ImageTransformer
      */
     protected $imageTransformer;
@@ -38,13 +32,11 @@ class PictshareModel
      * Model constructor.
      *
      * @param ConfigInterface  $config
-     * @param HTML             $html
      * @param ImageTransformer $imageTransformer
      */
-    public function __construct(ConfigInterface $config, HTML $html, ImageTransformer $imageTransformer)
+    public function __construct(ConfigInterface $config, ImageTransformer $imageTransformer)
     {
         $this->config           = $config;
-        $this->html             = $html;
         $this->imageTransformer = $imageTransformer;
     }
 
@@ -263,7 +255,7 @@ class PictshareModel
         // to catch a strange error for PHP7 and Alpine Linux
         // if the file seems to be a stream, use unix file command
         if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' &&
-            String::startsWith($type, 'application/octet-stream')
+            Str::startsWith($type, 'application/octet-stream')
         ) {
             $content_type = exec("file -bi " . escapeshellarg($url));
             if ($content_type && $content_type != $type && strpos($content_type, '/') !== false &&
@@ -502,7 +494,7 @@ class PictshareModel
     public function generateDeleteCodeForImage($hash)
     {
         while (1) {
-            $code = String::getRandomString(32);
+            $code = Str::getRandomString(32);
             $file = root_path('upload/deletecodes/' . $code);
             if (file_exists($file)) {
                 continue;
@@ -819,7 +811,7 @@ class PictshareModel
                 'hash'      => $hash,
                 'cachename' => $file,
                 'size'      => $byte,
-                'humansize' => $this->html->renderSize($byte),
+                'humansize' => File::renderSize($byte),
                 'width'     => $width,
                 'height'    => $height,
                 'type'      => $type
@@ -840,7 +832,7 @@ class PictshareModel
         $data = [];
 
         foreach ($url as $el) {
-            $el   = $this->html->sanatizeString($el);
+            $el   = Str::sanitize($el);
             $orig = $el;
             $el   = strtolower($el);
             if (!$el) {
