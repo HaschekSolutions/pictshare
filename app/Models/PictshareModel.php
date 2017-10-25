@@ -110,7 +110,7 @@ class PictshareModel
      */
     public function countResizedImages($hash)
     {
-        $fi = new \FilesystemIterator(root_path('upload/' . $hash . '/'), \FilesystemIterator::SKIP_DOTS);
+        $fi = new \FilesystemIterator(File::uploadDir($hash . '/'), \FilesystemIterator::SKIP_DOTS);
         return iterator_count($fi);
     }
 
@@ -379,7 +379,6 @@ class PictshareModel
             $type = $this->isTypeAllowed($type);
         }
 
-        $rootPath     = root_path();
         $relativePath = relative_path();
         $domain       = domain_path();
 
@@ -392,7 +391,7 @@ class PictshareModel
         $dup_id = $this->isDuplicate($url);
         if ($dup_id) {
             $hash = $dup_id;
-            $url  = $rootPath . '/upload/' . $hash . '/' . $hash;
+            $url  = File::uploadDir($hash . '/' . $hash);
         } else {
             if ($filename !== null) {
                 $hash = $filename;
@@ -412,8 +411,8 @@ class PictshareModel
             ];
         }
 
-        mkdir($rootPath . '/upload/' . $hash);
-        $file = $rootPath . '/upload/' . $hash . '/' . $hash;
+        mkdir(File::uploadDir($hash));
+        $file = File::uploadDir($hash . '/' . $hash);
 
         file_put_contents($file, file_get_contents($url));
 
@@ -428,7 +427,7 @@ class PictshareModel
         }
 
         if ($this->config->get('log_uploader', true)) {
-            $fh = fopen($rootPath . '/upload/uploads.txt', 'a');
+            $fh = fopen(File::uploadDir('uploads.txt'), 'a');
             fwrite($fh, time() . ';' . $url . ';' . $hash . ';' . Utils::getUserIP() . "\n");
             fclose($fh);
         }
@@ -450,7 +449,7 @@ class PictshareModel
      */
     public function isDuplicate($file)
     {
-        $sha_file = root_path('upload/hashes.csv');
+        $sha_file = File::uploadDir('hashes.csv');
         $sha      = sha1_file($file);
         if (!file_exists($sha_file)) {
             return false;
@@ -479,7 +478,7 @@ class PictshareModel
      */
     public function saveSHAOfFile($filepath, $hash)
     {
-        $sha_file = root_path('upload/hashes.csv');
+        $sha_file = File::uploadDir('hashes.csv');
         $sha      = sha1_file($filepath);
         $fp       = fopen($sha_file, 'a');
         fwrite($fp, "$sha;$hash\n");
@@ -783,12 +782,11 @@ class PictshareModel
             return ['status' => 'ERR', 'Reason' => 'Image not found'];
         }
 
-        $rootPath = root_path();
-        $file     = $this->getCacheName($data);
+        $file = $this->getCacheName($data);
 
-        $path = $rootPath . '/upload/' . $hash . '/' . $file;
+        $path = File::uploadDir($hash . '/' . $file);
         if (!file_exists($path)) {
-            $path = $rootPath . '/upload/' . $hash . '/' . $hash;
+            $path = File::uploadDir($hash . '/' . $hash);
         }
         if (file_exists($path)) {
             $type = $this->getType($path);
@@ -983,11 +981,9 @@ class PictshareModel
      */
     public function deleteImage($hash)
     {
-        $rootPath = root_path();
-
         //delete hash from hashes.csv
-        $tmpname = $rootPath . '/upload/delete_temp.csv';
-        $csv     = $rootPath . '/upload/hashes.csv';
+        $tmpname = File::uploadDir('delete_temp.csv');
+        $csv     = File::uploadDir('hashes.csv');
         $fptemp  = fopen($tmpname, "w");
         if (($handle = fopen($csv, "r")) !== false) {
             while (($line = fgets($handle)) !== false) {
@@ -1004,7 +1000,7 @@ class PictshareModel
         //unlink($tmpname);
 
         //delete actual image
-        $base_path = $rootPath . '/upload/' . $hash . '/';
+        $base_path = File::uploadDir($hash . '/');
         if (!is_dir($base_path)) {
             return false;
         }
@@ -1029,7 +1025,7 @@ class PictshareModel
      */
     public function getTypeOfHash($hash)
     {
-        $base_path = root_path('upload/' . $hash . '/');
+        $base_path = File::uploadDir($hash . '/');
         $path      = $base_path . $hash;
         $type      = $this->isTypeAllowed($this->getTypeOfFile($path));
 

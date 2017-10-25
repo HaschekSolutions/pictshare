@@ -128,7 +128,7 @@ class File
      */
     public static function hashExists($hash)
     {
-        return is_dir(root_path('upload/' . $hash));
+        return is_dir(static::uploadDir($hash));
     }
 
     /**
@@ -197,5 +197,37 @@ class File
         }
 
         return $result;
+    }
+
+    /**
+     * Get the path to the upload directory.
+     *
+     * @param string $path
+     *
+     * @return bool|mixed|string
+     */
+    public static function uploadDir($path = '')
+    {
+        // if upload directory is configured then we use it
+        if (! ($uploadDir = config('app.upload_dir', false))) {
+            // otherwise we fallback to using the default one (inside project)
+            $uploadDir = root_path('upload/');
+        }
+
+        // if additional path is given as argument we add it to the base directory
+        if ($path !== '') {
+            // we want to strip directory separator from the start of the additional path string
+            if (Str::startsWith($path, '/') || Str::startsWith($path, DIRECTORY_SEPARATOR)) {
+                $path = substr($path, 1);
+            }
+            // and we want to strip directory separator from the end of the base upload directory
+            if (Str::endsWith($uploadDir, '/') || Str::endsWith($uploadDir, DIRECTORY_SEPARATOR)) {
+                $uploadDir = substr($uploadDir, 0, -1);
+            }
+            // so we can concatenate those values with a single directory separator
+            $uploadDir .= '/'.$path;
+        }
+
+        return $uploadDir;
     }
 }

@@ -78,7 +78,12 @@ return [
 
         // List of additionally supported file types (eg. pdf, docx, xls, etc.)
         // defined as comma separated value string
-        'additional_file_types' => env('ADDITIONAL_FILE_TYPES', false)
+        'additional_file_types' => env('ADDITIONAL_FILE_TYPES', false),
+
+        // Allows defining of directory for uploads as absolute path
+        // to a directory other then the one inside the project, eg.
+        // '/tmp/uploads/'
+        'upload_dir' => env('UPLOAD_DIR', false)
     ],
 
     'session' => [

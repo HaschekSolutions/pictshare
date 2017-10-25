@@ -176,7 +176,7 @@ class Image
     {
         $rootPath = root_path();
 
-        $file = $rootPath . '/upload/' . $data['hash'] . '/' . $data['hash'];
+        $file = File::uploadDir($data['hash'] . '/' . $data['hash']);
         $file = escapeshellarg($file);
         $tmp  = '/dev/null';
         $bin  = escapeshellcmd($rootPath . '/bin/ffmpeg');

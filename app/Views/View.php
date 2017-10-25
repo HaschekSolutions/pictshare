@@ -4,6 +4,7 @@ namespace App\Views;
 
 use App\Config\ConfigInterface;
 use App\Models\PictshareModel;
+use App\Support\File;
 use App\Support\MIMEType;
 use App\Support\Translator;
 use App\Transformers\Image as ImageTransformer;
@@ -135,7 +136,7 @@ class View
             unset($data['changecode']);
         }
 
-        $base_path = root_path('upload/' . $hash . '/');
+        $base_path = File::uploadDir($hash . '/');
         $full_path = $base_path . $hash;
         $type      = $this->pictshareModel->isTypeAllowed($this->pictshareModel->getTypeOfFile($full_path));
         $cached    = false;
@@ -153,7 +154,7 @@ class View
             $cached    = true;
         } elseif ($maxResizedImages > -1 && $this->pictshareModel->countResizedImages($hash) > $maxResizedImages) {
             // if the number of max resized images is reached, just show the real one
-            $full_path = root_path('upload/' . $hash . '/' . $hash);
+            $full_path = File::uploadDir($hash . '/' . $hash);
         }
 
         switch ($type) {
@@ -253,15 +254,15 @@ class View
 
                 if (file_exists($cachepath) &&
                     filesize($cachepath) == 0) { //if there was an error and the file is 0 bytes, use the original
-                    $cachepath = root_path('upload/' . $hash . '/' . $hash);
+                    $cachepath = File::uploadDir($hash . '/' . $hash);
                 }
 
                 if ($data['webm']) {
-                    $this->pictshareModel->saveAsWebm(root_path('upload/' . $hash . '/' . $hash), $cachepath);
+                    $this->pictshareModel->saveAsWebm(File::uploadDir($hash . '/' . $hash), $cachepath);
                 }
 
                 if ($data['ogg']) {
-                    $this->pictshareModel->saveAsOGG(root_path('upload/' . $hash . '/' . $hash), $cachepath);
+                    $this->pictshareModel->saveAsOGG(File::uploadDir($hash . '/' . $hash), $cachepath);
                 }
 
                 if ($data['raw']) {
