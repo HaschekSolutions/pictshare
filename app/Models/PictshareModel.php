@@ -104,13 +104,13 @@ class PictshareModel
     }
 
     /**
-     * @param string $hash
+     * @param string $hashdir
      *
      * @return int
      */
-    public function countResizedImages($hash)
+    public function countResizedImages($hashdir)
     {
-        $fi = new \FilesystemIterator(root_path('upload/' . $hash . '/'), \FilesystemIterator::SKIP_DOTS);
+        $fi = new \FilesystemIterator(File::uploadDir($hashdir . '/'), \FilesystemIterator::SKIP_DOTS);
         return iterator_count($fi);
     }
 
@@ -164,14 +164,13 @@ class PictshareModel
 
             $data = $this->uploadFileFromURL($_FILES[$name]["tmp_name"], $type);
             if ($data['status'] == 'OK') {
-                $hash   = $data['hash'];
-                $domain = domain_path();
+                $hash = $data['hash'];
                 $o    = [
                     'status' => 'OK',
                     'type'   => $type,
                     'hash'   => $hash,
-                    'url'    => $domain . '/' . $hash,
-                    'domain' => $domain
+                    'url'    => domain_path($hash),
+                    'domain' => domain_path()
                 ];
                 if ($data['deletecode']) {
                     $o['deletecode'] = $data['deletecode'];
@@ -291,11 +290,9 @@ class PictshareModel
      */
     public function isProperMP4($filename)
     {
-        $rootPath = root_path();
-
         $file = escapeshellarg($filename);
-        $tmp  = $rootPath . '/tmp/' . md5(time() + rand(1, 10000)) . '.' . rand(1, 10000) . '.log';
-        $bin  = escapeshellcmd($rootPath . '/bin/ffmpeg');
+        $tmp  = root_path('tmp/' . md5(time() + rand(1, 10000)) . '.' . rand(1, 10000) . '.log');
+        $bin  = escapeshellcmd(root_path('/bin/ffmpeg'));
 
         $cmd = "$bin -i $file > $tmp 2>> $tmp";
 
@@ -379,45 +376,53 @@ class PictshareModel
             $type = $this->isTypeAllowed($type);
         }
 
-        $rootPath     = root_path();
-        $relativePath = relative_path();
-        $domain       = domain_path();
-
         if (!$type) {
             return ['status' => 'ERR', 'reason' => 'wrong filetype'];
         }
 
-        $filename = isset($_REQUEST['filename']) ? $_REQUEST['filename'] : null;
+        $filename = null;
+        $subdir   = '';
 
-        $dup_id = $this->isDuplicate($url);
-        if ($dup_id) {
-            $hash = $dup_id;
-            $url  = $rootPath . '/upload/' . $hash . '/' . $hash;
+        if (config('app.filename_enable') && isset($_REQUEST['filename'])) {
+            $filename = trim($_REQUEST['filename']);
+        }
+
+        if (config('app.subdir_enable') && isset($_REQUEST['subdir'])) {
+            $subdir = Str::stripSlash($_REQUEST['subdir'], Str::BOTH_SLASH);
+        }
+
+        $dupl = $this->isDuplicate($url);
+        if ($dupl) {
+            $hash    = $dupl[0];
+            $subdir  = $dupl[1];
+            $hashdir = $subdir . '/' . $hash;
+            $url      = File::uploadDir($hashdir . '/' . $hash);
         } else {
             if ($filename !== null) {
                 $hash = $filename;
             } else {
                 $hash = File::getNewHash($type);
             }
-            $this->saveSHAOfFile($url, $hash);
+            $hashdir = $subdir . '/' . $hash;
+            $this->saveSHAOfFile($url, $hash, $subdir);
         }
 
-        if ($dup_id) {
+        if ($dupl) {
             return [
                 'status' => 'OK',
                 'type'   => $type,
                 'hash'   => $hash,
-                'url'    => $domain . $relativePath . $hash,
-                'domain' => $domain
+                'url'    => domain_path(relative_path($hash)),
+                'domain' => domain_path()
             ];
         }
 
-        mkdir($rootPath . '/upload/' . $hash);
-        $file = $rootPath . '/upload/' . $hash . '/' . $hash;
+        mkdir(File::uploadDir($hashdir), 0777, true);
+        $file = File::uploadDir($hashdir . '/' . $hash);
 
         file_put_contents($file, file_get_contents($url));
 
-        //remove all exif data from jpeg
+        // remove all exif data from jpeg
         if ($type == 'jpg') {
             $res = \imagecreatefromjpeg($file);
             \imagejpeg(
@@ -428,7 +433,7 @@ class PictshareModel
         }
 
         if ($this->config->get('log_uploader', true)) {
-            $fh = fopen($rootPath . '/upload/uploads.txt', 'a');
+            $fh = fopen(File::uploadDir('uploads.txt'), 'a');
             fwrite($fh, time() . ';' . $url . ';' . $hash . ';' . Utils::getUserIP() . "\n");
             fclose($fh);
         }
@@ -437,8 +442,8 @@ class PictshareModel
             'status'     => 'OK',
             'type'       => $type,
             'hash'       => $hash,
-            'url'        => $domain . $relativePath . $hash,
-            'domain'     => $domain,
+            'url'        => domain_path(relative_path($hash)),
+            'domain'     => domain_path(),
             'deletecode' => $this->generateDeleteCodeForImage($hash)
         ];
     }
@@ -446,15 +451,17 @@ class PictshareModel
     /**
      * @param string $file
      *
-     * @return bool|string
+     * @return bool|array[hash,subdir]
      */
     public function isDuplicate($file)
     {
-        $sha_file = root_path('upload/hashes.csv');
-        $sha      = sha1_file($file);
+        $sha_file = File::uploadDir('hashes.csv');
         if (!file_exists($sha_file)) {
             return false;
         }
+
+        $sha = sha1_file($file);
+
         $fp = fopen($sha_file, 'r');
         while (($line = fgets($fp)) !== false) {
             $line = trim($line);
@@ -464,7 +471,8 @@ class PictshareModel
             $sha_upload = substr($line, 0, 40);
             if ($sha_upload == $sha) { //when it's a duplicate return the hash of the original file
                 fclose($fp);
-                return substr($line, 41);
+                $sstr = substr($line, 41);
+                return explode(';', $sstr);
             }
         }
 
@@ -476,13 +484,14 @@ class PictshareModel
     /**
      * @param string $filepath
      * @param string $hash
+     * @param string $subdir
      */
-    public function saveSHAOfFile($filepath, $hash)
+    public function saveSHAOfFile($filepath, $hash, $subdir = '')
     {
-        $sha_file = root_path('upload/hashes.csv');
+        $sha_file = File::uploadDir('hashes.csv');
         $sha      = sha1_file($filepath);
         $fp       = fopen($sha_file, 'a');
-        fwrite($fp, "$sha;$hash\n");
+        fwrite($fp, "${sha};${hash};${subdir}\n");
         fclose($fp);
     }
 
@@ -521,28 +530,26 @@ class PictshareModel
         $o  = '';
         $i  = 0;
 
-        $domain       = domain_path();
-        $relativePath = relative_path();
-
         foreach ($_FILES["pic"]["error"] as $key => $error) {
             if ($error == UPLOAD_ERR_OK) {
                 $data = $this->uploadFileFromURL($_FILES["pic"]["tmp_name"][$key]);
 
                 if ($data['status'] == 'OK') {
                     if ($data['deletecode']) {
-                        $deletecode = '<br/><a target="_blank" href="' . $domain . $relativePath . $data['hash'] .
-                                      '/delete_' . $data['deletecode'] . '">Delete image</a>';
+                        $deletecode = '<br/><a target="_blank" href="' . domain_path(relative_path($data['hash'] .
+                                      '/delete_' . $data['deletecode'])) . '">Delete image</a>';
                     } else {
                         $deletecode = '';
                     }
                     if ($data['type'] == 'mp4') {
-                        $o .= '<div><h2>' . Translator::translate(4) . ' ' . ++$i . '</h2><a target="_blank" href="' .
-                              $domain . $relativePath . $data['hash'] . '">' . $data['hash'] . '</a>' . $deletecode .
-                              '</div>';
+                        $o .= '<div><h2>' . Translator::translate(4) . ' ' . ++$i .
+                              '</h2><a target="_blank" href="' . domain_path(relative_path($data['hash'])) . '">' .
+                              $data['hash'] . '</a>' . $deletecode . '</div>';
                     } else {
-                        $o .= '<div><h2>' . Translator::translate(4) . ' ' . ++$i . '</h2><a target="_blank" href="' .
-                              $domain . $relativePath . $data['hash'] . '"><img src="' . $domain . $relativePath .
-                              '300/' . $data['hash'] . '" /></a>' . $deletecode . '</div>';
+                        $o .= '<div><h2>' . Translator::translate(4) . ' ' . ++$i .
+                              '</h2><a target="_blank" href="' . domain_path(relative_path($data['hash'])) .
+                              '"><img src="' . domain_path(relative_path('300/' . $data['hash'])) . '" />' .
+                              '</a>' . $deletecode . '</div>';
                     }
 
                     $hashes[] = $data['hash'];
@@ -551,7 +558,7 @@ class PictshareModel
         }
 
         if (isset($hashes) && count($hashes) > 1) {
-            $albumlink = $domain . $relativePath . implode('/', $hashes);
+            $albumlink = domain_path(relative_path(implode('/', $hashes)));
             $o         .= '<hr/><h1>Album link</h1><a href="' . $albumlink . '" >' . $albumlink . '</a>';
 
             $iframe = '<iframe frameborder="0" width="100%" height="500" src="' . $albumlink .
@@ -571,7 +578,12 @@ class PictshareModel
      */
     public function uploadImageFromBase64($data, $type = false)
     {
-        $type = $this->base64ToType($data);
+        // if we are not given a type in request, we calculate it from data
+        if (!$type) {
+            $type = $this->base64ToType($data);
+        }
+
+        // if we still don't have the type then we can't do anything
         if (!$type) {
             return [
                 'status' => 'ERR',
@@ -579,8 +591,9 @@ class PictshareModel
                 'type'   => $type
             ];
         }
+
         $hash    = File::getNewHash($type);
-        $picname = $hash;
+        //$picname = $hash;
         $file    = root_path('tmp/' . $hash);
         $this->base64ToImage($data, $file, $type);
 
@@ -708,7 +721,7 @@ class PictshareModel
     public function saveAsWebm($source, $target)
     {
         return false;
-        //$bin    = escapeshellcmd(root_path() . '/bin/ffmpeg');
+        //$bin    = escapeshellcmd(root_path('/bin/ffmpeg'));
         //$source = escapeshellarg($source);
         //$target = escapeshellarg($target);
         //$webm   = "$bin -y -i $source -vcodec libvpx -acodec libvorbis -aq 5 -ac 2 -qmax 25 -f webm $target";
@@ -778,17 +791,19 @@ class PictshareModel
     {
         $url  = rawurldecode($url);
         $data = $this->urlToData($url);
-        $hash = $data['hash'];
-        if (!$hash) {
+        $hash = isset($data['hash']) ? $data['hash'] : false;
+        if (! $hash) {
             return ['status' => 'ERR', 'Reason' => 'Image not found'];
         }
 
-        $rootPath = root_path();
-        $file     = $this->getCacheName($data);
+        $subdir  = $data['subdir'];
+        $hashdir = $subdir . '/' . $hash;
 
-        $path = $rootPath . '/upload/' . $hash . '/' . $file;
+        $file = $this->getCacheName($data);
+
+        $path = File::uploadDir($hashdir . '/' . $file);
         if (!file_exists($path)) {
-            $path = $rootPath . '/upload/' . $hash . '/' . $hash;
+            $path = File::uploadDir($hashdir . '/' . $hash);
         }
         if (file_exists($path)) {
             $type = $this->getType($path);
@@ -846,15 +861,16 @@ class PictshareModel
             $masterDeleteCode = $this->config->get('app.master_delete_code');
 
             if (File::isFile($orig)) {
-                // if there are more than one hashes in url
-                // make an album from them
+                $subdir = File::getSubDirFromHash($orig);
+                // if there are more than one hashes in url make an album from them
                 if ($data['hash']) {
-                    if (!$data['album']) {
+                    if (! isset($data['album'])) {
                         $data['album'][] = $data['hash'];
                     }
                     $data['album'][] = $orig;
                 }
-                $data['hash'] = $orig;
+                $data['hash']   = $orig;
+                $data['subdir'] = $subdir;
             } elseif ($el == 'mp4' || $el == 'raw' || $el == 'preview' || $el == 'webm' || $el == 'ogg') {
                 $data[$el] = 1;
             } elseif (File::isSize($el)) {
@@ -868,8 +884,9 @@ class PictshareModel
             } elseif (File::isFilter($el)) {
                 $data['filter'][] = $el;
             } elseif ($legacy = File::isLegacyThumbnail($el)) { //so old uploads will still work
-                $data['hash'] = $legacy['hash'];
-                $data['size'] = $legacy['size'];
+                $data['hash']   = $legacy['hash'];
+                $data['subdir'] = File::getSubDirFromHash($data['hash']);
+                $data['size']   = $legacy['size'];
             } elseif ($el == 'forcesize') {
                 $data['forcesize'] = true;
             } elseif (strlen($masterDeleteCode) > 10 && $el == 'delete_' . $masterDeleteCode) {
@@ -890,8 +907,9 @@ class PictshareModel
         }
 
         if (isset($data['mp4']) && $data['mp4']) {
-            $hash = $data['hash'];
-            if (!$hash || $this->getTypeOfHash($hash) != 'gif') {
+            $hash   = isset($data['hash']) ? $data['hash'] : false;
+            $subdir = isset($data['subdir']) ? $data['subdir'] : '';
+            if (! $hash || $this->getTypeOfHash($hash, $subdir) != 'gif') {
                 unset($data['mp4']);
             }
         }
@@ -983,17 +1001,17 @@ class PictshareModel
      */
     public function deleteImage($hash)
     {
-        $rootPath = root_path();
-
-        //delete hash from hashes.csv
-        $tmpname = $rootPath . '/upload/delete_temp.csv';
-        $csv     = $rootPath . '/upload/hashes.csv';
+        // delete hash from hashes.csv
+        $tmpname = File::uploadDir('delete_temp.csv');
+        $csv     = File::uploadDir('hashes.csv');
         $fptemp  = fopen($tmpname, "w");
         if (($handle = fopen($csv, "r")) !== false) {
             while (($line = fgets($handle)) !== false) {
                 $data = explode(';', $line);
                 if ($hash != trim($data[1])) {
                     fwrite($fptemp, $line);
+                } else {
+                    $subdir = $data[2];
                 }
             }
         }
@@ -1003,8 +1021,10 @@ class PictshareModel
         rename($tmpname, $csv);
         //unlink($tmpname);
 
-        //delete actual image
-        $base_path = $rootPath . '/upload/' . $hash . '/';
+        $subdir = isset($subdir) ? $subdir . '/' : '';
+
+        // delete actual image
+        $base_path = File::uploadDir($subdir . $hash . '/');
         if (!is_dir($base_path)) {
             return false;
         }
@@ -1024,12 +1044,13 @@ class PictshareModel
 
     /**
      * @param string $hash
+     * @param string $subdir
      *
      * @return bool|string
      */
-    public function getTypeOfHash($hash)
+    public function getTypeOfHash($hash, $subdir)
     {
-        $base_path = root_path('upload/' . $hash . '/');
+        $base_path = File::uploadDir($subdir . '/' . $hash . '/');
         $path      = $base_path . $hash;
         $type      = $this->isTypeAllowed($this->getTypeOfFile($path));
 
@@ -1050,7 +1071,7 @@ class PictshareModel
         //unset($data['preview']);
         $name = false;
         foreach ($data as $key => $val) {
-            if ($key != 'hash') {
+            if ($key != 'hash' && $key != 'subdir') {
                 if (!is_array($val)) {
                     $name[] = $key . '_' . $val;
                 } else {

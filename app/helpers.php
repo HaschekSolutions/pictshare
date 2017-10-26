@@ -25,9 +25,9 @@ if (! function_exists('root_path')) {
         $rootPath = app()->getRootPath();
 
         if ($path !== '') {
-            if (in_array($path[0], ['/', DIRECTORY_SEPARATOR], true)) {
-                $path = substr($path, 1);
-            }
+            // we want to strip directory separator from the start of the additional path string
+            $path = \App\Support\Str::stripSlash($path, \App\Support\Str::LEAD_SLASH);
+            // so we can concatenate those values with a single directory separator
             $rootPath .= '/'.$path;
         }
 
@@ -48,9 +48,9 @@ if (! function_exists('relative_path')) {
         $relativePath = app()->getRelativePath();
 
         if ($path !== '') {
-            if (in_array($path[0], ['/', DIRECTORY_SEPARATOR], true)) {
-                $path = substr($path, 1);
-            }
+            // we want to strip forward slash from the start of the additional path string
+            $path = \App\Support\Str::stripSlash($path, \App\Support\Str::LEAD_SLASH);
+            // so we can concatenate those values with a single forward slash
             $relativePath .= $path;
         }
 
@@ -70,14 +70,13 @@ if (! function_exists('domain_path')) {
     {
         $domainPath = app()->getDomainPath();
 
-        if (substr($domainPath, -1) === '/') {
-            $domainPath = substr($domainPath, 0, -1);
-        }
+        // we want to strip forward slash from the end of the domain path
+        $domainPath = \App\Support\Str::stripSlash($domainPath, \App\Support\Str::TAIL_SLASH);
 
         if ($path !== '') {
-            if (in_array($path[0], ['/', DIRECTORY_SEPARATOR], true)) {
-                $path = substr($path, 1);
-            }
+            // and we want to strip forward slash from the start of the additional path string
+            $path = \App\Support\Str::stripSlash($path, \App\Support\Str::LEAD_SLASH);
+            // so we can concatenate those values with a single forward slash
             $domainPath .= '/'.$path;
         }
 

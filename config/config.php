@@ -78,7 +78,22 @@ return [
 
         // List of additionally supported file types (eg. pdf, docx, xls, etc.)
         // defined as comma separated value string
-        'additional_file_types' => env('ADDITIONAL_FILE_TYPES', false)
+        'additional_file_types' => env('ADDITIONAL_FILE_TYPES', false),
+
+        // Allows defining of directory for uploads as absolute path
+        // to a directory other then the one inside the project, eg.
+        // '/tmp/uploads/'
+        'upload_dir' => env('UPLOAD_DIR', false),
+
+        // If set to true it's possibile to define subdirectories for
+        // files via API (as a request parameter 'subdir').
+        // This option is enabled by default.
+        'subdir_enable' => env('SUBDIR_ENABLE', true),
+
+        // If set to true it's possible to define subdirectories for
+        // files via API (as a request parameter 'filename').
+        // This option is enabled by default.
+        'filename_enable' => env('FILENAME_ENABLE', true)
     ],
 
     'session' => [

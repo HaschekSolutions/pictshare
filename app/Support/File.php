@@ -11,6 +11,11 @@ namespace App\Support;
 class File
 {
     /**
+     * @var array
+     */
+    protected static $subdirs = [];
+
+    /**
      * @param string $hash
      *
      * @return bool
@@ -107,7 +112,7 @@ class File
      */
     public static function isLegacyThumbnail($val)
     {
-        if (strpos($val, '_')) {
+        if (strpos($val, '_') !== false) {
             $a    = explode('_', $val);
             $size = $a[0];
             $hash = $a[1];
@@ -128,7 +133,10 @@ class File
      */
     public static function hashExists($hash)
     {
-        return is_dir(root_path('upload/' . $hash));
+        $subdir = static::getSubDirFromHash($hash);
+        $subdir = $subdir ? $subdir . '/' : '';
+
+        return is_dir(static::uploadDir($subdir . $hash));
     }
 
     /**
@@ -145,6 +153,43 @@ class File
                 return $hash;
             }
         }
+    }
+
+    /**
+     * @param string $hash
+     *
+     * @return bool|string
+     */
+    public static function getSubDirFromHash($hash)
+    {
+        if (isset(static::$subdirs[$hash])) {
+            return static::$subdirs[$hash];
+        }
+
+        $hashes = File::uploadDir('hashes.csv');
+        if (!file_exists($hashes)) {
+            return false;
+        }
+
+        $fp = fopen($hashes, 'r');
+        while (($line = fgets($fp)) !== false) {
+            $line = trim($line);
+            if (!$line) {
+                continue;
+            }
+            $data = explode(';', $line);
+            if ($hash == trim($data[1])) {
+                $subdir = trim($data[2]);
+                break;
+            }
+        }
+
+        fclose($fp);
+
+        $subdir = isset($subdir) ? $subdir : '';
+        static::$subdirs[$hash] = $subdir;
+
+        return $subdir;
     }
 
     /**
@@ -197,5 +242,33 @@ class File
         }
 
         return $result;
+    }
+
+    /**
+     * Get the path to the upload directory.
+     *
+     * @param string $path
+     *
+     * @return bool|mixed|string
+     */
+    public static function uploadDir($path = '')
+    {
+        // if upload directory is configured then we use it
+        if (! ($uploadDir = config('app.upload_dir', false))) {
+            // otherwise we fallback to using the default one (inside project)
+            $uploadDir = root_path('upload/');
+        }
+
+        // if additional path is given as argument we add it to the base directory
+        if ($path !== '') {
+            // we want to strip directory separator from the start of the additional path string
+            $path = Str::stripSlash($path, Str::LEAD_SLASH);
+            // and we want to strip directory separator from the end of the base upload directory
+            $uploadDir = Str::stripSlash($uploadDir, Str::TAIL_SLASH);
+            // so we can concatenate those values with a single directory separator
+            $uploadDir .= '/'.$path;
+        }
+
+        return $uploadDir;
     }
 }

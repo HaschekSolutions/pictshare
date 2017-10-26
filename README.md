@@ -23,9 +23,11 @@ Table of contents
     * [Example:](#example)
   * [Upload via POST](#upload-via-post)
   * [Upload from base64 string](#upload-from-base64-string)
+  * [Defining filenames](#defining-filenames)
 * [Restriction settings](#restriction-settings)
   * [UPLOAD_CODE](#upload_code)
   * [IMAGE_CHANGE_CODE](#image_change_code)
+  * [ADDITIONAL_FILE_TYPES](#additional_file_types)
 * [Security and privacy](#security-and-privacy)
 * [Requirements](#requirements)
 * [Upgrading](#upgrading)
@@ -177,6 +179,8 @@ Server will return JSON of uploaded data like this:
 ```
 You may also want to upload other file types - which is possible if defined in configuration (check [Restriction settings](#restriction-setting)), by sending a POST request to ```https://pictshare.net/backend.php```and the file in variable ```postfile```.
 
+By default, PictShare always stores the file under ```upload/``` directory. If you want to change this for file you are uploading you can specific a request parameter ```subdir``` (eg. subdir=foo/bar) and you file will be stored under that subdirectory (```upload/foo/bar```). In order to use this functionality make sure you have it configured (check [Restriction settings](#restriction-setting)). 
+
 ### Upload from base64 string
 
 Just send a POST request to ```https://pictshare.net/backend.php``` and send your image in base64 as the variable name ```base64```
@@ -185,28 +189,38 @@ Server will automatically try to guess the file type (which should work in 90% o
 
 ### Defining filenames
 
-By default PictShare will store images under randomly generated hashkeys. If you wish to store an image under specific name you can do so by sending the value as request parameter ```filename```.
+By default PictShare will store images under randomly generated hashkeys. If you wish to store an image under specific name you can do so by sending the value as request parameter ```filename```. In order to use this functionality make sure you have it configured (check [Restriction settings](#restriction-setting)).
 
 ## Restriction settings
-In your ```.env``` or ```config.inc.php``` there are three values to be set: ```UPLOAD_CODE```, ```IMAGE_CHANGE_CODE``` and ```ADDITIONAL_FILE_TYPES```
+In your ```.env``` or ```config.inc.php``` there are couple of values to be set: ```UPLOAD_CODE```, ```IMAGE_CHANGE_CODE```, ```ADDITIONAL_FILE_TYPES```, ```SUBDIR_ENABLE``` and ```FILENAME_ENABLE```
 
-All the settings can be set to strings or multiple strings semi;colon;separated. If there is a semicolon in the string, any of the elements will work
+Some of the settings can be set to strings or multiple strings semi;colon;separated. If there is a semicolon in the string, any of the elements will work
 
 ### UPLOAD_CODE
-If set, will show users a code field in the upload form. If it doesn't match your setting, files won't be uploaded.
+If set, will show users a code field in the upload form. If it doesn't match your setting, files won't be uploaded. Supports multiple strings semi;colon;separated
 
 If enabled, the Upload API will need the variable ```upload_code``` via GET (eg: ```https://pictshare.net/backend.php?getimage=https://www.0xf.at/css/imgs/logo.png&upload_code=YourUploadCodeHere```)
 
 ### IMAGE_CHANGE_CODE
-If set, the [options](#available-options) will only work if the URL got the code in it. You can provide the code as option ```changecode_YourChangeCode```
+If set, the [options](#available-options) will only work if the URL got the code in it. You can provide the code as option ```changecode_YourChangeCode```. Supports multiple strings semi;colon;separated
 
 For example: If enabled the image ```https://www.pictshare.net/negative/b260e36b60.jpg``` won't show the negative version but the original.
 If you access the image with the code like this: ```https://www.pictshare.net/changecode_YourChangeCode/b260e36b60.jpg``` it gets cached on the server so the next time someone requests the link without providing the change-code, they'll see the inverted image (because you just created it before by accessing the image with the code)
 
 ### ADDITIONAL_FILE_TYPES
-If set, allows the files of set type(s) to be uploaded via REST API.
+If set, allows the files of set type(s) to be uploaded via REST API. Support multiple strings semi;colon;separated
 
 When requested by the URL provided in response, these files (for additionally defined types) will be offered for download.
+
+### SUBDIR_ENABLE
+If set to true, it is possible to define subdirectories via REST API under which the file will be stored.
+
+This setting is turned on by default.
+
+### FILENAME_ENABLE
+If set to true , it is possible to define file name via REST API under which the file will be stored.
+
+This setting is turned on by default.
 
 ## Security and privacy
 - By hosting your own images you can delete them any time you want

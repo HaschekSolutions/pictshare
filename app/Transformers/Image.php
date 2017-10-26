@@ -174,12 +174,10 @@ class Image
      */
     public function resizeFFMPEG($data, $cachepath, $type = 'mp4')
     {
-        $rootPath = root_path();
-
-        $file = $rootPath . '/upload/' . $data['hash'] . '/' . $data['hash'];
+        $file = File::uploadDir($data['subdir'] . '/' . $data['hash'] . '/' . $data['hash']);
         $file = escapeshellarg($file);
-        $tmp  = '/dev/null';
-        $bin  = escapeshellcmd($rootPath . '/bin/ffmpeg');
+        //$tmp  = '/dev/null';
+        $bin  = escapeshellcmd(root_path('/bin/ffmpeg'));
 
         $size = $data['size'];
 

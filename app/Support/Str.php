@@ -9,6 +9,21 @@ namespace App\Support;
 class Str
 {
     /**
+     * @var int
+     */
+    const TAIL_SLASH = 0;
+
+    /**
+     * @var int
+     */
+    const LEAD_SLASH = 1;
+
+    /**
+     * @var int
+     */
+    const BOTH_SLASH = 2;
+
+    /**
      * @param int    $length
      * @param string $keyspace
      *
@@ -50,6 +65,34 @@ class Str
             return false;
         }
         return substr_compare($haystack, $needle, $strlen - $testlen, $testlen) === 0;
+    }
+
+    /**
+     * @param string $string
+     * @param int    $position
+     *
+     * @return string
+     */
+    public static function stripSlash($string, $position = self::TAIL_SLASH)
+    {
+        $separators = '/'. DIRECTORY_SEPARATOR;
+
+        switch ($position) {
+            case self::TAIL_SLASH:
+            default:
+                $string = rtrim($string, $separators);
+                break;
+
+            case self::LEAD_SLASH:
+                $string = ltrim($string, $separators);
+                break;
+
+            case self::BOTH_SLASH:
+                $string = trim($string, $separators);
+                break;
+        }
+
+        return $string;
     }
 
     /**
