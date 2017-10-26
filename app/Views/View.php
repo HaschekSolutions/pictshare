@@ -83,11 +83,10 @@ class View
      */
     public function renderAlbum($data)
     {
-        $content      = '';
-        $filters      = '';
-        $size         = '';
-        $forcesize    = isset($data['forcesize']) && $data['forcesize'] ? 'forcesize/' : '';
-        $relativePath = relative_path();
+        $content   = '';
+        $filters   = '';
+        $size      = '';
+        $forcesize = isset($data['forcesize']) && $data['forcesize'] ? 'forcesize/' : '';
 
         if (isset($data['filter']) && $data['filter']) {
             $filters = implode('/', $data['filter']) . '/';
@@ -100,8 +99,8 @@ class View
         }
 
         foreach ($data['album'] as $hash) {
-            $content .= '<a href="' . $relativePath . $filters . $hash . '">
-                            <img class="picture" src="' . $relativePath . $size . $forcesize . $filters . $hash . '" />
+            $content .= '<a href="' . relative_path($filters . $hash) . '">
+                            <img class="picture" src="' . relative_path($size . $forcesize . $filters . $hash) . '" />
                         </a>';
         }
 
@@ -113,7 +112,7 @@ class View
 
         echo $tpl->render([
             'title'      => $this->config->get('app.title'),
-            'path'       => $relativePath,
+            'path'       => relative_path(),
             'year'       => date("Y"),
             'slogan'     => isset($data['slogan']) ? $data['slogan'] : '',
             'content'    => $content,
@@ -128,15 +127,17 @@ class View
      */
     public function renderFile($data)
     {
-        $hash = isset($data['hash']) ? $data['hash'] : '';
-
         $changecode = '';
         if (isset($data['changecode']) && $data['changecode']) {
             $changecode = $data['changecode'];
             unset($data['changecode']);
         }
 
-        $base_path = File::uploadDir($hash . '/');
+        $hash    = $data['hash'];
+        $subdir  = $data['subdir'];
+        $hashdir = $subdir . '/' . $hash;
+
+        $base_path = File::uploadDir($hashdir . '/');
         $full_path = $base_path . $hash;
         $type      = $this->pictshareModel->isTypeAllowed($this->pictshareModel->getTypeOfFile($full_path));
         $cached    = false;
@@ -152,9 +153,9 @@ class View
         if (file_exists($cachepath)) {
             $full_path = $cachepath;
             $cached    = true;
-        } elseif ($maxResizedImages > -1 && $this->pictshareModel->countResizedImages($hash) > $maxResizedImages) {
+        } elseif ($maxResizedImages > -1 && $this->pictshareModel->countResizedImages($hashdir) > $maxResizedImages) {
             // if the number of max resized images is reached, just show the real one
-            $full_path = File::uploadDir($hash . '/' . $hash);
+            $full_path = File::uploadDir($hashdir . '/' . $hash);
         }
 
         switch ($type) {
@@ -222,7 +223,7 @@ class View
                         }
                     } else {
                         if ($data['preview']) {
-                            $file = $mp4path;
+                            //$file = $mp4path;
                             if (!file_exists($cachepath)) {
                                 $this->pictshareModel->saveFirstFrameOfMP4($mp4path, $cachepath);
                             }
@@ -252,17 +253,17 @@ class View
                     $full_path = $cachepath;
                 }
 
-                if (file_exists($cachepath) &&
-                    filesize($cachepath) == 0) { //if there was an error and the file is 0 bytes, use the original
-                    $cachepath = File::uploadDir($hash . '/' . $hash);
+                if (file_exists($cachepath) && filesize($cachepath) == 0) {
+                    // if there was an error and the file is 0 bytes, use the original
+                    $cachepath = File::uploadDir($hashdir . '/' . $hash);
                 }
 
                 if ($data['webm']) {
-                    $this->pictshareModel->saveAsWebm(File::uploadDir($hash . '/' . $hash), $cachepath);
+                    $this->pictshareModel->saveAsWebm(File::uploadDir($hashdir . '/' . $hash), $cachepath);
                 }
 
                 if ($data['ogg']) {
-                    $this->pictshareModel->saveAsOGG(File::uploadDir($hash . '/' . $hash), $cachepath);
+                    $this->pictshareModel->saveAsOGG(File::uploadDir($hashdir . '/' . $hash), $cachepath);
                 }
 
                 if ($data['raw']) {
@@ -304,6 +305,7 @@ class View
     public function renderMP4($path, $data)
     {
         $hash    = isset($data['hash']) ? $data['hash'] : '';
+        $subdir  = isset($data['subdir']) ? $data['subdir'] : '';
         $urldata = $this->pictshareModel->getURLInfo($path, true);
         if ($data['size']) {
             $hash = $data['size'] . '/' . $hash;
@@ -313,15 +315,12 @@ class View
         $height   = $info['height'];
         $filesize = $urldata['humansize'];
 
-        $domain       = domain_path();
-        $relativePath = relative_path();
-
         $tpl = $this->mustache->loadTemplate('template_mp4');
         echo $tpl->render([
             'title'      => $this->config->get('app.title'),
-            'path'       => $relativePath,
-            'domain'     => $domain,
-            'rawurlpath' => rawurlencode($domain . $relativePath . $hash),
+            'path'       => relative_path(),
+            'domain'     => domain_path(),
+            'rawurlpath' => rawurlencode(domain_path(relative_path($subdir . '/' . $hash))),
             'year'       => date("Y"),
             'hash'       => $hash,
             'width'      => $width,
@@ -428,7 +427,7 @@ class View
         header('Content-Length: ' . $byte_range);
         header('Expires: ' . date('D, d M Y H:i:s', time() + 60 * 60 * 24 * $expiry) . ' GMT');
 
-        $buffer          = '';
+        //$buffer          = '';
         $bytes_remaining = $byte_range;
 
         $handle = fopen($filename, 'r');
@@ -472,7 +471,7 @@ class View
             header('Content-type: video/mp4');
             header("Accept-Ranges: 0-$length");
             if (isset($_SERVER['HTTP_RANGE'])) {
-                $c_start = $start;
+                //$c_start = $start;
                 $c_end   = $end;
                 list(, $range) = explode('=', $_SERVER['HTTP_RANGE'], 2);
                 if (strpos($range, ',') !== false) {

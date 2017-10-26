@@ -32,7 +32,7 @@ class CliController
      */
     public function processCommand($argv)
     {
-        $action = $argv[2];
+        //$action = $argv[2];
         $params = $argv;
 
         // lose first param (self name)

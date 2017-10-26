@@ -47,7 +47,7 @@ class BackendController
             echo json_encode($this->pictshareModel->processSingleUpload('postfile'));
         } elseif ($reqParams['base64']) {
             $data   = $reqParams['base64'];
-            $format = $reqParams['format'];
+            $format = isset($reqParams['format']) ? $reqParams['format'] : false;
             echo json_encode($this->pictshareModel->uploadImageFromBase64($data, $format));
         } elseif ($reqParams['geturlinfo']) {
             echo json_encode($this->pictshareModel->getURLInfo($reqParams['geturlinfo']));
