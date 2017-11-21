@@ -139,13 +139,12 @@ class View
 
         $base_path = File::uploadDir($hashdir . '/');
         $full_path = $base_path . $hash;
-        $type      = $this->pictshareModel->isTypeAllowed($this->pictshareModel->getTypeOfFile($full_path));
-        $cached    = false;
 
         // update last_rendered of this hash so we can later
         // sort out old, unused images easier
         @file_put_contents($base_path . 'last_rendered.txt', time());
 
+        $cached           = false;
         $cachename        = $this->pictshareModel->getCacheName($data);
         $cachepath        = $base_path . $cachename;
         $maxResizedImages = $this->config->get('app.max_resized_images', 20);
@@ -155,8 +154,9 @@ class View
             $cached    = true;
         } elseif ($maxResizedImages > -1 && $this->pictshareModel->countResizedImages($hashdir) > $maxResizedImages) {
             // if the number of max resized images is reached, just show the real one
-            $full_path = File::uploadDir($hashdir . '/' . $hash);
         }
+
+        $type = $this->pictshareModel->isTypeAllowed($this->pictshareModel->getTypeOfFile($full_path));
 
         switch ($type) {
             case 'jpg':
@@ -293,6 +293,17 @@ class View
                 break;
         }
 
+        exit();
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return void
+     */
+    public function renderError($data)
+    {
+        echo $data['error_message'];
         exit();
     }
 

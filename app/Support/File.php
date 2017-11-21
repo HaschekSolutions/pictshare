@@ -133,10 +133,11 @@ class File
      */
     public static function hashExists($hash)
     {
-        $subdir = static::getSubDirFromHash($hash);
-        $subdir = $subdir ? $subdir . '/' : '';
+        $subdir  = static::getSubDirFromHash($hash);
+        $subdir  = $subdir ? $subdir . '/' : '';
+        $hashdir = static::uploadDir($subdir . $hash);
 
-        return is_dir(static::uploadDir($subdir . $hash));
+        return is_dir($hashdir) && file_exists(static::concatPath($hashdir, $hash));
     }
 
     /**
@@ -186,7 +187,12 @@ class File
 
         fclose($fp);
 
-        $subdir = isset($subdir) ? $subdir : '';
+        if (!isset($subdir)) {
+            // if not found return empty string
+            return '';
+        }
+
+        // found - so "cache" and return
         static::$subdirs[$hash] = $subdir;
 
         return $subdir;
@@ -270,5 +276,23 @@ class File
         }
 
         return $uploadDir;
+    }
+
+    /**
+     * Takes two paths and concatenates them being careful about directory separator.
+     *
+     * @param string $path
+     * @param string $extra
+     *
+     * @return string
+     */
+    public static function concatPath($path, $extra)
+    {
+        // we want to strip directory separator from the start of the extra string
+        $extra = Str::stripSlash($extra, Str::LEAD_SLASH);
+        // and we want to strip directory separator from the end of the path string
+        $path = Str::stripSlash($path, Str::TAIL_SLASH);
+        // so we can concatenate those values with a single directory separator
+        return $path . '/' . $extra;
     }
 }

@@ -843,11 +843,13 @@ class PictshareModel
      */
     public function urlToData($url)
     {
-        $url  = explode("/", $url);
-        $data = [];
+        $urlArr = explode("/", $url);
+        $data   = [];
 
-        foreach ($url as $el) {
-            $el   = Str::sanitize($el);
+        $masterDeleteCode = $this->config->get('app.master_delete_code');
+
+        for ($i = 0, $j = count($urlArr); $i < $j; $i++) {
+            $el   = Str::sanitize($urlArr[$i]);
             $orig = $el;
             $el   = strtolower($el);
             if (!$el) {
@@ -858,10 +860,25 @@ class PictshareModel
                 $data['changecode'] = substr($el, 11);
             }
 
-            $masterDeleteCode = $this->config->get('app.master_delete_code');
+            if (($isFile = File::isFile($orig)) || ($i === ($j - 1))) {
+                if ($el === 'robots.txt') {
+                    continue;
+                }
 
-            if (File::isFile($orig)) {
                 $subdir = File::getSubDirFromHash($orig);
+
+                if (!$isFile && (( $fetchScript = $this->config->get('app.fetch_script') ) !== false)) {
+                    $hashdir = ($subdir !== '' ? $subdir . '/' : '') . $orig . '/' . $orig;
+                    //$output = shell_exec($fetchScript . ' ' . $hashdir);
+                    $output = exec($fetchScript . ' ' . $hashdir, $outputArr, $returnVar);
+
+                    //if (mb_stripos($output, 'OK') === false) {
+                    if (trim($output) !== 'OK') {
+                        $data['error_message'] = implode("\n", $outputArr);
+                        continue;
+                    }
+                }
+
                 // if there are more than one hashes in url make an album from them
                 if ($data['hash']) {
                     if (! isset($data['album'])) {
