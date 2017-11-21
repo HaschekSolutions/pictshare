@@ -46,7 +46,9 @@ class IndexController
 
         $data = $this->pictshareModel->urlToData($url);
 
-        if (!is_array($data) || !$data['hash']) {
+        if (isset($data['error_message'])) {
+            $this->view->renderError($data);
+        } elseif (!is_array($data) || !$data['hash']) {
             $uploadFormLocation = config('app.upload_form_location');
 
             if (($uploadFormLocation && $url == $uploadFormLocation) || (!$uploadFormLocation)) {

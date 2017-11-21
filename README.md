@@ -28,6 +28,8 @@ Table of contents
   * [UPLOAD_CODE](#upload_code)
   * [IMAGE_CHANGE_CODE](#image_change_code)
   * [ADDITIONAL_FILE_TYPES](#additional_file_types)
+* [Clustered systems](#clustered_systems)
+  * [FETCH_SCRIPT](#fetch_script)
 * [Security and privacy](#security-and-privacy)
 * [Requirements](#requirements)
 * [Upgrading](#upgrading)
@@ -221,6 +223,46 @@ This setting is turned on by default.
 If set to true , it is possible to define file name via REST API under which the file will be stored.
 
 This setting is turned on by default.
+
+## Clustered systems
+Sometimes you may wish to have PictShare deployed in a clustered environment, but in such systems it could happen that directories where files are stored or archived is not the same as the upload directory where PictShare stores them.
+
+### FETCH_SCRIPT
+Through configurable option ```FETCH_SCRIPT``` it is possible to define absolute path to a bash script which will be called if file is not found within upload directory. This script should do the following:
+- take a single parameter representing relative path to the file in upload directory (subdir + hash/name)
+- check if file is already in upload directory and in such case return OK
+- restore the file into upload directory and return OK (if it finds it somewhere in the system)
+- return NOTFOUND if it cannot find it.
+
+This setting is turned off by default.
+
+Script example:
+```
+#!/bin/bash
+
+BASEPATH=/absolute/path/to/pictshare/upload
+FILESTORAGEPATH=/absolute/path/to/storage
+
+set -o errexit
+trap "echo ERROR" ERR
+
+logger -t $0 -- "$@"
+
+if [[ -z "$1" ]]; then
+    # filename = (subdir/)hash/hash
+    echo Usage: $0 filename
+    exit 1
+fi
+
+if [[ -f "$BASEPATH/$1" ]]; then
+   echo OK
+elif [[ -f "$FILESTORAGEPATH/$(basename $1)" ]]; then
+   cp "$FILESTORAGEPATH/$(basename $1)" "$BASEPATH/$1"
+   echo OK
+else
+   echo NOTFOUND
+fi
+```
 
 ## Security and privacy
 - By hosting your own images you can delete them any time you want

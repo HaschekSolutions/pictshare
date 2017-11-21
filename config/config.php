@@ -93,7 +93,13 @@ return [
         // If set to true it's possible to define subdirectories for
         // files via API (as a request parameter 'filename').
         // This option is enabled by default.
-        'filename_enable' => env('FILENAME_ENABLE', true)
+        'filename_enable' => env('FILENAME_ENABLE', true),
+
+        // Path to the script which will try to find and return a resource
+        // if it doesn't exist in out standard upload directory but
+        // does exist somewhere (used in clustering systems).
+        // This option is disabled by default.
+        'fetch_script' => env('FETCH_SCRIPT', false)
     ],
 
     'session' => [
@@ -102,7 +108,7 @@ return [
         'cache_limiter' => env('SESSION_CACHE_LIMITER', 'public'),
 
         // Session cache expiry in days
-        'cache_expire'  => env('SESSION_CACHE_EXPIRE', 90)
+        'cache_expire' => env('SESSION_CACHE_EXPIRE', 90)
     ],
 
     'view' => [

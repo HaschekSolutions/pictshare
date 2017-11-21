@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 //Set title for your image and mp4 hosting service
 define('TITLE', 'PictShare');
@@ -61,7 +61,7 @@ define('LOG_UPLOADER', true);
 //how many resizes may one image have?
 //-1 = infinite
 //0 = none
-define('MAX_RESIZED_IMAGES',20);
+define('MAX_RESIZED_IMAGES', 20);
 
 //when the user requests a resize. Can the resized image be bigger than the original?
 define('ALLOW_BLOATING', false);
@@ -92,3 +92,9 @@ define('SUBDIR_ENABLE', true);
 // files via API (as a request parameter 'filename').
 // This option is enabled by default.
 define('FILENAME_ENABLE', true);
+
+//Path to the script which will try to find and return a resource
+// if it doesn't exist in out standard upload directory but
+// does exist somewhere (used in clustering systems).
+// This option is disabled by default.
+define('FETCH_SCRIPT', false);
