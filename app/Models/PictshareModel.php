@@ -391,7 +391,7 @@ class PictshareModel
             $subdir = Str::stripSlash($_REQUEST['subdir'], Str::BOTH_SLASH);
         }
 
-        $dupl = $this->isDuplicate($url);
+        $dupl = $this->isDuplicate($url, $filename);
         if ($dupl) {
             $hash    = $dupl[0];
             $subdir  = $dupl[1];
@@ -404,7 +404,7 @@ class PictshareModel
                 $hash = File::getNewHash($type);
             }
             $hashdir = $subdir . '/' . $hash;
-            $this->saveSHAOfFile($url, $hash, $subdir);
+            $this->saveSHAOfFile($url, $hash, $subdir, $filename);
         }
 
         if ($dupl) {
@@ -449,19 +449,25 @@ class PictshareModel
     }
 
     /**
-     * @param string $file
+     * @param string      $file
+     * @param string|null $filename
      *
-     * @return bool|array[hash,subdir]
+     * @return array|bool [hash,subdir]
      */
-    public function isDuplicate($file)
+    public function isDuplicate($file, $filename = null)
     {
         $sha_file = File::uploadDir('hashes.csv');
         if (!file_exists($sha_file)) {
             return false;
         }
 
+        // calculate sha of file content (and filename if given)
         $sha = sha1_file($file);
+        if ($filename !== null) {
+            $sha = sha1($sha . $filename);
+        }
 
+        // and check for calculated sha within hashes.csv
         $fp = fopen($sha_file, 'r');
         while (($line = fgets($fp)) !== false) {
             $line = trim($line);
@@ -482,14 +488,21 @@ class PictshareModel
     }
 
     /**
-     * @param string $filepath
-     * @param string $hash
-     * @param string $subdir
+     * @param string      $filepath
+     * @param string      $hash
+     * @param string      $subdir
+     * @param string|null $filename
      */
-    public function saveSHAOfFile($filepath, $hash, $subdir = '')
+    public function saveSHAOfFile($filepath, $hash, $subdir = '', $filename = null)
     {
+        // calculate sha of file content (and filename if given)
+        $sha = sha1_file($filepath);
+        if ($filename !== null) {
+            $sha = sha1($sha . $filename);
+        }
+
+        // and save calculated sha (along with hash and subdir) into hashes.csv
         $sha_file = File::uploadDir('hashes.csv');
-        $sha      = sha1_file($filepath);
         $fp       = fopen($sha_file, 'a');
         fwrite($fp, "${sha};${hash};${subdir}\n");
         fclose($fp);
