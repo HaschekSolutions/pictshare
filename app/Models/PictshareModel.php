@@ -163,7 +163,7 @@ class PictshareModel
             }
 
             $data = $this->uploadFileFromURL($_FILES[$name]["tmp_name"], $type);
-            if ($data['status'] == 'OK') {
+            if ($data['status'] === 'OK') {
                 $hash = $data['hash'];
                 $o    = [
                     'status' => 'OK',
@@ -177,6 +177,8 @@ class PictshareModel
                 }
 
                 return $o;
+            } elseif ($data['status'] === 'ERR') {
+                return $data;
             }
         }
 
@@ -382,13 +384,35 @@ class PictshareModel
 
         $filename = null;
         $subdir   = '';
+        $errors   = [];
 
-        if (config('app.filename_enable') && isset($_REQUEST['filename'])) {
+        $filenameEnable = config('app.filename_enable');
+        $filenameForce  = config('app.filename_force');
+        $subdirEnable   = config('app.subdir_enable');
+        $subdirForce    = config('app.subdir_force');
+
+        if ($filenameEnable && isset($_REQUEST['filename'])) {
             $filename = trim($_REQUEST['filename']);
         }
 
-        if (config('app.subdir_enable') && isset($_REQUEST['subdir'])) {
+        if ($filenameEnable && $filenameForce &&
+            (isset($_FILES['postfile']) || isset($_FILES['postimage'])) && !$filename
+        ) {
+            // if filename is not provided but config says to force it - return error
+            $errors[] = 'missing filename parameter';
+        }
+
+        if ($subdirEnable && isset($_REQUEST['subdir'])) {
             $subdir = Str::stripSlash($_REQUEST['subdir'], Str::BOTH_SLASH);
+        }
+
+        if ($subdirEnable && $subdirForce && (isset($_FILES['postfile']) || isset($_FILES['postimage'])) && !$subdir) {
+            // if subdir is not provided but config says to force it - return error
+            $errors[] = 'missing subdir parameter';
+        }
+
+        if (!empty($errors)) {
+            return ['status' => 'ERR', 'reason' => $errors];
         }
 
         $dupl = $this->isDuplicate($url, $filename);

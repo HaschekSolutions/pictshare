@@ -90,10 +90,20 @@ return [
         // This option is enabled by default.
         'subdir_enable' => env('SUBDIR_ENABLE', true),
 
+        // If set to true it forces the users to define subdirectories
+        // for files via API (as a request parameter 'subdit')
+        // This option is disabled by default.
+        'subdir_force' => env('SUBDIR_FORCE', false),
+
         // If set to true it's possible to define subdirectories for
         // files via API (as a request parameter 'filename').
         // This option is enabled by default.
         'filename_enable' => env('FILENAME_ENABLE', true),
+
+        // If set to true it forces the users to define filenames for
+        // files via API (as a request parameter 'filename').
+        // This option is disabled by default.
+        'filename_force' => env('FILENAME_FORCE', false),
 
         // Path to the script which will try to find and return a resource
         // if it doesn't exist in out standard upload directory but
