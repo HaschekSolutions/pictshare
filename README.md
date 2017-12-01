@@ -193,6 +193,8 @@ Server will automatically try to guess the file type (which should work in 90% o
 
 By default PictShare will store images under randomly generated hashkeys. If you wish to store an image under specific name you can do so by sending the value as request parameter ```filename```. In order to use this functionality make sure you have it configured (check [Restriction settings](#restriction-setting)).
 
+Please not that even if you specify a name for the file it will still get an 8-character hash prepended to it. The reason is due to potential collision when trying to store files under same name into different subdirectories (as subdirectory info is not part of the hashkey).
+
 ## Restriction settings
 In your ```.env``` or ```config.inc.php``` there are couple of values to be set: ```UPLOAD_CODE```, ```IMAGE_CHANGE_CODE```, ```ADDITIONAL_FILE_TYPES```, ```SUBDIR_ENABLE``` and ```FILENAME_ENABLE```
 
@@ -225,7 +227,7 @@ If set to true (combined with ```SUBDIR_ENABLE```), it forces the user to define
 This setting is turned off by default.
 
 ### FILENAME_ENABLE
-If set to true, it is possible to define file name via REST API (request parameter ```filename```) under which the file will be stored.
+If set to true, it is possible to define file name via REST API (request parameter ```filename```) under which the file will be stored. Limitations described in [defining filenames](#defining-filenames) apply.
 
 This setting is turned on by default.
 

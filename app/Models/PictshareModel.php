@@ -393,6 +393,11 @@ class PictshareModel
 
         if ($filenameEnable && isset($_REQUEST['filename'])) {
             $filename = trim($_REQUEST['filename']);
+
+            // to ensure uniqueness of "hash" when using provided filenames we
+            // prepend 8-characters (calculated as CRC32 hash of the file) to
+            // the name which should avoid collisions of same name files
+            $filename = hash_file('crc32', $url) . '_' . $filename;
         }
 
         if ($filenameEnable && $filenameForce &&
