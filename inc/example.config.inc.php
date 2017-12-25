@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 //Set title for your image and mp4 hosting service
 define('TITLE', 'PictShare');
@@ -51,7 +51,8 @@ define('UPLOAD_CODE', false);
 //if set to a string, this string must be provided in the URL to use any options (filters, resizes, etc..)
 //you can set multiple codes by;separating;them;with;semicolons
 //if set to false, everybody can use options on all images
-//if image change code is not provided but the requested image (with options) already exists, it will render to the user just fine
+//if image change code is not provided but the requested image (with options) already exists,
+// it will render to the user just fine
 define('IMAGE_CHANGE_CODE', false);
 
 // shall we log all uploaders IP addresses?
@@ -60,7 +61,7 @@ define('LOG_UPLOADER', true);
 //how many resizes may one image have?
 //-1 = infinite
 //0 = none
-define('MAX_RESIZED_IMAGES',20);
+define('MAX_RESIZED_IMAGES', 20);
 
 //when the user requests a resize. Can the resized image be bigger than the original?
 define('ALLOW_BLOATING', false);
@@ -72,3 +73,28 @@ define('FORCE_DOMAIN', false);
 //Shall errors be displayed to the user?
 //For dev environments: true, in production: false
 define('SHOW_ERRORS', false);
+
+// List of additionally supported file types (eg. pdf, docx, xls, etc.)
+// defined as comma separated value string
+define('ADDITIONAL_FILE_TYPES', false);
+
+// Allows defining of directory for uploads as absolute path
+// to a directory other then the one inside the project, eg.
+// '/tmp/uploads/'
+define('UPLOAD_DIR', false);
+
+// If set to true it's possibile to define subdirectories for
+// files via API (as a request parameter 'subdir').
+// This option is enabled by default.
+define('SUBDIR_ENABLE', true);
+
+// If set to true it's possible to define subdirectories for
+// files via API (as a request parameter 'filename').
+// This option is enabled by default.
+define('FILENAME_ENABLE', true);
+
+//Path to the script which will try to find and return a resource
+// if it doesn't exist in out standard upload directory but
+// does exist somewhere (used in clustering systems).
+// This option is disabled by default.
+define('FETCH_SCRIPT', false);

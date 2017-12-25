@@ -1,0 +1,4 @@
+/.idea
+/vendor
+.env
+.php_cs.cache
