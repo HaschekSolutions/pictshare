@@ -193,6 +193,8 @@ Server will automatically try to guess the file type (which should work in 90% o
 
 By default PictShare will store images under randomly generated hashkeys. If you wish to store an image under specific name you can do so by sending the value as request parameter ```filename```. In order to use this functionality make sure you have it configured (check [Restriction settings](#restriction-setting)).
 
+Please not that even if you specify a name for the file it will still get an 8-character hash prepended to it. The reason is due to potential collision when trying to store files under same name into different subdirectories (as subdirectory info is not part of the hashkey).
+
 ## Restriction settings
 In your ```.env``` or ```config.inc.php``` there are couple of values to be set: ```UPLOAD_CODE```, ```IMAGE_CHANGE_CODE```, ```ADDITIONAL_FILE_TYPES```, ```SUBDIR_ENABLE``` and ```FILENAME_ENABLE```
 
@@ -215,14 +217,24 @@ If set, allows the files of set type(s) to be uploaded via REST API. Support mul
 When requested by the URL provided in response, these files (for additionally defined types) will be offered for download.
 
 ### SUBDIR_ENABLE
-If set to true, it is possible to define subdirectories via REST API under which the file will be stored.
+If set to true, it is possible to define subdirectories via REST API (request parameter ```subdir```) under which the file will be stored.
 
 This setting is turned on by default.
+
+### SUBDIR_FORCE
+If set to true (combined with ```SUBDIR_ENABLE```), it forces the user to define subdirectory for file via REST API. If subdirectory is not provided it will result in an error.
+
+This setting is turned off by default.
 
 ### FILENAME_ENABLE
-If set to true , it is possible to define file name via REST API under which the file will be stored.
+If set to true, it is possible to define file name via REST API (request parameter ```filename```) under which the file will be stored. Limitations described in [defining filenames](#defining-filenames) apply.
 
 This setting is turned on by default.
+
+### FILENAME_FORCE
+If set to true (combined with ```FILENAME_ENABLE```), it forces the user to define file name via REST API. If file name is not provided it will result in an error.
+
+This setting is turned off by default.
 
 ## Clustered systems
 Sometimes you may wish to have PictShare deployed in a clustered environment, but in such systems it could happen that directories where files are stored or archived is not the same as the upload directory where PictShare stores them.

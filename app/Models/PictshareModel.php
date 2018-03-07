@@ -163,7 +163,7 @@ class PictshareModel
             }
 
             $data = $this->uploadFileFromURL($_FILES[$name]["tmp_name"], $type);
-            if ($data['status'] == 'OK') {
+            if ($data['status'] === 'OK') {
                 $hash = $data['hash'];
                 $o    = [
                     'status' => 'OK',
@@ -177,6 +177,8 @@ class PictshareModel
                 }
 
                 return $o;
+            } elseif ($data['status'] === 'ERR') {
+                return $data;
             }
         }
 
@@ -382,16 +384,43 @@ class PictshareModel
 
         $filename = null;
         $subdir   = '';
+        $errors   = [];
 
-        if (config('app.filename_enable') && isset($_REQUEST['filename'])) {
+        $filenameEnable = config('app.filename_enable');
+        $filenameForce  = config('app.filename_force');
+        $subdirEnable   = config('app.subdir_enable');
+        $subdirForce    = config('app.subdir_force');
+
+        if ($filenameEnable && isset($_REQUEST['filename'])) {
             $filename = trim($_REQUEST['filename']);
+
+            // to ensure uniqueness of "hash" when using provided filenames we
+            // prepend 8-characters (calculated as CRC32 hash of the file) to
+            // the name which should avoid collisions of same name files
+            $filename = hash_file('crc32', $url) . '_' . $filename;
         }
 
-        if (config('app.subdir_enable') && isset($_REQUEST['subdir'])) {
+        if ($filenameEnable && $filenameForce &&
+            (isset($_FILES['postfile']) || isset($_FILES['postimage'])) && !$filename
+        ) {
+            // if filename is not provided but config says to force it - return error
+            $errors[] = 'missing filename parameter';
+        }
+
+        if ($subdirEnable && isset($_REQUEST['subdir'])) {
             $subdir = Str::stripSlash($_REQUEST['subdir'], Str::BOTH_SLASH);
         }
 
-        $dupl = $this->isDuplicate($url);
+        if ($subdirEnable && $subdirForce && (isset($_FILES['postfile']) || isset($_FILES['postimage'])) && !$subdir) {
+            // if subdir is not provided but config says to force it - return error
+            $errors[] = 'missing subdir parameter';
+        }
+
+        if (!empty($errors)) {
+            return ['status' => 'ERR', 'reason' => $errors];
+        }
+
+        $dupl = $this->isDuplicate($url, $filename);
         if ($dupl) {
             $hash    = $dupl[0];
             $subdir  = $dupl[1];
@@ -404,7 +433,7 @@ class PictshareModel
                 $hash = File::getNewHash($type);
             }
             $hashdir = $subdir . '/' . $hash;
-            $this->saveSHAOfFile($url, $hash, $subdir);
+            $this->saveSHAOfFile($url, $hash, $subdir, $filename);
         }
 
         if ($dupl) {
@@ -449,19 +478,25 @@ class PictshareModel
     }
 
     /**
-     * @param string $file
+     * @param string      $file
+     * @param string|null $filename
      *
-     * @return bool|array[hash,subdir]
+     * @return array|bool [hash,subdir]
      */
-    public function isDuplicate($file)
+    public function isDuplicate($file, $filename = null)
     {
         $sha_file = File::uploadDir('hashes.csv');
         if (!file_exists($sha_file)) {
             return false;
         }
 
+        // calculate sha of file content (and filename if given)
         $sha = sha1_file($file);
+        if ($filename !== null) {
+            $sha = sha1($sha . $filename);
+        }
 
+        // and check for calculated sha within hashes.csv
         $fp = fopen($sha_file, 'r');
         while (($line = fgets($fp)) !== false) {
             $line = trim($line);
@@ -482,14 +517,21 @@ class PictshareModel
     }
 
     /**
-     * @param string $filepath
-     * @param string $hash
-     * @param string $subdir
+     * @param string      $filepath
+     * @param string      $hash
+     * @param string      $subdir
+     * @param string|null $filename
      */
-    public function saveSHAOfFile($filepath, $hash, $subdir = '')
+    public function saveSHAOfFile($filepath, $hash, $subdir = '', $filename = null)
     {
+        // calculate sha of file content (and filename if given)
+        $sha = sha1_file($filepath);
+        if ($filename !== null) {
+            $sha = sha1($sha . $filename);
+        }
+
+        // and save calculated sha (along with hash and subdir) into hashes.csv
         $sha_file = File::uploadDir('hashes.csv');
-        $sha      = sha1_file($filepath);
         $fp       = fopen($sha_file, 'a');
         fwrite($fp, "${sha};${hash};${subdir}\n");
         fclose($fp);
