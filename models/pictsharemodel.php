@@ -748,6 +748,8 @@ class PictshareModel extends Model
 		break;
 	
 		case 'png':
+				imagefill($source, 0, 0, IMG_COLOR_TRANSPARENT);
+				imagesavealpha($source,true);
 				imagepng($source,$output_file,(defined('PNG_COMPRESSION')?PNG_COMPRESSION:6));
 				trigger_error("========= SAVING AS ".$type." TO ".$output_file);
 		break;
@@ -758,6 +760,8 @@ class PictshareModel extends Model
 		break;
 	
 		default:
+				imagefill($source, 0, 0, IMG_COLOR_TRANSPARENT);
+				imagesavealpha($source,true);
 				imagepng($source,$output_file,(defined('PNG_COMPRESSION')?PNG_COMPRESSION:6));
 		break;
 		}
