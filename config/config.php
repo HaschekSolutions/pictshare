@@ -109,7 +109,23 @@ return [
         // if it doesn't exist in out standard upload directory but
         // does exist somewhere (used in clustering systems).
         // This option is disabled by default.
-        'fetch_script' => env('FETCH_SCRIPT', false)
+        'fetch_script' => env('FETCH_SCRIPT', false),
+
+        // Indicator whether hashes (and other file information)
+        // will be stored
+        'hashes_store' => env('HASHES_STORE', 'filesystem')
+    ],
+
+    'database' => [
+        'default' => env('DB_CONNECTION', 'mysql'),
+
+        'mysql' => [
+            'host'      => env('DB_HOST', 'localhost'),
+            'database'  => env('DB_DATABASE', 'schema'),
+            'username'  => env('DB_USERNAME', 'user'),
+            'password'  => env('DB_PASSWORD', 'pass'),
+            'charset'   => 'utf8'
+        ]
     ],
 
     'session' => [

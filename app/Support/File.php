@@ -167,27 +167,13 @@ class File
             return static::$subdirs[$hash];
         }
 
-        $hashes = File::uploadDir('hashes.csv');
-        if (!file_exists($hashes)) {
-            return false;
+        if (config('app.hashes_store') === 'database') {
+            $subdir = static::subDirFromHashesDb($hash);
+        } else {
+            $subdir = static::subDirFromHashesFile($hash);
         }
 
-        $fp = fopen($hashes, 'r');
-        while (($line = fgets($fp)) !== false) {
-            $line = trim($line);
-            if (!$line) {
-                continue;
-            }
-            $data = explode(';', $line);
-            if ($hash == trim($data[1])) {
-                $subdir = trim($data[2]);
-                break;
-            }
-        }
-
-        fclose($fp);
-
-        if (!isset($subdir)) {
+        if (!$subdir) {
             // if not found return empty string
             return '';
         }
@@ -294,5 +280,69 @@ class File
         $path = Str::stripSlash($path, Str::TAIL_SLASH);
         // so we can concatenate those values with a single directory separator
         return $path . '/' . $extra;
+    }
+
+    /**
+     * @param string $hash
+     *
+     * @return bool|string
+     */
+    protected static function subDirFromHashesFile($hash)
+    {
+        $hashes = File::uploadDir('hashes.csv');
+        if (!file_exists($hashes)) {
+            return false;
+        }
+
+        $fp = fopen($hashes, 'r');
+        while (($line = fgets($fp)) !== false) {
+            $line = trim($line);
+            if (!$line) {
+                continue;
+            }
+            $data = explode(';', $line);
+            if ($hash == trim($data[1])) {
+                $subdir = trim($data[2]);
+                break;
+            }
+        }
+
+        fclose($fp);
+
+        if (!isset($subdir)) {
+            return false;
+        }
+
+        return $subdir;
+    }
+
+    /**
+     * @param string $hash
+     *
+     * @return bool|string
+     */
+    protected static function subDirFromHashesDb($hash)
+    {
+        /** @var Database $db */
+        $db = app()->getContainer()->get(Database::class);
+
+        $query = 'SELECT subdir FROM hashes WHERE name = :hash';
+        $data  = ['hash' => $hash];
+
+        $stmt = $db->execute($query, $data);
+
+        $sqlResult = false;
+        if ($stmt instanceof \PDOStatement) {
+            $sqlResult = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $stmt = null; // free up resources
+        }
+
+        if (!$sqlResult || count($sqlResult) != 1) {
+            return false;
+        }
+
+        $subdir = $sqlResult[0]['subdir'];
+
+        return $subdir;
     }
 }
