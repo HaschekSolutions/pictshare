@@ -76,6 +76,10 @@ return [
         // For dev environments: true, in production: false
         'show_errors' => env('SHOW_ERRORS', false),
 
+        // Whether initial homepage upload form should be visible or not.
+        // This option is enabled by default.
+        'uploadform_enable' => env('UPLOADFORM_ENABLE', true),
+
         // List of additionally supported file types (eg. pdf, docx, xls, etc.)
         // defined as comma separated value string
         'additional_file_types' => env('ADDITIONAL_FILE_TYPES', false),

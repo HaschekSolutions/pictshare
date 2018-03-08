@@ -216,6 +216,11 @@ If set, allows the files of set type(s) to be uploaded via REST API. Support mul
 
 When requested by the URL provided in response, these files (for additionally defined types) will be offered for download.
 
+### UPLOADFORM_ENABLE
+If set, upload form will be presented on homepage of pictshare which allows users to easily upload images through browser instead of requesting through ```backend.php```.
+
+This setting is turned on by default.
+
 ### SUBDIR_ENABLE
 If set to true, it is possible to define subdirectories via REST API (request parameter ```subdir```) under which the file will be stored.
 
