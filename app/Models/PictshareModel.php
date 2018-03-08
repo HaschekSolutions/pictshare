@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Config\ConfigInterface;
+use App\Support\Database;
 use App\Support\File;
 use App\Support\MIMEType;
 use App\Support\Str;
@@ -29,15 +30,22 @@ class PictshareModel
     protected $imageTransformer;
 
     /**
+     * @var Database
+     */
+    protected $database;
+
+    /**
      * Model constructor.
      *
      * @param ConfigInterface  $config
      * @param ImageTransformer $imageTransformer
+     * @param Database         $database
      */
-    public function __construct(ConfigInterface $config, ImageTransformer $imageTransformer)
+    public function __construct(ConfigInterface $config, ImageTransformer $imageTransformer, Database $database)
     {
         $this->config           = $config;
         $this->imageTransformer = $imageTransformer;
+        $this->database         = $database;
     }
 
     /**
@@ -485,33 +493,55 @@ class PictshareModel
      */
     public function isDuplicate($file, $filename = null)
     {
-        $sha_file = File::uploadDir('hashes.csv');
-        if (!file_exists($sha_file)) {
-            return false;
-        }
-
         // calculate sha of file content (and filename if given)
         $sha = sha1_file($file);
         if ($filename !== null) {
             $sha = sha1($sha . $filename);
         }
 
-        // and check for calculated sha within hashes.csv
-        $fp = fopen($sha_file, 'r');
-        while (($line = fgets($fp)) !== false) {
-            $line = trim($line);
-            if (!$line) {
-                continue;
-            }
-            $sha_upload = substr($line, 0, 40);
-            if ($sha_upload == $sha) { //when it's a duplicate return the hash of the original file
-                fclose($fp);
-                $sstr = substr($line, 41);
-                return explode(';', $sstr);
-            }
-        }
+        if (config('app.hashes_store') === 'database') {
+            $query = 'SELECT `name`, `subdir` FROM `hashes` WHERE `sha_hash` = :hash';
+            $data  = ['hash' => $sha];
 
-        fclose($fp);
+            $stmt = $this->database->execute($query, $data);
+
+            $sqlResult = false;
+            if ($stmt instanceof \PDOStatement) {
+                $sqlResult = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+                $stmt = null; // free up resources
+            }
+
+            if (!$sqlResult || count($sqlResult) != 1) {
+                return false;
+            }
+
+            return [
+                $sqlResult[0]['name'],
+                $sqlResult[0]['subdir']
+            ];
+        } else {
+            $sha_file = File::uploadDir('hashes.csv');
+            if (!file_exists($sha_file)) {
+                return false;
+            }
+
+            // and check for calculated sha within hashes.csv
+            $fp = fopen($sha_file, 'r');
+            while (($line = fgets($fp)) !== false) {
+                $line = trim($line);
+                if (!$line) {
+                    continue;
+                }
+                $sha_upload = substr($line, 0, 40);
+                if ($sha_upload == $sha) { //when it's a duplicate return the hash of the original file
+                    fclose($fp);
+                    $sstr = substr($line, 41);
+                    return explode(';', $sstr);
+                }
+            }
+
+            fclose($fp);
+        }
 
         return false;
     }
@@ -530,11 +560,19 @@ class PictshareModel
             $sha = sha1($sha . $filename);
         }
 
-        // and save calculated sha (along with hash and subdir) into hashes.csv
-        $sha_file = File::uploadDir('hashes.csv');
-        $fp       = fopen($sha_file, 'a');
-        fwrite($fp, "${sha};${hash};${subdir}\n");
-        fclose($fp);
+        // and save calculated sha (along with hash and subdir) into hashes
+        if (config('app.hashes_store') === 'database') {
+            $query = "INSERT INTO `hashes` (`sha_hash`, `name`, `subdir`) VALUES (:hash, :name, :subdir)";
+            $data  = ['hash' => $sha, 'name' => $hash, 'subdir' => $subdir];
+
+            // TODO: error handling?
+            $this->database->execute($query, $data);
+        } else {
+            $sha_file = File::uploadDir('hashes.csv');
+            $fp       = fopen($sha_file, 'a');
+            fwrite($fp, "${sha};${hash};${subdir}\n");
+            fclose($fp);
+        }
     }
 
     /**
@@ -1060,25 +1098,49 @@ class PictshareModel
      */
     public function deleteImage($hash)
     {
-        // delete hash from hashes.csv
-        $tmpname = File::uploadDir('delete_temp.csv');
-        $csv     = File::uploadDir('hashes.csv');
-        $fptemp  = fopen($tmpname, "w");
-        if (($handle = fopen($csv, "r")) !== false) {
-            while (($line = fgets($handle)) !== false) {
-                $data = explode(';', $line);
-                if ($hash != trim($data[1])) {
-                    fwrite($fptemp, $line);
-                } else {
-                    $subdir = $data[2];
+        // delete hash from hashes
+        if (config('app.hashes_store') === 'database') {
+            $query = 'SELECT `id`, `subdir` FROM `hashes` WHERE `name` = :hash';
+            $data  = ['hash' => $hash];
+
+            $stmt = $this->database->execute($query, $data);
+
+            $sqlResult = false;
+            if ($stmt instanceof \PDOStatement) {
+                $sqlResult = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+                $stmt = null; // free up resources
+            }
+
+            if ($sqlResult && count($sqlResult) === 1) {
+                $id     = $sqlResult[0]['id'];
+                $subdir = $sqlResult[0]['subdir'];
+
+                $query = 'DELETE FROM `hashes` WHERE `id` = :id';
+                $data  = ['id' => $id];
+
+                // TODO: error handling?
+                $this->database->execute($query, $data);
+            }
+        } else {
+            $tmpname = File::uploadDir('delete_temp.csv');
+            $csv     = File::uploadDir('hashes.csv');
+            $fptemp  = fopen($tmpname, "w");
+            if (($handle = fopen($csv, "r")) !== false) {
+                while (($line = fgets($handle)) !== false) {
+                    $data = explode(';', $line);
+                    if ($hash != trim($data[1])) {
+                        fwrite($fptemp, $line);
+                    } else {
+                        $subdir = $data[2];
+                    }
                 }
             }
+            fclose($handle);
+            fclose($fptemp);
+            unlink($csv);
+            rename($tmpname, $csv);
+            //unlink($tmpname);
         }
-        fclose($handle);
-        fclose($fptemp);
-        unlink($csv);
-        rename($tmpname, $csv);
-        //unlink($tmpname);
 
         $subdir = isset($subdir) ? $subdir . '/' : '';
 

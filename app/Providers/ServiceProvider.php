@@ -7,6 +7,7 @@ use App\Controllers\BackendController;
 use App\Controllers\CliController;
 use App\Controllers\IndexController;
 use App\Models\PictshareModel;
+use App\Support\Database;
 use App\Transformers\Image;
 use App\Views\View;
 use League\Container\ServiceProvider\AbstractServiceProvider;
@@ -64,6 +65,7 @@ class ServiceProvider extends AbstractServiceProvider
         });
 
         $this->registerVendor();
+        $this->registerDatabase();
         $this->registerControllers();
         $this->registerModels();
         $this->registerViews();
@@ -77,6 +79,20 @@ class ServiceProvider extends AbstractServiceProvider
     protected function registerVendor()
     {
         $this->getContainer()->add(Mustache_Engine::class);
+    }
+
+    /**
+     * Register database manager.
+     */
+    protected function registerDatabase()
+    {
+        $container = $this->getContainer();
+        $container->share(Database::class, function () use ($container) {
+            $config   = $container->get(ConfigInterface::class);
+            $dbConfig = $config->get('database', []);
+
+            return new Database($dbConfig);
+        });
     }
 
     /**
@@ -104,7 +120,7 @@ class ServiceProvider extends AbstractServiceProvider
     {
         $this->getContainer()
             ->share(PictshareModel::class)
-            ->withArguments([ConfigInterface::class, Image::class]);
+            ->withArguments([ConfigInterface::class, Image::class, Database::class]);
     }
 
     /**

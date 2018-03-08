@@ -172,3 +172,20 @@ if (! function_exists('is_cli')) {
         return php_sapi_name() == 'cli';
     }
 }
+
+if (! function_exists('print_exception')) {
+    /**
+     * Print exception
+     *
+     * @param Exception $e
+     *
+     * @return void
+     */
+    function print_exception(Exception $e)
+    {
+        echo '<h3>' . $e->getMessage() . '</h3>';
+        echo '<p> In file: ' . $e->getFile() . ' on line: ' . $e->getLine() . '</p>';
+        echo '<p>' . $e->getTraceAsString() . '</p>';
+        exit();
+    }
+}

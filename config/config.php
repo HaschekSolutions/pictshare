@@ -76,6 +76,10 @@ return [
         // For dev environments: true, in production: false
         'show_errors' => env('SHOW_ERRORS', false),
 
+        // Whether initial homepage upload form should be visible or not.
+        // This option is enabled by default.
+        'uploadform_enable' => env('UPLOADFORM_ENABLE', true),
+
         // List of additionally supported file types (eg. pdf, docx, xls, etc.)
         // defined as comma separated value string
         'additional_file_types' => env('ADDITIONAL_FILE_TYPES', false),
@@ -109,7 +113,23 @@ return [
         // if it doesn't exist in out standard upload directory but
         // does exist somewhere (used in clustering systems).
         // This option is disabled by default.
-        'fetch_script' => env('FETCH_SCRIPT', false)
+        'fetch_script' => env('FETCH_SCRIPT', false),
+
+        // Indicator whether hashes (and other file information)
+        // will be stored
+        'hashes_store' => env('HASHES_STORE', 'filesystem')
+    ],
+
+    'database' => [
+        'default' => env('DB_CONNECTION', 'mysql'),
+
+        'mysql' => [
+            'host'      => env('DB_HOST', 'localhost'),
+            'database'  => env('DB_DATABASE', 'schema'),
+            'username'  => env('DB_USERNAME', 'user'),
+            'password'  => env('DB_PASSWORD', 'pass'),
+            'charset'   => 'utf8'
+        ]
     ],
 
     'session' => [

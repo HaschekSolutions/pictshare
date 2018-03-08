@@ -216,6 +216,11 @@ If set, allows the files of set type(s) to be uploaded via REST API. Support mul
 
 When requested by the URL provided in response, these files (for additionally defined types) will be offered for download.
 
+### UPLOADFORM_ENABLE
+If set, upload form will be presented on homepage of pictshare which allows users to easily upload images through browser instead of requesting through ```backend.php```.
+
+This setting is turned on by default.
+
 ### SUBDIR_ENABLE
 If set to true, it is possible to define subdirectories via REST API (request parameter ```subdir```) under which the file will be stored.
 
@@ -274,6 +279,24 @@ elif [[ -f "$FILESTORAGEPATH/$(basename $1)" ]]; then
 else
    echo NOTFOUND
 fi
+```
+
+### HASHES_STORE
+This option can currently be set to two different values - ```filesystem``` and ```database```. It dictates whether hashes generated from uploaded files, and their corresponding information (subdirectory), will be stored in ```hashes.csv``` file inside upload directory or inside the database. If set to ```database``` connection parameters ```DB_*``` need to be set as well.
+
+This setting is set to ```filesystem``` by default.
+
+DB table structure:
+```
+CREATE TABLE `hashes` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `sha_hash` varchar(40) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `subdir` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hash_UNIQUE` (`sha_hash`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 ```
 
 ## Security and privacy

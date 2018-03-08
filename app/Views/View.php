@@ -345,6 +345,10 @@ class View
      */
     public function renderUploadForm()
     {
+        if (!$this->config->get('app.uploadform_enable')) {
+            return 'This is not the page you are looking for!';
+        }
+
         $maxfilesize = (int) (ini_get('upload_max_filesize'));
 
         $upload_code_form = '';
