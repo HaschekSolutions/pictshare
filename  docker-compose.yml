@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+  pictshare:
+    restart: always
+    image: hascheksolutions/pictshare:latest
+    volumes:
+    - ./volumes/upload:/opt/pictshare/upload
+    ports:
+    - "80:80"
+    - "443:443"
+    environment:
+    - TITLE=
+    - AUTOUPDATE=false
+    - MAXUPLOADSIZE=
+    - MASTERDELETECODE=
+    - BLOATING=
+    - UPLOADCODE=
+    - UPLOADPATH=
+    - IMAGECHANGECODE=
+    - LOGUPLOADER=
+    - MAXRESIZEDIMAGES=
+    - DOMAIN=
+    - SHOWERRORS=

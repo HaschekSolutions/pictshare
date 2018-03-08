@@ -14,6 +14,7 @@ Table of contents
 * [Installation](#installation)
   * [Docker](#docker)
   * [On nginx](#on-nginx)
+  * [Docker Compose With Prebuild Image by hascheksolutions](#docker-compose-with-prebuild-image-by-hascheksolutions)
 * [Why would I want to host my own images?](#why-would-i-want-to-host-my-own-images)
 * [Features](#features)
 * [Smart query system](#smart-query-system)
@@ -45,6 +46,29 @@ docker run -d -p 80:80 -e "TITLE=My own PictShare" hascheksolutions/pictshare
 ```
 
 [![Docker setup](http://www.pictshare.net/b65dea2117.gif)](https://www.pictshare.net/8a1dec0973.mp4)
+
+### Docker Compose With Prebuild Image by hascheksolutions
+
+Run container by docker-compose:
+- First, install docker compose:
+[Docker official docs](https://docs.docker.com/compose/install/)
+- Pull docker-compose file:
+```bash
+wget https://raw.githubusercontent.com/chrisiaut/pictshare/master/docker-compose.yml
+```
+- Edit docker-compose file:
+```bash
+vi docker-compose.yml
+```
+- Run container by docker-compose:
+```bash
+docker-compose up
+```
+
+By using this compose file, you should know that:
+- Will make a directory "volumes" in the same directory where compose file is.
+- Change `AUTOUPDATE` to false from true by defalt.
+- And...it is highly recommended to build your own image.
 
 ### Without Docker
 
@@ -105,8 +129,8 @@ If there is some option that's not recognized by PictShare it's simply ignored, 
 |     Option    |      Parameter      |      Example URL       |      Result |
 | ------------- | ------------------- | ---------------------- | ----------- |
 **Resizing**  | | | |
-&lt;width&gt;**x**&lt;height&gt; | -none-			| https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg) |
-forcesize      | -none-				| https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg) |
+&lt;width&gt;**x**&lt;height&gt; | -none-           | https://pictshare.net/20x20/b260e36b60.jpg | ![Resized](https://pictshare.net/20x20/b260e36b60.jpg) |
+forcesize      | -none-             | https://pictshare.net/100x400/forcesize/b260e36b60.jpg | ![Forced size](https://pictshare.net/100x400/forcesize/b260e36b60.jpg) |
 **Albums**   |  |  | |
 just add multiple image hashes            | -none-             | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg | Takes the **images** you put in the URL and makes an album out of them. All filters are supported!
 embed        | -none-                     | https://www.pictshare.net/b260e36b60.jpg/32c9cf77c5.jpg/163484b6b1.jpg/embed | Renders the album without CSS and with transparent background so you can embed them easily
@@ -122,27 +146,27 @@ preview        | -none-             | https://www.pictshare.net/mp4/preview/1026
 raw            | -none-             | https://www.pictshare.net/raw/65714d22f0.mp4 | Renders the mp4 video directly so you can link it
 preview        | -none-             | https://www.pictshare.net/preview/65714d22f0.mp4 | Renders the first frame of the MP4 as an JPEG image
 **Rotating**   |  |  | 
-left		   | -none-				| https://pictshare.net/left/b260e36b60.jpg | ![Rotated left](https://pictshare.net/200/left/b260e36b60.jpg)
-right		   | -none-				| https://pictshare.net/right/b260e36b60.jpg | ![Rotated right](https://pictshare.net/200/right/b260e36b60.jpg)
-upside		   | -none-				| https://pictshare.net/upside/b260e36b60.jpg | ![Upside down](https://pictshare.net/200/upside/b260e36b60.jpg)
+left           | -none-             | https://pictshare.net/left/b260e36b60.jpg | ![Rotated left](https://pictshare.net/200/left/b260e36b60.jpg)
+right          | -none-             | https://pictshare.net/right/b260e36b60.jpg | ![Rotated right](https://pictshare.net/200/right/b260e36b60.jpg)
+upside         | -none-             | https://pictshare.net/upside/b260e36b60.jpg | ![Upside down](https://pictshare.net/200/upside/b260e36b60.jpg)
 **Filters**    |  |  | 
 negative       | -none-              | https://pictshare.net/negative/b260e36b60.jpg         | ![Negative](https://pictshare.net/negative/200/b260e36b60.jpg)
-grayscale      | -none-              | https://pictshare.net/grayscale/b260e36b60.jpg 		    | ![grayscale](https://pictshare.net/grayscale/200/b260e36b60.jpg)
-brightness     | -255 to 255         | https://pictshare.net/brightness_100/b260e36b60.jpg 	| ![brightness](https://pictshare.net/brightness_100/200/b260e36b60.jpg)
-edgedetect     | -none-              | https://pictshare.net/edgedetect/b260e36b60.jpg 		  | ![edgedetect](https://pictshare.net/edgedetect/200/b260e36b60.jpg)
-smooth         | -10 to 2048         | https://pictshare.net/smooth_3/b260e36b60.jpg 		    | ![smooth](https://pictshare.net/smooth_3/200/b260e36b60.jpg)
+grayscale      | -none-              | https://pictshare.net/grayscale/b260e36b60.jpg           | ![grayscale](https://pictshare.net/grayscale/200/b260e36b60.jpg)
+brightness     | -255 to 255         | https://pictshare.net/brightness_100/b260e36b60.jpg  | ![brightness](https://pictshare.net/brightness_100/200/b260e36b60.jpg)
+edgedetect     | -none-              | https://pictshare.net/edgedetect/b260e36b60.jpg        | ![edgedetect](https://pictshare.net/edgedetect/200/b260e36b60.jpg)
+smooth         | -10 to 2048         | https://pictshare.net/smooth_3/b260e36b60.jpg            | ![smooth](https://pictshare.net/smooth_3/200/b260e36b60.jpg)
 contrast       | -100 to 100         | https://pictshare.net/contrast_40/b260e36b60.jpg     | ![contrast](https://pictshare.net/contrast_40/200/b260e36b60.jpg)
 pixelate       | 0 to 100            | https://pictshare.net/pixelate_10/b260e36b60.jpg      | ![pixelate](https://pictshare.net/pixelate_10/200/b260e36b60.jpg)
 blur           | -none- or 0 to 5    | https://pictshare.net/blur/b260e36b60.jpg      | ![pixelate](https://pictshare.net/blur/200/b260e36b60.jpg)
-sepia			| -none-				| https://pictshare.net/sepia/b260e36b60.jpg	| ![instagram filter sepia](https://pictshare.net/200/sepia/b260e36b60.jpg)
-sharpen			| -none-				| https://pictshare.net/sharpen/b260e36b60.jpg	| ![instagram filter sharpen](https://pictshare.net/200/sharpen/b260e36b60.jpg)
-emboss			| -none-				| https://pictshare.net/emboss/b260e36b60.jpg	| ![instagram filter emboss](https://pictshare.net/200/emboss/b260e36b60.jpg)
-cool			| -none-				| https://pictshare.net/cool/b260e36b60.jpg		| ![instagram filter cool](https://pictshare.net/200/cool/b260e36b60.jpg)	
-light			| -none-				| https://pictshare.net/light/b260e36b60.jpg	| ![instagram filter light](https://pictshare.net/200/light/b260e36b60.jpg)
-aqua			| -none-				| https://pictshare.net/aqua/b260e36b60.jpg		| ![instagram filter aqua](https://pictshare.net/200/aqua/b260e36b60.jpg)	
-fuzzy			| -none-				| https://pictshare.net/fuzzy/b260e36b60.jpg	| ![instagram filter fuzzy](https://pictshare.net/200/fuzzy/b260e36b60.jpg)
-boost			| -none-				| https://pictshare.net/boost/b260e36b60.jpg	| ![instagram filter boost](https://pictshare.net/200/boost/b260e36b60.jpg)
-gray			| -none-				| https://pictshare.net/gray/b260e36b60.jpg		| ![instagram filter gray](https://pictshare.net/200/gray/b260e36b60.jpg)	
+sepia           | -none-                | https://pictshare.net/sepia/b260e36b60.jpg    | ![instagram filter sepia](https://pictshare.net/200/sepia/b260e36b60.jpg)
+sharpen         | -none-                | https://pictshare.net/sharpen/b260e36b60.jpg  | ![instagram filter sharpen](https://pictshare.net/200/sharpen/b260e36b60.jpg)
+emboss          | -none-                | https://pictshare.net/emboss/b260e36b60.jpg   | ![instagram filter emboss](https://pictshare.net/200/emboss/b260e36b60.jpg)
+cool            | -none-                | https://pictshare.net/cool/b260e36b60.jpg     | ![instagram filter cool](https://pictshare.net/200/cool/b260e36b60.jpg)   
+light           | -none-                | https://pictshare.net/light/b260e36b60.jpg    | ![instagram filter light](https://pictshare.net/200/light/b260e36b60.jpg)
+aqua            | -none-                | https://pictshare.net/aqua/b260e36b60.jpg     | ![instagram filter aqua](https://pictshare.net/200/aqua/b260e36b60.jpg)   
+fuzzy           | -none-                | https://pictshare.net/fuzzy/b260e36b60.jpg    | ![instagram filter fuzzy](https://pictshare.net/200/fuzzy/b260e36b60.jpg)
+boost           | -none-                | https://pictshare.net/boost/b260e36b60.jpg    | ![instagram filter boost](https://pictshare.net/200/boost/b260e36b60.jpg)
+gray            | -none-                | https://pictshare.net/gray/b260e36b60.jpg     | ![instagram filter gray](https://pictshare.net/200/gray/b260e36b60.jpg)   
 
 You can also combine as many options as you want. Even multiple times! Want your image to be negative, resized, grayscale , with increased brightness and negate it again? No problem: https://pictshare.net/500x500/grayscale/negative/brightness_100/negative/b260e36b60.jpg
 
@@ -249,20 +273,20 @@ This is a simple vHost config that should make PictShare work on Apache2.
 
 ```
 <VirtualHost *:80 >
-	ServerAdmin webmaster@sub.domain.tld
-	ServerName sub.domain.tld
-	ServerAlias sub.domain.tld
-	DocumentRoot /var/www/html
+    ServerAdmin webmaster@sub.domain.tld
+    ServerName sub.domain.tld
+    ServerAlias sub.domain.tld
+    DocumentRoot /var/www/html
 
-	<Directory /var/www/html/>
-		Options Indexes FollowSymLinks MultiViews
-		AllowOverride All
-		Order allow,deny
-		Allow from All
-	</Directory>
-	ErrorLog ${APACHE_LOG_DIR}/error.log
-	LogLevel warn
-	CustomLog ${APACHE_LOG_DIR}/access.log combined
+    <Directory /var/www/html/>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Order allow,deny
+        Allow from All
+    </Directory>
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    LogLevel warn
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 ```
 
