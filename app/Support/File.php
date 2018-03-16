@@ -326,7 +326,7 @@ class File
         /** @var Database $db */
         $db = app()->getContainer()->get(Database::class);
 
-        $query = 'SELECT subdir FROM hashes WHERE name = :hash';
+        $query = 'SELECT `subdir` FROM `hashes` WHERE `name` = :hash';
         $data  = ['hash' => $hash];
 
         $stmt = $db->execute($query, $data);
@@ -342,6 +342,10 @@ class File
         }
 
         $subdir = $sqlResult[0]['subdir'];
+
+        $query = 'UPDATE `hashes` SET `last_access_ts` = now() WHERE `name` = :hash';
+        // TODO: error handling?
+        $db->execute($query, $data);
 
         return $subdir;
     }

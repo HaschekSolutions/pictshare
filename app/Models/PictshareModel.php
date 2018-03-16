@@ -515,6 +515,10 @@ class PictshareModel
                 return false;
             }
 
+            $query = 'UPDATE `hashes` SET `last_access_ts` = now() WHERE `sha_hash` = :hash';
+            // TODO: error handling?
+            $this->database->execute($query, $data);
+
             return [
                 $sqlResult[0]['name'],
                 $sqlResult[0]['subdir']
@@ -562,7 +566,7 @@ class PictshareModel
 
         // and save calculated sha (along with hash and subdir) into hashes
         if (config('app.hashes_store') === 'database') {
-            $query = "INSERT INTO `hashes` (`sha_hash`, `name`, `subdir`) VALUES (:hash, :name, :subdir)";
+            $query = "INSERT INTO `hashes` (`sha_hash`, `name`, `subdir`, `last_access_ts`, `archived`, `archive_location`) VALUES (:hash, :name, :subdir, now(), 0, '')";
             $data  = ['hash' => $sha, 'name' => $hash, 'subdir' => $subdir];
 
             // TODO: error handling?

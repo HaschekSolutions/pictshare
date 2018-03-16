@@ -289,14 +289,18 @@ This setting is set to ```filesystem``` by default.
 DB table structure:
 ```
 CREATE TABLE `hashes` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sha_hash` varchar(40) NOT NULL,
   `name` varchar(255) NOT NULL,
   `subdir` varchar(255) NOT NULL DEFAULT '',
+  `last_access_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `archived` tinyint(1) NOT NULL DEFAULT '0',
+  `archive_location` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `hash_UNIQUE` (`sha_hash`),
-  UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+  UNIQUE KEY `name_UNIQUE` (`name`),
+  KEY `last_access_ts` (`last_access_ts`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
 ## Security and privacy
