@@ -104,11 +104,11 @@ class PictshareModel extends Model
 			}
 			else if($el=='forcesize')
 				$data['forcesize'] = true;
-			else if(strlen(MASTER_DELETE_CODE)>10 && $el=='delete_'.MASTER_DELETE_CODE)
+			else if(strlen(MASTER_DELETE_CODE)>10 && $el=='delete_'.strtolower(MASTER_DELETE_CODE))
 				$data['delete'] = true;
 			else if($el=='delete' && $this->mayDeleteImages()===true)
 				$data['delete'] = true;
-			else if((strlen(MASTER_DELETE_CODE)>10 && $el=='delete_'.MASTER_DELETE_CODE) || $this->deleteCodeExists($el))
+			else if((strlen(MASTER_DELETE_CODE)>10 && $el=='delete_'.strtolower(MASTER_DELETE_CODE)) || $this->deleteCodeExists($el))
 				$data['delete'] = $this->deleteCodeExists($el)?$el:true;
 				
 		}
