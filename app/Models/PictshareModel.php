@@ -933,9 +933,10 @@ class PictshareModel
         $masterDeleteCode = $this->config->get('app.master_delete_code');
 
         for ($i = 0, $j = count($urlArr); $i < $j; $i++) {
-            $el   = Str::sanitize($urlArr[$i]);
-            $orig = $el;
-            $el   = strtolower($el);
+            $orig  = $urlArr[$i];
+            $clean = Str::sanitize($orig);
+            $el    = strtolower($clean);
+
             if (!$el) {
                 continue;
             }
@@ -944,15 +945,21 @@ class PictshareModel
                 $data['changecode'] = substr($el, 11);
             }
 
-            if (($isFile = File::isFile($orig)) || ($i === ($j - 1))) {
+            if (($isFile = File::isFile($clean)) || ($isFile2 = File::isFile($orig)) || ($i === ($j - 1))) {
                 if ($el === 'robots.txt') {
                     continue;
                 }
 
-                $subdir = File::getSubDirFromHash($orig);
+                if (!$isFile && isset($isFile2) && $isFile2) {
+                    $clean = $orig;
+                }
 
-                if (!$isFile && (( $fetchScript = $this->config->get('app.fetch_script') ) !== false)) {
-                    $hashdir = ($subdir !== '' ? $subdir . '/' : '') . $orig . '/' . $orig;
+                $subdir = File::getSubDirFromHash($clean);
+
+                if (!$isFile && isset($isFile2) && !$isFile2 &&
+                    (( $fetchScript = $this->config->get('app.fetch_script') ) !== false)
+                ) {
+                    $hashdir = ($subdir !== '' ? $subdir . '/' : '') . $clean . '/' . $clean;
                     //$output = shell_exec($fetchScript . ' ' . $hashdir);
                     $output = exec($fetchScript . ' ' . $hashdir, $outputArr, $returnVar);
 
@@ -968,9 +975,9 @@ class PictshareModel
                     if (! isset($data['album'])) {
                         $data['album'][] = $data['hash'];
                     }
-                    $data['album'][] = $orig;
+                    $data['album'][] = $clean;
                 }
-                $data['hash']   = $orig;
+                $data['hash']   = $clean;
                 $data['subdir'] = $subdir;
             } elseif ($el == 'mp4' || $el == 'raw' || $el == 'preview' || $el == 'webm' || $el == 'ogg') {
                 $data[$el] = 1;
