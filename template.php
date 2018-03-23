@@ -35,7 +35,7 @@
         <div class="container" id="headcontainer">
             <div class="row">
                 <div class="col-md-8">
-                    <a href="<?php echo PATH; ?>"><img src="<?php echo PATH; ?>css/imgs/logo.png" /></a>
+                    <a href="<?php echo PATH; ?>"><img src="<?php echo PATH; ?>css/imgs/logo/horizontal3.png" /></a>
                     <h4><?php echo $slogan; ?></h4>
                     <div class="well">
                         <?php echo $content?>
