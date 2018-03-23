@@ -72,3 +72,15 @@ define('FORCE_DOMAIN', false);
 //Shall errors be displayed to the user?
 //For dev environments: true, in production: false
 define('SHOW_ERRORS', false);
+
+
+//for scalability reasons you might want to upload images to cloud providers
+//remove comments to use
+
+/* BACKBLAZE B2 */
+/* You can find your info here: https://secure.backblaze.com/b2_buckets.htm */
+//define('BACKBLAZE',true); //true=>use backblaze to upload images, false=>don't
+//define('BACKBLAZE_ID','');
+//define('BACKBLAZE_KEY', '');
+//define('BACKBLAZE_BUCKET_ID', '');
+//define('BACKBLAZE_BUCKET_NAME', '');

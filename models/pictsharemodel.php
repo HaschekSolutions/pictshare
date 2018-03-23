@@ -59,6 +59,15 @@ class PictshareModel extends Model
 		else
 			return array('status'=>'ERR','Reason'=>'Image not found');
 	}
+
+	function couldThisBeAnImage($string)
+	{
+		$len = strlen($string);
+		$dot = strpos($string,'.');
+		if(!$dot) return false;
+		if($dot<=10 && ( ($len-$dot) == 4 || ($len-$dot) == 5 ) )
+			return true;
+	}
 	
 	function urlToData($url)
 	{
@@ -75,7 +84,7 @@ class PictshareModel extends Model
 			
 			if($this->isImage($el))
 			{
-				//if there are mor than one hashes in url
+				//if there are more than one hashes in url
 				//make an album from them
 				if($data['hash'])
 				{
@@ -84,6 +93,12 @@ class PictshareModel extends Model
 					$data['album'][] = $el;
 				}
 				$data['hash']=$el;
+			}
+			else if(BACKBLAZE === true && $this->couldThisBeAnImage($el)) //looks like it might be a hash but didn't find it here. Let's see
+			{
+				$b = new Backblaze();
+				if($b->download($el)) //if the backblaze download function says it's an image, we'll take it
+					$data['hash'] = $el;
 			}
 			else if($el=='mp4' || $el=='raw' || $el=='preview' || $el=='webm' || $el=='ogg')
 				$data[$el] = 1;
@@ -195,6 +210,14 @@ class PictshareModel extends Model
 		}
 		
 		rmdir($base_path);
+
+		//delete from backblaze if configured
+		if(BACKBLAZE===true)
+		{
+			$b = new Backblaze();
+			$b->deleteFile($hash);
+		}
+		
 		
 		return true;
     }
@@ -464,6 +487,12 @@ class PictshareModel extends Model
 			$fh = fopen(ROOT.DS.'upload'.DS.'uploads.txt', 'a');
 			fwrite($fh, time().';'.$url.';'.$hash.';'.getUserIP()."\n");
 			fclose($fh);
+		}
+
+		if(BACKBLAZE===true)
+		{
+			$b = new Backblaze();
+			$b->upload($hash);
 		}
 
 		return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.PATH.$hash,'domain'=>DOMAINPATH,'deletecode'=>$this->generateDeleteCodeForImage($hash));
