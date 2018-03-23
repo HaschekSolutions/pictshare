@@ -400,12 +400,15 @@ class PictshareModel
         $subdirForce    = config('app.subdir_force');
 
         if ($filenameEnable && isset($_REQUEST['filename'])) {
-            $filename = trim($_REQUEST['filename']);
+            $filename = Str::sanitize(trim($_REQUEST['filename']));
 
-            // to ensure uniqueness of "hash" when using provided filenames we
-            // prepend 8-characters (calculated as CRC32 hash of the file) to
-            // the name which should avoid collisions of same name files
-            $filename = hash_file('crc32', $url) . '_' . $filename;
+            // to ensure uniqueness of "hash" when using provided filenames we prepend
+            // 8-characters calculated as CRC32 hash of the file + 8-characters
+            // calculated as CRC32 hash of subdir, filename and random string
+            // to the name which should avoid collisions of same name files
+            $filehash   = hash_file('crc32b', $url);
+            $randomhash = hash('crc32b', $subdir . $filename . Str::getRandomString());
+            $filename   = $filehash . $randomhash . '_' . $filename;
         }
 
         if ($filenameEnable && $filenameForce &&
@@ -934,7 +937,7 @@ class PictshareModel
 
         for ($i = 0, $j = count($urlArr); $i < $j; $i++) {
             $orig  = $urlArr[$i];
-            $clean = Str::sanitize($orig);
+            $clean = Str::sanitize(trim($orig));
             $el    = strtolower($clean);
 
             if (!$el) {
@@ -945,20 +948,14 @@ class PictshareModel
                 $data['changecode'] = substr($el, 11);
             }
 
-            if (($isFile = File::isFile($clean)) || ($isFile2 = File::isFile($orig)) || ($i === ($j - 1))) {
+            if (($isFile = File::isFile($clean)) || ($i === ($j - 1))) {
                 if ($el === 'robots.txt') {
                     continue;
                 }
 
-                if (!$isFile && isset($isFile2) && $isFile2) {
-                    $clean = $orig;
-                }
-
                 $subdir = File::getSubDirFromHash($clean);
 
-                if (!$isFile && isset($isFile2) && !$isFile2 &&
-                    (( $fetchScript = $this->config->get('app.fetch_script') ) !== false)
-                ) {
+                if (!$isFile && (( $fetchScript = $this->config->get('app.fetch_script') ) !== false)) {
                     $hashdir = ($subdir !== '' ? $subdir . '/' : '') . $clean . '/' . $clean;
                     //$output = shell_exec($fetchScript . ' ' . $hashdir);
                     $output = exec($fetchScript . ' ' . $hashdir, $outputArr, $returnVar);
