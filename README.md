@@ -3,7 +3,6 @@
 PictShare is a multi lingual, open source image hosting service with a simple resizing and upload API that you can host yourself.
 
 ---
-[![Rocket.Chat](https://rocket.haschek.at/images/join-chat.svg)](https://rocket.haschek.at/channel/pictshare)
 [![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/chrisiaut/pictshare/blob/master/LICENSE)
 
 
@@ -224,6 +223,11 @@ If you access the image with the code like this: ```https://www.pictshare.net/ch
 - You can enable or disable upload logging. Don't want to know who uploaded stuff? Just change the setting in inc/config.inc.php
 - No exif data is stored on the server, all jpegs get cleaned on upload
 - You have full control over your data. PictShare doesn't need remote libaries or tracking crap
+
+## Scaling
+You can use Backblaze Buckets for storage of images so you can use multiple instances of PictShare and if the image is not found on the instance, it will look in the bucket.
+
+Just add your credentials to the config.inc.php file as described in the ```example.config.inc.php``` file.
 
 ## Requirements
 - Apache or Nginx Webserver with PHP
