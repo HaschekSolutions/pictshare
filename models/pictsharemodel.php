@@ -94,7 +94,7 @@ class PictshareModel extends Model
 				}
 				$data['hash']=$el;
 			}
-			else if(BACKBLAZE === true && $this->couldThisBeAnImage($el)) //looks like it might be a hash but didn't find it here. Let's see
+			else if(BACKBLAZE === true && $this->couldThisBeAnImage($el) && BACKBLAZE_AUTODOWNLOAD ===true) //looks like it might be a hash but didn't find it here. Let's see
 			{
 				$b = new Backblaze();
 				if($b->download($el)) //if the backblaze download function says it's an image, we'll take it
@@ -212,7 +212,7 @@ class PictshareModel extends Model
 		rmdir($base_path);
 
 		//delete from backblaze if configured
-		if(BACKBLAZE===true)
+		if(BACKBLAZE===true && BACKBLAZE_AUTOUPDELETE===true)
 		{
 			$b = new Backblaze();
 			$b->deleteFile($hash);
@@ -489,7 +489,7 @@ class PictshareModel extends Model
 			fclose($fh);
 		}
 
-		if(BACKBLAZE===true)
+		if(BACKBLAZE===true && BACKBLAZE_AUTOUPLOAD===true)
 		{
 			$b = new Backblaze();
 			$b->upload($hash);

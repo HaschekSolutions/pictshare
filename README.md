@@ -225,7 +225,7 @@ If you access the image with the code like this: ```https://www.pictshare.net/ch
 - You have full control over your data. PictShare doesn't need remote libaries or tracking crap
 
 ## Scaling
-You can use Backblaze Buckets for storage of images so you can use multiple instances of PictShare and if the image is not found on the instance, it will look in the bucket.
+You can use **Backblaze Buckets** for storage of images so you can use multiple instances of PictShare and if the image is not found on the instance, it will look in the bucket.
 
 Just add your credentials to the config.inc.php file as described in the ```example.config.inc.php``` file.
 
@@ -237,8 +237,8 @@ Just add your credentials to the config.inc.php file as described in the ```exam
 ## nginx config
 This is a simple config file that should make PictShare work on nginx
 
-- Install php fpm: ```apt-get install php5-fpm```
-- Install php Graphics libraries: ```apt-get install php5-gd```
+- Install php fpm: ```apt-get install php-fpm```
+- Install php Graphics libraries: ```apt-get install php-gd```
 
 ```
 server {

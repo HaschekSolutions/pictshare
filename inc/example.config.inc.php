@@ -79,8 +79,11 @@ define('SHOW_ERRORS', false);
 
 /* BACKBLAZE B2 */
 /* You can find your info here: https://secure.backblaze.com/b2_buckets.htm */
-//define('BACKBLAZE',true); //true=>use backblaze to upload images, false=>don't
+//define('BACKBLAZE',true); //true=>use backblaze false=>don't
 //define('BACKBLAZE_ID','');
 //define('BACKBLAZE_KEY', '');
 //define('BACKBLAZE_BUCKET_ID', '');
 //define('BACKBLAZE_BUCKET_NAME', '');
+//define('BACKBLAZE_AUTODOWNLOAD', true);   //if true, will download images from backblaze if not found local
+//define('BACKBLAZE_AUTOUPLOAD', true);     //if true, will upload images to backblaze when they are uploaded to pictshare
+//define('BACKBLAZE_AUTOUPDELETE', true);     //if true, will delete images from backblaze if they are deleted from pictshare
