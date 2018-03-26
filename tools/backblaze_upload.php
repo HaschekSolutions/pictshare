@@ -42,7 +42,7 @@ echo "[i] Loading local files ..";
 while (false !== ($filename = readdir($dh))) {
     $img = $dir.$filename.DS.$filename;
     if(!file_exists($img)) continue;
-    $type = $pm->getTypeOfFile($img);
+    $type = pathinfo($img, PATHINFO_EXTENSION);
     $type = $pm->isTypeAllowed($type);
     if($type)
         $localfiles[] = $filename;
