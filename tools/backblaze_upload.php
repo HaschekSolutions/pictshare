@@ -5,9 +5,10 @@
 * This tool uploads all local images to backblaze if they don't exist yet
 * You can use this to backup your images to backblaze or set it up as your data source for scaling
 *
-*/
+*/ 
 
 if(php_sapi_name() !== 'cli') exit('This script can only be called via CLI');
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', dirname(__FILE__).DS.'..');
 include_once(ROOT.DS.'inc/config.inc.php');
