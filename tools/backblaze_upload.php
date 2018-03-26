@@ -5,7 +5,6 @@
 * This tool uploads all local images to backblaze if they don't exist yet
 * You can use this to backup your images to backblaze or set it up as your data source for scaling
 *
-* This scripts needs the "bcmath" library. install it with: apt-get install php-bcmath
 */
 
 if(php_sapi_name() !== 'cli') exit('This script can only be called via CLI');
@@ -59,17 +58,20 @@ foreach($localfiles as $hash)
         if($sim!==true)
         $b->upload($hash);
         $uploadsize+=filesize($dir.$hash.DS.$hash);
-        echo " done.\tUploaded so far: ".renderSize($uploadsize,2,false)."\n";
+        echo " done.\tUploaded so far: ".renderSize($uploadsize)."\n";
         
     }
 }
+function renderSize($bytes, $precision = 2) { 
+    $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
 
-function renderSize($byte,$precision=2,$mibi=true)
-{
-    $base = (string)($mibi?1024:1000);
-    $labels = array('K','M','G','T','P','E','Z','Y');
-    for($i=8;$i>=1;$i--)
-        if(bccomp($byte,bcpow($base, $i))>=0)
-            return bcdiv($byte,bcpow($base, $i), $precision).' '.$labels[$i-1].($mibi?'iB':'B');
-    return $byte.' Byte';
-}
+    $bytes = max($bytes, 0); 
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
+    $pow = min($pow, count($units) - 1); 
+
+    // Uncomment one of the following alternatives
+    $bytes /= pow(1024, $pow);
+    // $bytes /= (1 << (10 * $pow)); 
+
+    return round($bytes, $precision) . ' ' . $units[$pow]; 
+} 
