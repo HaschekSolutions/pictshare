@@ -271,5 +271,7 @@ class Backblaze
 
         if($data['nextFileName'])
             $this->getAllFilesInBucket($data['nextFileName']);
+
+        return $this->files;
     }
 }
