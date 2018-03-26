@@ -17,12 +17,19 @@ include_once(ROOT.DS.'classes/backblaze.php');
 
 $pm = new PictshareModel();
 
-if($argv[1]=='sim')
+if(in_array('sim',$argv))
 {
     echo "[!!!!] SIMULATION MODE. Nothing will be uploaded [!!!!] \n\n";
     $sim = true;
 }
 else $sim = false;
+
+if(in_array('recentlyrendered',$argv))
+{
+    echo "[O] Will only upload if the image was recently viewed. Recently meaning now minus one year \n\n";
+    $recentonly = true;
+}
+else $recentonly = false;
     
 
 $b = new Backblaze();
@@ -45,7 +52,14 @@ while (false !== ($filename = readdir($dh))) {
     $type = pathinfo($img, PATHINFO_EXTENSION);
     $type = $pm->isTypeAllowed($type);
     if($type)
+    {
+        if($recentonly===true)
+        {
+            $recent = @file_get_contents($dir.$filename.DS.'last_rendered.txt');
+            if(!$recent || (time()-$recent) > 3600*24*365) continue;
+        }
         $localfiles[] = $filename;
+    }
 }
 
 echo " done. Got ".count($localfiles)." files\n";
@@ -60,7 +74,6 @@ foreach($localfiles as $hash)
         $b->upload($hash);
         $uploadsize+=filesize($dir.$hash.DS.$hash);
         echo " done.\tUploaded so far: ".renderSize($uploadsize)."\n";
-        
     }
 }
 function renderSize($bytes, $precision = 2) { 
