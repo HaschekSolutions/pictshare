@@ -212,7 +212,7 @@ class PictshareModel extends Model
 		rmdir($base_path);
 
 		//delete from backblaze if configured
-		if(BACKBLAZE===true && BACKBLAZE_AUTOUPDELETE===true)
+		if(BACKBLAZE===true && BACKBLAZE_AUTODELETE===true)
 		{
 			$b = new Backblaze();
 			$b->deleteFile($hash);

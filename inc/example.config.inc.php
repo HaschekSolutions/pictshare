@@ -86,4 +86,4 @@ define('SHOW_ERRORS', false);
 //define('BACKBLAZE_BUCKET_NAME', '');
 //define('BACKBLAZE_AUTODOWNLOAD', true);   //if true, will download images from backblaze if not found local
 //define('BACKBLAZE_AUTOUPLOAD', true);     //if true, will upload images to backblaze when they are uploaded to pictshare
-//define('BACKBLAZE_AUTOUPDELETE', true);     //if true, will delete images from backblaze if they are deleted from pictshare
+//define('BACKBLAZE_AUTODELETE', true);     //if true, will delete images from backblaze if they are deleted from pictshare
