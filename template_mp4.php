@@ -40,8 +40,12 @@
         <div id="container">
             <video id="video" poster="<?php echo DOMAINPATH.PATH.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>   
                 <source src="<?php echo DOMAINPATH.PATH.'raw/mp4/'.$hash; ?>" type="video/mp4">
-                <!--<source src="<?php echo DOMAINPATH.PATH.'raw/webm/'.$hash; ?>" type="video/webm"> 
-                <source src="<?php echo DOMAINPATH.PATH.'raw/ogg/'.$hash; ?>" type="video/ogg">-->
+                <?php
+                    if(file_exists(ROOT.DS.'upload'.DS.$hash.DS.'webm_1.'.$hash))
+                        echo '<source src="'.DOMAINPATH.PATH.'raw/webm/'.$hash.'" type="video/webm">'."\n";
+                    if(file_exists(ROOT.DS.'upload'.DS.$hash.DS.'ogg_1.'.$hash))
+                        echo '<source src="'.DOMAINPATH.PATH.'raw/ogg/'.$hash.'" type="video/ogg">'."\n";
+                ?>
             </video>
         </div>
             <small><?php echo $filesize; ?></small>

@@ -853,7 +853,7 @@ class PictshareModel extends Model
 		switch($type)
 		{
 			case 'mp4': 
-				$addition = '-c:v libx264';
+				$addition = '-c:v libx264 -profile:v baseline -level 3.0 -pix_fmt yuv420p';
 			break;
 		}
 		
