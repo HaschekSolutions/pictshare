@@ -5,7 +5,12 @@
 * Since we don't know where the mp4's come from we'll have to handle them ourselves
 * While desktop browsers are more forgiving older phones might not be
 *
+* usage: php re-encode_mp4.php [noogg] [nowebm] [noskip]
+*
+* Params:
+* noskip => Won't skip existing videos (re-renders them)
 */ 
+
 
 if(php_sapi_name() !== 'cli') exit('This script can only be called via CLI');
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
@@ -60,50 +65,4 @@ foreach($localfiles as $hash)
         echo "\tdone\n";
     }
 
-    if(in_array('ogg',$argv))
-    {
-        $tmp = ROOT.DS.'tmp'.DS.$hash.'.ogg';
-        $ogg = $dir.$hash.DS.'ogg_1.'.$hash;
-        if(file_exists($ogg) && $allowskipping==true)
-            echo "Skipping OGG of $hash\n";
-        else
-        {
-            echo "  [OGG] User wants OGG. Will do.. ";
-            $cmd = "../bin/ffmpeg -y -i $img -loglevel panic -vcodec libtheora -an $tmp && cp $tmp $ogg";
-            system($cmd);
-            echo "done\n";
-        }
-    }
-
-    if(in_array('webm',$argv))
-    {
-        $tmp = ROOT.DS.'tmp'.DS.$hash.'.webm';
-        $webm = $dir.$hash.DS.'webm_1.'.$hash;
-        if(file_exists($webm) && $allowskipping==true)
-            echo "Skipping WEBM of $hash\n";
-        else
-        {
-            echo "  [WEBM] User wants WEBM. Will do.. ";
-            $cmd = "../bin/ffmpeg -y -i $img -loglevel panic -c:v libvpx -crf 10 -b:v 1M $tmp && cp $tmp $webm";
-            system($cmd);
-            echo "done\n";
-        }
-    }
-
-    
 }
-
-
-function renderSize($bytes, $precision = 2) { 
-    $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
-
-    $bytes = max($bytes, 0); 
-    $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
-    $pow = min($pow, count($units) - 1); 
-
-    // Uncomment one of the following alternatives
-    $bytes /= pow(1024, $pow);
-    // $bytes /= (1 << (10 * $pow)); 
-
-    return round($bytes, $precision) . ' ' . $units[$pow]; 
-} 
