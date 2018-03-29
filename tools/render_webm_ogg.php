@@ -1,9 +1,9 @@
 <?php 
 
 /*
-* MP4 re-encoder
-* Since we don't know where the mp4's come from we'll have to handle them ourselves
-* While desktop browsers are more forgiving older phones might not be
+* MP4 to webm and ogg converter
+* When MP4s are uploaded we only have MP4s. This script converts also to
+* webm and ogg for wider range of supported devices
 *
 * usage: php render_webm_ogg.php [noogg] [nowebm] [noskip]
 *
