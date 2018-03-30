@@ -482,6 +482,12 @@ class PictshareModel extends Model
 			imagejpeg($res, $file, (defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
 		}
 
+		//re-render new mp4 by calling the re-encode script
+		if($type=='mp4' && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
+		{
+			system("nohup php ".ROOT.DS.'tools'.DS.'re-encode_mp4.php force '.$hash." > /dev/null 2> /dev/null &");
+		}
+
 		if(LOG_UPLOADER)
 		{
 			$fh = fopen(ROOT.DS.'upload'.DS.'uploads.txt', 'a');
