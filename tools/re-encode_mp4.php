@@ -25,7 +25,13 @@ $dir = ROOT.DS.'upload'.DS;
 $dh  = opendir($dir);
 $localfiles = array();
 
-if(in_array('noskip',$argv))
+foreach($argv as $arg)
+{
+    if($pm->isImage($arg) && $pm->isTypeAllowed(pathinfo($dir.$arg, PATHINFO_EXTENSION)) == 'mp4')
+        $localfiles[] = $arg;
+}
+
+if(in_array('noskip',$argv) || in_array('force',$argv))
 {
     echo "Won't skip existing files\n\n";
     $allowskipping = false;
@@ -36,19 +42,22 @@ else
 //making sure ffmpeg is executable
 system("chmod +x ".ROOT.DS.'bin'.DS.'ffmpeg');
 
-echo "[i] Finding local mp4 files ..";
-while (false !== ($filename = readdir($dh))) {
-    $img = $dir.$filename.DS.$filename;
-    if(!file_exists($img)) continue;
-    $type = pathinfo($img, PATHINFO_EXTENSION);
-    $type = $pm->isTypeAllowed($type);
-    if($type=='mp4')
-        $localfiles[] = $filename;
+if(count($localfiles)==0)
+{
+    echo "[i] Finding local mp4 files\n";
+    while (false !== ($filename = readdir($dh))) {
+        $img = $dir.$filename.DS.$filename;
+        if(!file_exists($img)) continue;
+        $type = pathinfo($img, PATHINFO_EXTENSION);
+        $type = $pm->isTypeAllowed($type);
+        if($type=='mp4')
+            $localfiles[] = $filename;
+    }
 }
 
 if(count($localfiles)==0) exit('No MP4 files found'."\n");
 
-echo " done. Got ".count($localfiles)." files\n";
+echo "[i] Got ".count($localfiles)." files\n";
 
 echo "[i] Starting to convert\n";
 foreach($localfiles as $hash)
@@ -59,7 +68,7 @@ foreach($localfiles as $hash)
         echo "Skipping $hash\n";
     else 
     {
-        $cmd = "../bin/ffmpeg -y -i $img -loglevel panic -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
+        $cmd = ROOT.DS.'bin'.DS."ffmpeg -loglevel panic -y -i $img -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
         echo "  [i] Converting $hash";
         system($cmd);
         echo "\tdone\n";
