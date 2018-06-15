@@ -452,6 +452,17 @@ class PictshareModel extends Model
 		if(!$type)
 			return array('status'=>'ERR','reason'=>'wrong filetype');
 
+		$tempfile = ROOT.DS.'tmp'.DS.md5(rand(1,999)*rand(0,10000)+time());
+		file_put_contents($tempfile, file_get_contents($url));
+
+		//remove all exif data from jpeg
+		if($type=='jpg')
+		{
+			$res = imagecreatefromjpeg($tempfile);
+			imagejpeg($res, $tempfile, (defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
+		}
+		$url = $tempfile;
+
 		$dup_id = $this->isDuplicate($url);
 		if($dup_id)
 		{
@@ -464,9 +475,6 @@ class PictshareModel extends Model
 			$this->saveSHAOfFile($url,$hash);
 		}
 		
-		
-		
-			
 		if($dup_id)
 			return array('status'=>'OK','type'=>$type,'hash'=>$hash,'url'=>DOMAINPATH.PATH.$hash,'domain'=>DOMAINPATH);
 		
@@ -474,13 +482,7 @@ class PictshareModel extends Model
 		$file = ROOT.DS.'upload'.DS.$hash.DS.$hash;
 		
 		file_put_contents($file, file_get_contents($url));
-
-		//remove all exif data from jpeg
-		if($type=='jpg')
-		{
-			$res = imagecreatefromjpeg($file);
-			imagejpeg($res, $file, (defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
-		}
+		unlink($tempfile);
 
 		//re-render new mp4 by calling the re-encode script
 		if($type=='mp4' && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
