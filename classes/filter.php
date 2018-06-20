@@ -2,219 +2,217 @@
 
 class Filter
 {
-	/**
-	 * @var resource
-	 */
-	
-	private $image;
-	
-	/**
-	 * Directory for image assets.
-	 * @var string
-	 */
-	
-	private $assetDirectory;
+    /**
+     * @var resource
+     */
+    private $image;
 
-	/**
-	 * run constructor
-	 * @param resource &$image GD image resource
-	 */
-	
-	public function __construct(&$image)
-	{
-		$this->image = $image;
-		
-		$this->assetDirectory = dirname(dirname(dirname(__FILE__))) . '/assets/';
-	}
-	
-	/**
-	 * Get the current image resource
-	 * 
-	 * @return resource
-	 */
-	
-	public function getImage()
-	{
-		return $this->image;
-	}
+    /**
+     * Directory for image assets.
+     *
+     * @var string
+     */
+    private $assetDirectory;
 
-	public function bubbles()
-	{
-		$dest = imagecreatefromjpeg($this->assetDirectory . "pattern4.jpg");
+    /**
+     * run constructor
+     *
+     * @param resource &$image GD image resource
+     */
+    public function __construct(&$image)
+    {
+        $this->image = $image;
 
-		$x = imagesx($this->image);
-		$y = imagesy($this->image);
+        $this->assetDirectory = dirname(dirname(dirname(__FILE__))) . '/assets/';
+    }
 
-		$x2 = imagesx($dest);
-		$y2 = imagesy($dest);
+    /**
+     * Get the current image resource
+     *
+     * @return resource
+     */
+    public function getImage()
+    {
+        return $this->image;
+    }
 
-		$thumb = imagecreatetruecolor($x, $y);
-		imagecopyresampled($thumb, $dest, 0, 0, 0, 0, $x, $y, $x2, $y2);
+    public function bubbles()
+    {
+        $destination = imagecreatefromjpeg($this->assetDirectory . 'pattern4.jpg');
 
-		imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 20);
-		imagefilter($this->image, IMG_FILTER_BRIGHTNESS, 40);
-		imagefilter($this->image, IMG_FILTER_CONTRAST, -10);
+        $x = imagesx($this->image);
+        $y = imagesy($this->image);
 
-		return $this;
-	}
+        $x2 = imagesx($destination);
+        $y2 = imagesy($destination);
 
-	public function colorise()
-	{
-		$dest = imagecreatefromjpeg($this->assetDirectory . "pattern5.jpg");
+        $thumb = imagecreatetruecolor($x, $y);
+        imagecopyresampled($thumb, $destination, 0, 0, 0, 0, $x, $y, $x2, $y2);
 
-		$x = imagesx($this->image);
-		$y = imagesy($this->image);
+        imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 20);
+        imagefilter($this->image, IMG_FILTER_BRIGHTNESS, 40);
+        imagefilter($this->image, IMG_FILTER_CONTRAST, -10);
 
-		$x2 = imagesx($dest);
-		$y2 = imagesy($dest);
+        return $this;
+    }
 
-		$thumb = imagecreatetruecolor($x, $y);
-		imagecopyresampled($thumb, $dest, 0, 0, 0, 0, $x, $y, $x2, $y2);
+    public function colorise()
+    {
+        $destination = imagecreatefromjpeg($this->assetDirectory . 'pattern5.jpg');
 
-		imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 40);
-		imagefilter($this->image, IMG_FILTER_CONTRAST, -25);
-		
-		return $this;
-	}
+        $x = imagesx($this->image);
+        $y = imagesy($this->image);
 
-	public function sepia()
-	{
-		imagefilter($this->image, IMG_FILTER_GRAYSCALE);
-		imagefilter($this->image, IMG_FILTER_COLORIZE, 100, 50, 0);
-		
-		return $this;
-	}
+        $x2 = imagesx($destination);
+        $y2 = imagesy($destination);
 
-	public function sharpen()
-	{
-		$gaussian = array(
-				array(1.0, 1.0, 1.0),
-				array(1.0, -7.0, 1.0),
-				array(1.0, 1.0, 1.0)
-		);
-		imageconvolution($this->image, $gaussian, 1, 4);
-		
-		return $this;
-	}
+        $thumb = imagecreatetruecolor($x, $y);
+        imagecopyresampled($thumb, $destination, 0, 0, 0, 0, $x, $y, $x2, $y2);
 
-	public function emboss()
-	{
-		$gaussian = array(
-				array(-2.0, -1.0, 0.0),
-				array(-1.0, 1.0, 1.0),
-				array(0.0, 1.0, 2.0)
-		);
-		
-		imageconvolution($this->image, $gaussian, 1, 5);
-		
-		return $this;
-	}
+        imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 40);
+        imagefilter($this->image, IMG_FILTER_CONTRAST, -25);
 
-	public function cool()
-	{
-		imagefilter($this->image, IMG_FILTER_MEAN_REMOVAL);
-		imagefilter($this->image, IMG_FILTER_CONTRAST, -50);
-		
-		return $this;
-	}
+        return $this;
+    }
 
-	public function old2()
-	{
-		$dest = imagecreatefromjpeg($this->assetDirectory . "pattern1.jpg");
+    public function sepia()
+    {
+        imagefilter($this->image, IMG_FILTER_GRAYSCALE);
+        imagefilter($this->image, IMG_FILTER_COLORIZE, 100, 50, 0);
 
-		$x = imagesx($this->image);
-		$y = imagesy($this->image);
+        return $this;
+    }
 
-		$x2 = imagesx($dest);
-		$y2 = imagesy($dest);
+    public function sharpen()
+    {
+        $gaussian = array(
+                array(1.0, 1.0, 1.0),
+                array(1.0, -7.0, 1.0),
+                array(1.0, 1.0, 1.0)
+        );
+        imageconvolution($this->image, $gaussian, 1, 4);
 
-		$thumb = imagecreatetruecolor($x, $y);
-		imagecopyresampled($thumb, $dest, 0, 0, 0, 0, $x, $y, $x2, $y2);
+        return $this;
+    }
 
-		imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 40);
-		
-		return $this;
-	}
+    public function emboss()
+    {
+        $gaussian = array(
+                array(-2.0, -1.0, 0.0),
+                array(-1.0, 1.0, 1.0),
+                array(0.0, 1.0, 2.0)
+        );
 
-	public function old3()
-	{
-		imagefilter($this->image, IMG_FILTER_CONTRAST, -30);
+        imageconvolution($this->image, $gaussian, 1, 5);
 
-		$dest = imagecreatefromjpeg($this->assetDirectory . "pattern3.jpg");
+        return $this;
+    }
 
-		$x = imagesx($this->image);
-		$y = imagesy($this->image);
+    public function cool()
+    {
+        imagefilter($this->image, IMG_FILTER_MEAN_REMOVAL);
+        imagefilter($this->image, IMG_FILTER_CONTRAST, -50);
 
-		$x2 = imagesx($dest);
-		$y2 = imagesy($dest);
+        return $this;
+    }
 
-		$thumb = imagecreatetruecolor($x, $y);
-		imagecopyresampled($thumb, $dest, 0, 0, 0, 0, $x, $y, $x2, $y2);
+    public function old2()
+    {
+        $destination = imagecreatefromjpeg($this->assetDirectory . 'pattern1.jpg');
 
-		imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 50);
-		
-		return $this;
-	}
+        $x = imagesx($this->image);
+        $y = imagesy($this->image);
 
-	public function old()
-	{
-		$dest = imagecreatefromjpeg($this->assetDirectory . "bg1.jpg");
+        $x2 = imagesx($destination);
+        $y2 = imagesy($destination);
 
-		$x = imagesx($this->image);
-		$y = imagesy($this->image);
+        $thumb = imagecreatetruecolor($x, $y);
+        imagecopyresampled($thumb, $destination, 0, 0, 0, 0, $x, $y, $x2, $y2);
 
-		$x2 = imagesx($dest);
-		$y2 = imagesy($dest);
+        imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 40);
 
-		$thumb = imagecreatetruecolor($x, $y);
-		imagecopyresampled($thumb, $dest, 0, 0, 0, 0, $x, $y, $x2, $y2);
+        return $this;
+    }
 
-		imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 30);
-		
-		return $this;
-	}
+    public function old3()
+    {
+        imagefilter($this->image, IMG_FILTER_CONTRAST, -30);
 
-	public function light()
-	{
-		imagefilter($this->image, IMG_FILTER_BRIGHTNESS, 10);
-		imagefilter($this->image, IMG_FILTER_COLORIZE, 100, 50, 0, 10);
-		
-		return $this;
-	}
+        $destination = imagecreatefromjpeg($this->assetDirectory . 'pattern3.jpg');
 
-	public function aqua()
-	{
-		imagefilter($this->image, IMG_FILTER_COLORIZE, 0, 70, 0, 30);
-		
-		return $this;
-	}
+        $x = imagesx($this->image);
+        $y = imagesy($this->image);
 
-	public function fuzzy()
-	{
-		$gaussian = array(
-				array(1.0, 1.0, 1.0),
-				array(1.0, 1.0, 1.0),
-				array(1.0, 1.0, 1.0)
-		);
+        $x2 = imagesx($destination);
+        $y2 = imagesy($destination);
 
-		imageconvolution($this->image, $gaussian, 9, 20);
-		
-		return $this;
-	}
+        $thumb = imagecreatetruecolor($x, $y);
+        imagecopyresampled($thumb, $destination, 0, 0, 0, 0, $x, $y, $x2, $y2);
 
-	public function boost()
-	{
-		imagefilter($this->image, IMG_FILTER_CONTRAST, -35);
-		imagefilter($this->image, IMG_FILTER_BRIGHTNESS, 10);
-		
-		return $this;
-	}
+        imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 50);
 
-	public function gray()
-	{
-		imagefilter($this->image, IMG_FILTER_CONTRAST, -60);
-		imagefilter($this->image, IMG_FILTER_GRAYSCALE);
-		
-		return $this;
-	}
+        return $this;
+    }
+
+    public function old()
+    {
+        $destination = imagecreatefromjpeg($this->assetDirectory . 'bg1.jpg');
+
+        $x = imagesx($this->image);
+        $y = imagesy($this->image);
+
+        $x2 = imagesx($destination);
+        $y2 = imagesy($destination);
+
+        $thumb = imagecreatetruecolor($x, $y);
+        imagecopyresampled($thumb, $destination, 0, 0, 0, 0, $x, $y, $x2, $y2);
+
+        imagecopymerge($this->image, $thumb, 0, 0, 0, 0, $x, $y, 30);
+
+        return $this;
+    }
+
+    public function light()
+    {
+        imagefilter($this->image, IMG_FILTER_BRIGHTNESS, 10);
+        imagefilter($this->image, IMG_FILTER_COLORIZE, 100, 50, 0, 10);
+
+        return $this;
+    }
+
+    public function aqua()
+    {
+        imagefilter($this->image, IMG_FILTER_COLORIZE, 0, 70, 0, 30);
+
+        return $this;
+    }
+
+    public function fuzzy()
+    {
+        $gaussian = array(
+                array(1.0, 1.0, 1.0),
+                array(1.0, 1.0, 1.0),
+                array(1.0, 1.0, 1.0)
+        );
+
+        imageconvolution($this->image, $gaussian, 9, 20);
+
+        return $this;
+    }
+
+    public function boost()
+    {
+        imagefilter($this->image, IMG_FILTER_CONTRAST, -35);
+        imagefilter($this->image, IMG_FILTER_BRIGHTNESS, 10);
+
+        return $this;
+    }
+
+    public function gray()
+    {
+        imagefilter($this->image, IMG_FILTER_CONTRAST, -60);
+        imagefilter($this->image, IMG_FILTER_GRAYSCALE);
+
+        return $this;
+    }
 }

@@ -5,19 +5,12 @@
  *
  * @author Christian
  */
-class Model// extends SQLQuery
+class Model // extends SQLQuery
 {
-	protected $_model;
+    protected $model;
 
-	function __construct($id=0)
-        {
-		$this->_model = substr(get_class($this),0,-5);
-		$this->_table = strtolower($this->_model);
-                $this->_id = $id;
-	}
-
-	function __destruct()
-	{
-            
-	}
+    public function __construct($id = 0)
+    {
+        $this->model = substr(get_class($this), 0, -5);
+    }
 }

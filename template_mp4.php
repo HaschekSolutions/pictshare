@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title><?php echo (defined('TITLE')?TITLE:'PictShare image hosting'); ?></title>
+        <title><?php echo(defined('TITLE') ? TITLE : 'PictShare image hosting'); ?></title>
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
         <meta name="copyright" content="Copyright <?php echo date("Y"); ?> PictShare" />
         <meta id="viewport" name="viewport" content="width=<?php echo $width ?>, user-scalable=yes" />
@@ -11,23 +11,23 @@
             *{margin:0px;padding:0px;}
         </style>
         
-        <link rel="alternate" type="application/json+oembed" href="<?php echo DOMAINPATH.PATH; ?>backend.php?a=oembed&t=json&url=<?php echo rawurlencode(DOMAINPATH.PATH.$hash); ?>" title="PictShare" />
+        <link rel="alternate" type="application/json+oembed" href="<?php echo DOMAINPATH . PATH; ?>backend.php?a=oembed&t=json&url=<?php echo rawurlencode(DOMAINPATH . PATH . $hash); ?>" title="PictShare" />
                 
-        <link rel="canonical"                 href="<?php echo DOMAINPATH.PATH.$hash; ?>" />
+        <link rel="canonical"                 href="<?php echo DOMAINPATH . PATH . $hash; ?>" />
 
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-        <meta property="og:site_name"         content="<?php echo (defined('TITLE')?TITLE:'PictShare mp4 hosting'); ?>" />
-        <meta property="og:url"               content="<?php echo DOMAINPATH.PATH.$hash; ?>" />
-        <meta property="og:title"             content="<?php echo (defined('TITLE')?TITLE:'PictShare mp4 hosting'); ?> MP4" />
+        <meta property="og:site_name"         content="<?php echo(defined('TITLE') ? TITLE : 'PictShare mp4 hosting'); ?>" />
+        <meta property="og:url"               content="<?php echo DOMAINPATH . PATH . $hash; ?>" />
+        <meta property="og:title"             content="<?php echo(defined('TITLE') ? TITLE : 'PictShare mp4 hosting'); ?> MP4" />
         <meta property="og:type"              content="video.other" />
         
-        <meta property="og:image"             content="<?php echo DOMAINPATH.PATH.'preview/'.$hash; ?>" />
+        <meta property="og:image"             content="<?php echo DOMAINPATH . PATH . 'preview/' . $hash; ?>" />
         <meta property="og:image:width"       content="<?php echo $width ?>" />
         <meta property="og:image:height"      content="<?php echo $height ?>" />
         <meta property="og:description"       content="MP4 Video" />
-        <meta property="og:video"             content="<?php echo DOMAINPATH.PATH.$hash; ?>" />
-        <meta property="og:video:secure_url"  content="<?php echo DOMAINPATH.PATH.$hash; ?>" />
+        <meta property="og:video"             content="<?php echo DOMAINPATH . PATH . $hash; ?>" />
+        <meta property="og:video:secure_url"  content="<?php echo DOMAINPATH . PATH . $hash; ?>" />
         <meta property="og:video:type"        content="application/x-shockwave-flash" />
         <meta property="og:video:width"       content="<?php echo $width ?>" />
         <meta property="og:video:height"      content="<?php echo $height ?>" />
@@ -38,13 +38,15 @@
     <body id="body">
 
         <div id="container">
-            <video id="video" poster="<?php echo DOMAINPATH.PATH.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>   
-                <source src="<?php echo DOMAINPATH.PATH.'raw/mp4/'.$hash; ?>" type="video/mp4">
+            <video id="video" poster="<?php echo DOMAINPATH . PATH . 'preview/' . $hash; ?>" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline>   
+                <source src="<?php echo DOMAINPATH . PATH . 'raw/mp4/' . $hash; ?>" type="video/mp4">
                 <?php
-                    if(file_exists(ROOT.DS.'upload'.DS.$hash.DS.'webm_1.'.$hash))
-                        echo '<source src="'.DOMAINPATH.PATH.'raw/webm/'.$hash.'" type="video/webm">'."\n";
-                    if(file_exists(ROOT.DS.'upload'.DS.$hash.DS.'ogg_1.'.$hash))
-                        echo '<source src="'.DOMAINPATH.PATH.'raw/ogg/'.$hash.'" type="video/ogg">'."\n";
+                if (file_exists(ROOT . DS . 'upload' . DS . $hash . DS . 'webm_1.' . $hash)) {
+                    echo '<source src="' . DOMAINPATH . PATH . 'raw/webm/' . $hash . '" type="video/webm">' . "\n";
+                }
+                if (file_exists(ROOT . DS . 'upload' . DS . $hash . DS . 'ogg_1.' . $hash)) {
+                    echo '<source src="' . DOMAINPATH . PATH . 'raw/ogg/' . $hash . '" type="video/ogg">' . "\n";
+                }
                 ?>
             </video>
         </div>

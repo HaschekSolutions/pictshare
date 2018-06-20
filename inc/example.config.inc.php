@@ -1,14 +1,14 @@
-<?php 
+<?php
 
 //Set title for your image and mp4 hosting service
 define('TITLE', 'PictShare');
 
-// PNG level from 0 (largest file) to 
+// PNG level from 0 (largest file) to
 // 9 (smallest file). Note that this doesn't affect
 // quality, only file size and CPU
 define('PNG_COMPRESSION', 6);
 
-// JPG compression percenage from 0 (smallest file, worst quality) 
+// JPG compression percentage from 0 (smallest file, worst quality)
 // to 100 (large file, best quality)
 define('JPEG_COMPRESSION', 90);
 
@@ -22,7 +22,7 @@ define('MASTER_DELETE_CODE', false);
 
 //if set, the IP, hostname or every device in the IP range (CIDR naming) will be allowed to delete images
 //by supplying the parameter "delete"
-//use multiple ips/hostnames/ranges: semicolon seperated
+//use multiple ips/hostnames/ranges: semicolon separated
 //examples:
 //======
 //ip: define('MASTER_DELETE_IP', '8.8.8.8');
@@ -60,9 +60,9 @@ define('LOG_UPLOADER', true);
 //how many resizes may one image have?
 //-1 = infinite
 //0 = none
-define('MAX_RESIZED_IMAGES',20);
+define('MAX_RESIZED_IMAGES', 20);
 
-//when the user requests a resize. Can the resized image be bigger than the original?
+//when the user requests a resize. Can the resided image be bigger than the original?
 define('ALLOW_BLOATING', false);
 
 //Force a specific domain for this server. If set to false, will autodetect.

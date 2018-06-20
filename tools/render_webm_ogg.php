@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /*
 * MP4 to webm and ogg converter
@@ -11,59 +11,63 @@
 * noogg => Won't render videos as OGG
 * nowebm => Won't render videos as webm
 * noskip => Won't skip existing videos (re-renders them)
-*/ 
+*/
 
-if(php_sapi_name() !== 'cli') exit('This script can only be called via CLI');
+if (php_sapi_name() !== 'cli') {
+    exit('This script can only be called via CLI');
+}
+
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', dirname(__FILE__).DS.'..');
-include_once(ROOT.DS.'inc/config.inc.php');
-include_once(ROOT.DS.'inc/core.php');
+define('ROOT', dirname(__FILE__) . DS . '..');
+require_once ROOT . DS . 'inc/config.inc.php';
+require_once ROOT . DS . 'inc/core.php';
 
 $pm = new PictshareModel();
 
-$dir = ROOT.DS.'upload'.DS;
+$dir = ROOT . DS . 'upload' . DS;
 $dh  = opendir($dir);
 $localfiles = array();
 
-if(in_array('noskip',$argv))
-{
+if (in_array('noskip', $argv)) {
     echo "Won't skip existing files\n\n";
     $allowskipping = false;
-}
-else
+} else {
     $allowskipping = true;
+}
 
 //making sure ffmpeg is executable
-system("chmod +x ".ROOT.DS.'bin'.DS.'ffmpeg');
+system("chmod +x " . ROOT . DS . 'bin' . DS . 'ffmpeg');
 
 echo "[i] Finding local mp4 files ..";
 while (false !== ($filename = readdir($dh))) {
-    $img = $dir.$filename.DS.$filename;
-    if(!file_exists($img)) continue;
+    $img = $dir . $filename . DS . $filename;
+    if (!file_exists($img)) {
+        continue;
+    }
     $type = pathinfo($img, PATHINFO_EXTENSION);
     $type = $pm->isTypeAllowed($type);
-    if($type=='mp4')
+    if ($type == 'mp4') {
         $localfiles[] = $filename;
+    }
 }
 
-if(count($localfiles)==0) exit(' No MP4 files found'."\n");
+if (count($localfiles) == 0) {
+    exit(' No MP4 files found' . "\n");
+}
 
-echo " done. Got ".count($localfiles)." files\n";
+echo " done. Got " . count($localfiles) . " files\n";
 
 echo "[i] Starting to convert\n";
-foreach($localfiles as $hash)
-{
-    $img = $dir.$hash.DS.$hash;
+foreach ($localfiles as $hash) {
+    $img = $dir . $hash . DS . $hash;
 
-    if(!in_array('noogg',$argv))
-    {
-        $tmp = ROOT.DS.'tmp'.DS.$hash.'.ogg';
-        $ogg = $dir.$hash.DS.'ogg_1.'.$hash;
-        if(file_exists($ogg) && $allowskipping==true)
+    if (!in_array('noogg', $argv)) {
+        $tmp = ROOT . DS . 'tmp' . DS . $hash . '.ogg';
+        $ogg = $dir . $hash . DS . 'ogg_1.' . $hash;
+        if (file_exists($ogg) && $allowskipping == true) {
             echo "Skipping OGG of $hash\n";
-        else
-        {
+        } else {
             echo "  [OGG] User wants OGG. Will do.. ";
             $cmd = "../bin/ffmpeg -y -i $img -loglevel panic -vcodec libtheora -an $tmp && cp $tmp $ogg";
             system($cmd);
@@ -71,35 +75,32 @@ foreach($localfiles as $hash)
         }
     }
 
-    if(!in_array('nowebm',$argv))
-    {
-        $tmp = ROOT.DS.'tmp'.DS.$hash.'.webm';
-        $webm = $dir.$hash.DS.'webm_1.'.$hash;
-        if(file_exists($webm) && $allowskipping==true)
+    if (!in_array('nowebm', $argv)) {
+        $tmp = ROOT . DS . 'tmp' . DS . $hash . '.webm';
+        $webm = $dir . $hash . DS . 'webm_1.' . $hash;
+        if (file_exists($webm) && $allowskipping == true) {
             echo "Skipping WEBM of $hash\n";
-        else
-        {
+        } else {
             echo "  [WEBM] User wants WEBM. Will do.. ";
             $cmd = "../bin/ffmpeg -y -i $img -loglevel panic -c:v libvpx -crf 10 -b:v 1M $tmp && cp $tmp $webm";
             system($cmd);
             echo "done\n";
         }
     }
-
-    
 }
 
 
-function renderSize($bytes, $precision = 2) { 
-    $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
+function renderSize($bytes, $precision = 2)
+{
+    $units = array('B', 'KB', 'MB', 'GB', 'TB');
 
-    $bytes = max($bytes, 0); 
-    $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
-    $pow = min($pow, count($units) - 1); 
+    $bytes = max($bytes, 0);
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+    $pow = min($pow, count($units) - 1);
 
     // Uncomment one of the following alternatives
     $bytes /= pow(1024, $pow);
-    // $bytes /= (1 << (10 * $pow)); 
+    // $bytes /= (1 << (10 * $pow));
 
-    return round($bytes, $precision) . ' ' . $units[$pow]; 
-} 
+    return round($bytes, $precision) . ' ' . $units[$pow];
+}
