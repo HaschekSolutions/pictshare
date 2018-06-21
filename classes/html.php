@@ -3,21 +3,6 @@
 class HTML
 {
     /**
-     * Characters that will pass:
-     * a-z
-     * A-Z
-     * 0-9
-     *
-     * @param $string
-     *
-     * @return null|string|string[]
-     */
-    public function sanitizeString($string)
-    {
-        return preg_replace("/[^a-zA-Z0-9._\-]+/", '', $string);
-    }
-
-    /**
      * @param $byte
      *
      * @return string

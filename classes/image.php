@@ -1,5 +1,7 @@
 <?php
 
+use PictShare\Classes\FilterFactory;
+
 class Image
 {
     public function rotate(&$im, $direction)
@@ -118,152 +120,38 @@ class Image
     }
 
     /**
-     * Strong Blur
+     * @param $im
+     * @param $vars
      *
-     * @param resource $gdImageResource
-     * @param int $blurFactor optional
-     *  This is the strength of the blur
-     *  0 = no blur, 3 = default, anything over 5 is extremely blurred
-     * @return GD image resource
-     * @author Martijn Frazer, idea based on http://stackoverflow.com/a/20264482
-    */
-    public function blur(&$gdImageResource, $blurFactor = 3)
-    {
-        if (!$blurFactor) {
-            $blurFactor = 3;
-        }
-        if ($blurFactor > 6) {
-            $blurFactor = 6;
-        } elseif ($blurFactor < 0) {
-            $blurFactor = 0;
-        }
-        // blurFactor has to be an integer
-        $blurFactor = round($blurFactor);
-
-        $originalWidth = imagesx($gdImageResource);
-        $originalHeight = imagesy($gdImageResource);
-
-        $smallestWidth = ceil($originalWidth * pow(0.5, $blurFactor));
-        $smallestHeight = ceil($originalHeight * pow(0.5, $blurFactor));
-
-        // for the first run, the previous image is the original input
-        $prevImage = $gdImageResource;
-        $prevWidth = $originalWidth;
-        $prevHeight = $originalHeight;
-
-        // scale way down and gradually scale back up, blurring all the way
-        for ($i = 0; $i < $blurFactor; ++$i) {
-            // determine dimensions of next image
-            $nextWidth = $smallestWidth * pow(2, $i);
-            $nextHeight = $smallestHeight * pow(2, $i);
-
-            // resize previous image to next size
-            $nextImage = imagecreatetruecolor($nextWidth, $nextHeight);
-            imagecopyresized(
-                $nextImage,
-                $prevImage,
-                0,
-                0,
-                0,
-                0,
-                $nextWidth,
-                $nextHeight,
-                $prevWidth,
-                $prevHeight
-            );
-
-            // apply blur filter
-            imagefilter($nextImage, IMG_FILTER_GAUSSIAN_BLUR);
-
-            // now the new image becomes the previous image for the next step
-            $prevImage = $nextImage;
-            $prevWidth = $nextWidth;
-            $prevHeight = $nextHeight;
-        }
-
-        // scale back to original size and blur one more time
-        imagecopyresized(
-            $gdImageResource,
-            $nextImage,
-            0,
-            0,
-            0,
-            0,
-            $originalWidth,
-            $originalHeight,
-            $nextWidth,
-            $nextHeight
-        );
-        imagefilter($gdImageResource, IMG_FILTER_GAUSSIAN_BLUR);
-
-        // clean up
-        imagedestroy($prevImage);
-
-        // return result
-        return $gdImageResource;
-    }
-
+     * @return resource GD image resource
+     */
     public function filter(&$im, $vars)
     {
         foreach ($vars as $var) {
+            $filterName  = $var;
+            $filterValue = null;
+            $params      = [];
+
             if (strpos($var, '_')) {
-                $a = explode('_', $var);
-                $var = $a[0];
-                $val = $a[1];
+                list($filterName, $filterValue) = explode('_', $var);
             }
-            switch ($var) {
-                case 'negative':
-                    imagefilter($im, IMG_FILTER_NEGATE);
-                    break;
-                case 'grayscale':
-                    imagefilter($im, IMG_FILTER_GRAYSCALE);
-                    break;
-                case 'brightness':
-                    imagefilter($im, IMG_FILTER_BRIGHTNESS, $val);
-                    break;
-                case 'edgedetect':
-                    imagefilter($im, IMG_FILTER_EDGEDETECT);
-                    break;
-                case 'smooth':
-                    imagefilter($im, IMG_FILTER_SMOOTH, $val);
-                    break;
-                case 'contrast':
-                    imagefilter($im, IMG_FILTER_CONTRAST, $val);
-                    break;
-                case 'pixelate':
-                    imagefilter($im, IMG_FILTER_PIXELATE, $val);
-                    break;
-                case 'blur':
-                    $this->blur($im, $val);
-                    break;
-                case 'sepia':
-                    (new Filter($im))->sepia()->getImage();
-                    break;
-                case 'sharpen':
-                    (new Filter($im))->sharpen()->getImage();
-                    break;
-                case 'emboss':
-                    (new Filter($im))->emboss()->getImage();
-                    break;
-                case 'cool':
-                    (new Filter($im))->cool()->getImage();
-                    break;
-                case 'light':
-                    (new Filter($im))->light()->getImage();
-                    break;
-                case 'aqua':
-                    (new Filter($im))->aqua()->getImage();
-                    break;
-                case 'fuzzy':
-                    (new Filter($im))->fuzzy()->getImage();
-                    break;
-                case 'boost':
-                    (new Filter($im))->boost()->getImage();
-                    break;
-                case 'gray':
-                    (new Filter($im))->gray()->getImage();
-                    break;
+
+            if ($filterValue !== null) {
+                $params = [
+                    'brightness' => $filterValue,
+                    'blur'       => $filterValue,
+                    'pixelate'   => $filterValue,
+                    'smooth'     => $filterValue,
+                ];
             }
+
+            $im = FilterFactory::getFilter($filterName)
+                ->setImage($im)
+                ->setSettings($params)
+                ->apply()
+                ->getImage();
         }
+
+        return $im;
     }
 }

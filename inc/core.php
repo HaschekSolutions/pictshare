@@ -1,13 +1,83 @@
 <?php
 spl_autoload_register('autoload');
 
-function autoload($className)
+/**
+ * Old autoloader, for backwards compatibility.
+ *
+ * @TODO: When everything is converted over to the namespace autoloader, remove this.
+ *
+ * @deprecated
+ *
+ * @param $className
+ *
+ * @return bool
+ */
+function deprecatedAutoload(string $className): bool
 {
     if (file_exists(ROOT . DS . 'models' . DS . strtolower($className) . '.php')) {
         include_once ROOT . DS . 'models' . DS . strtolower($className) . '.php';
+
+        return true;
     }
+
     if (file_exists(ROOT . DS . 'classes' . DS . strtolower($className) . '.php')) {
         include_once ROOT . DS . 'classes' . DS . strtolower($className) . '.php';
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * New autoloader, supporting namespaces. PSR-4 style.
+ *
+ * @param $className
+ *
+ * @return bool
+ *
+ * @throws \DomainException
+ */
+function namespaceAutoloader(string $className): bool
+{
+    $prefix = 'PictShare\\';
+    // Does the class use this namespace prefix?
+    $len = mb_strlen($prefix);
+
+    if (strncmp($prefix, $className, $len) !== 0) {
+        var_export(strncmp($prefix, $className, $len));
+        return false;
+    }
+
+    $relativeClass = mb_substr($className, $len);
+    $baseDir       = __DIR__ . '/../';
+    $endPath       = str_replace('\\', '/', $relativeClass).'.php';
+    $file          = $baseDir . $endPath;
+
+    if (file_exists($file) === true) {
+        include_once $file;
+
+        return false;
+    }
+
+    throw new \DomainException('Class ' . $className . ' not found.');
+}
+
+/**
+ * Temporary shim around the real autoloader.
+ *
+ * @TODO When the majority of classes have been refactored, try the new loader first.
+ * @TODO Drop the old loader completely.
+ *
+ * @param $className
+ */
+function autoload($className)
+{
+    // Old style first.
+    $loaded = deprecatedAutoload($className);
+
+    if (!$loaded) {
+        namespaceAutoloader($className);
     }
 }
 

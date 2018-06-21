@@ -1,6 +1,6 @@
 <?php
 
-class PictshareModel extends Model
+class PictshareModel
 {
     public function backend($params)
     {
@@ -76,7 +76,7 @@ class PictshareModel extends Model
         $html = new HTML();
         $url = explode("/", $url);
         foreach ($url as $el) {
-            $el = $html->sanitizeString($el);
+            $el = preg_replace("/[^a-zA-Z0-9._\-]+/", '', $el);
             $el = strtolower($el);
             if (!$el) {
                 continue;
