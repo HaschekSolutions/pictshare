@@ -71,7 +71,7 @@ By using this compose file, you should know that:
 
 ### Without Docker
 
-- Make sure you have PHP5 GD libraries installed: ```apt-get install php5-gd```
+- Make sure you have PHP5 GD libraries installed: ```apt-get install php7-gd```
 - Unpack the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip)
 - Rename /inc/example.config.inc.php to /inc/config.inc.php
 - ```chmod +x bin/ffmpeg``` if you want to be able to use mp4 uploads
@@ -231,7 +231,7 @@ Just add your credentials to the config.inc.php file as described in the ```exam
 
 ## Requirements
 - Apache or Nginx Webserver with PHP
-- PHP 5 GD library
+- PHP 7 GD library
 - A domain or sub-domain since PictShare can't be run from a subfolder of some other domain
 
 ## nginx config
@@ -253,7 +253,7 @@ server {
     }
 
     location ~ \.php {
-        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_pass unix:/var/run/php7-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -271,8 +271,8 @@ server {
 ## Apache config
 This is a simple vHost config that should make PictShare work on Apache2. 
 
-- Install php5: ```apt-get install php5 libapache2-mod-php5```
-- Install php Graphics libraries: ```apt-get install php5-gd```
+- Install php7: ```apt-get install php7 libapache2-mod-php7```
+- Install php Graphics libraries: ```apt-get install php7-gd```
 - enable mod_rewrite
 
 ```
