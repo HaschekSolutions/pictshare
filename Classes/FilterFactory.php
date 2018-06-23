@@ -33,6 +33,7 @@ class FilterFactory
         'old2' => 'OldTwo',
         'old3' => 'OldThree',
         'pixelate' => 'Pixelate',
+        'rotate' => 'Rotate',
         'sepia' => 'Sepia',
         'sharpen' => 'Sharpen',
         'smooth' => 'Smooth',

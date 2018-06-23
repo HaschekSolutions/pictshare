@@ -24,17 +24,26 @@ class PictshareModel
         return array('status' => 'ok');
     }
 
-    public function getURLInfo($url, $ispath = false)
+    /**
+     * @param string $url
+     * @param bool $isPath
+     *
+     * @return array
+     */
+    public function getURLInfo(string $url, bool $isPath = false): array
     {
-        $url = rawurldecode($url);
+        $url  = rawurldecode($url);
         $data = $this->urlToData($url);
         $hash = $data['hash'];
+
         if (!$hash) {
-            return array('status' => 'ERR','Reason' => 'Image not found');
+            return [
+                'status' => 'ERR',
+                'Reason' => 'Image not found',
+            ];
         }
 
         $file = $this->getCacheName($data);
-        $html = new HTML();
 
         $path = ROOT . DS . 'upload' . DS . $hash . DS . $file;
         if (!file_exists($path)) {
@@ -42,42 +51,59 @@ class PictshareModel
         }
         if (file_exists($path)) {
             $type = $this->getType($path);
-            if ($ispath) {
-                $byte = filesize($url);
-            } else {
-                $byte = filesize($path);
-            }
 
+            $byte = $isPath ? filesize($url) : filesize($path);
 
-            if ($type == 'mp4') {
+            if ($type === 'mp4') {
                 $info = $this->getSizeOfMP4($path);
-                $width = intval($info['width']);
-                $height = intval($info['height']);
+                $width = (int) $info['width'];
+                $height = (int) $info['height'];
             } else {
                 list($width, $height) = getimagesize($path);
             }
-            return array('status' => 'ok','hash' => $hash,'cachename' => $file,'size' => $byte,'humansize' => $html->renderSize($byte),'width' => $width,'height' => $height,'type' => $type);
-        } else {
-            return array('status' => 'ERR','Reason' => 'Image not found');
+
+            return [
+                'status' => 'ok',
+                'hash' => $hash,
+                'cachename' => $file,
+                'size' => $byte,
+                'humansize' => renderSize($byte),
+                'width' => $width,
+                'height' => $height,
+                'type' => $type,
+            ];
         }
+
+        return [
+            'status' => 'ERR',
+            'Reason' => 'Image not found',
+        ];
     }
 
-    public function couldThisBeAnImage($string)
+    /**
+     * @param string $string
+     *
+     * @return bool
+     */
+    public function couldThisBeAnImage(string $string): bool
     {
         $len = strlen($string);
         $dot = strpos($string, '.');
+
         if (!$dot) {
             return false;
         }
-        if ($dot <= 10 && (($len - $dot) == 4 || ($len - $dot) == 5)) {
+
+        if ($dot <= 10 && (($len - $dot) === 4 || ($len - $dot) === 5)) {
             return true;
         }
+
+        return false;
     }
 
     public function urlToData($url)
     {
-        $html = new HTML();
-        $url = explode("/", $url);
+        $url = explode('/', $url);
         foreach ($url as $el) {
             $el = preg_replace("/[^a-zA-Z0-9._\-]+/", '', $el);
             $el = strtolower($el);
@@ -158,7 +184,7 @@ class PictshareModel
         $parts = explode(';', MASTER_DELETE_IP);
         foreach ($parts as $part) {
             if (strpos($part, '/') !== false) {       //it's a CIDR address
-                if (cidr_match($ip, $part)) {
+                if (cidrMatch($ip, $part)) {
                     return true;
                 }
             } elseif (isIP($part)) {                //it's an IP address
@@ -553,7 +579,6 @@ class PictshareModel
             exit(json_encode(array('status' => 'ERR','reason' => $this->translate(21))));
         }
 
-        $im = new Image();
         if ($_FILES[$name]['error'] == UPLOAD_ERR_OK) {
             $type = $this->getTypeOfFile($_FILES[$name]['tmp_name']);
             $type = $this->isTypeAllowed($type);
@@ -587,7 +612,6 @@ class PictshareModel
             return '<span class="error">' . $this->translate(21) . '</span>';
         }
 
-        $im = new Image();
         $i = 0;
         foreach ($_FILES['pic']['error'] as $key => $error) {
             if ($error == UPLOAD_ERR_OK) {

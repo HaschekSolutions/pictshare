@@ -1,4 +1,7 @@
 <?php
+
+use PictShare\Classes\FilterFactory;
+
 spl_autoload_register('autoload');
 
 /**
@@ -16,12 +19,6 @@ function deprecatedAutoload(string $className): bool
 {
     if (file_exists(ROOT . DS . 'models' . DS . strtolower($className) . '.php')) {
         include_once ROOT . DS . 'models' . DS . strtolower($className) . '.php';
-
-        return true;
-    }
-
-    if (file_exists(ROOT . DS . 'classes' . DS . strtolower($className) . '.php')) {
-        include_once ROOT . DS . 'classes' . DS . strtolower($className) . '.php';
 
         return true;
     }
@@ -142,7 +139,6 @@ function whatToDo($url)
 {
     $pm = new PictshareModel();
 
-
     $data = $pm->urlToData($url);
 
     if (!is_array($data) || !$data['hash']) {
@@ -151,7 +147,7 @@ function whatToDo($url)
             if ($upload_answer) {
                 $o = $upload_answer;
             } else {
-                $o .= $pm->renderUploadForm();
+                $o = $pm->renderUploadForm();
             }
 
             $vars['content'] = $o;
@@ -187,6 +183,8 @@ function renderAlbum($data)
     }
 
     $forcesize = ($data['forcesize'] ? 'forcesize/' : '');
+
+    $content = '';
 
     foreach ($data['album'] as $hash) {
         $content .= '<a href="' . PATH . $filters . $hash . '"><img class="picture" src="' . PATH . $size . $forcesize . $filters . $hash . '" /></a>';
@@ -337,19 +335,174 @@ function renderImage($data)
     exit();
 }
 
-function changeImage(&$im, $data)
+function rotate(&$im, $direction)
 {
-    $image = new Image();
+    switch ($direction) {
+        case 'upside':
+            $angle = 180;
+            break;
+        case 'left':
+            $angle = 90;
+            break;
+        case 'right':
+            $angle = -90;
+            break;
+        default:
+            $angle = 0;
+            break;
+    }
+
+    $im = FilterFactory::getFilter('rotate')->setSettings(['angle' => $angle])->apply()->getImage();
+}
+
+function forceResize(&$img, $size)
+{
+    $pm = new PictshareModel();
+
+    $sd = $pm->sizeStringToWidthHeight($size);
+    $maxWidth  = $sd['width'];
+    $maxHeight = $sd['height'];
+
+    $width = imagesx($img);
+    $height = imagesy($img);
+
+    $maxWidth = ($maxWidth > $width ? $width : $maxWidth);
+    $maxHeight = ($maxHeight > $height ? $height : $maxHeight);
+
+
+    $dst_img = imagecreatetruecolor($maxWidth, $maxHeight);
+    $src_img = $img;
+
+    $palsize = imagecolorstotal($img);
+    for ($i = 0; $i < $palsize; $i++) {
+        $colors = imagecolorsforindex($img, $i);
+        imagecolorallocate($dst_img, $colors['red'], $colors['green'], $colors['blue']);
+    }
+
+    imagefill($dst_img, 0, 0, IMG_COLOR_TRANSPARENT);
+    imagesavealpha($dst_img, true);
+    imagealphablending($dst_img, true);
+
+    $width_new = $height * $maxWidth / $maxHeight;
+    $height_new = $width * $maxHeight / $maxWidth;
+    // If the new width is greater than the actual width of the image,
+    // then the height is too large and the rest cut off, or vice versa.
+    if ($width_new > $width) {
+        //cut point by height
+        $h_point = (($height - $height_new) / 2);
+        //copy image
+        imagecopyresampled($dst_img, $src_img, 0, 0, 0, $h_point, $maxWidth, $maxHeight, $width, $height_new);
+    } else {
+        //cut point by width
+        $w_point = (($width - $width_new) / 2);
+        imagecopyresampled($dst_img, $src_img, 0, 0, $w_point, 0, $maxWidth, $maxHeight, $width_new, $height);
+    }
+
+    $img = $dst_img;
+}
+
+/**
+ * From: https://stackoverflow.com/questions/4590441/php-thumbnail-image-resizing-with-proportions
+ *
+ * @param $img
+ * @param int $size
+ */
+function resize(&$img, $size)
+{
+    $pm = new PictshareModel();
+
+    $sd = $pm->sizeStringToWidthHeight($size);
+    $maxWidth  = $sd['width'];
+    $maxHeight = $sd['height'];
+
+    $width = imagesx($img);
+    $height = imagesy($img);
+
+    if (!ALLOW_BLOATING) {
+        if ($maxWidth > $width) {
+            $maxWidth = $width;
+        }
+        if ($maxHeight > $height) {
+            $maxHeight = $height;
+        }
+    }
+
+    if ($height > $width) {
+        $ratio = $maxHeight / $height;
+        $newHeight = $maxHeight;
+        $newWidth = $width * $ratio;
+    } else {
+        $ratio = $maxWidth / $width;
+        $newWidth = $maxWidth;
+        $newHeight = $height * $ratio;
+    }
+
+    $newImg = imagecreatetruecolor($newWidth, $newHeight);
+
+    $palSize = imagecolorstotal($img);
+    for ($i = 0; $i < $palSize; $i++) {
+        $colors = imagecolorsforindex($img, $i);
+        imagecolorallocate($newImg, $colors['red'], $colors['green'], $colors['blue']);
+    }
+
+    imagefill($newImg, 0, 0, IMG_COLOR_TRANSPARENT);
+    imagesavealpha($newImg, true);
+    imagealphablending($newImg, true);
+
+    imagecopyresampled($newImg, $img, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+    $img = $newImg;
+}
+
+/**
+ * @param $im
+ * @param array $vars
+ *
+ * @return resource GD image resource
+ */
+function filter(&$im, $vars)
+{
+    foreach ($vars as $var) {
+        $filterName  = $var;
+        $filterValue = null;
+        $params      = [];
+
+        if (strpos($var, '_')) {
+            list($filterName, $filterValue) = explode('_', $var);
+        }
+
+        if ($filterValue !== null) {
+            $params = [
+                'brightness' => $filterValue,
+                'blur'       => $filterValue,
+                'pixelate'   => $filterValue,
+                'smooth'     => $filterValue,
+                'angle'      => $filterValue,
+            ];
+        }
+
+        $im = FilterFactory::getFilter($filterName)
+            ->setImage($im)
+            ->setSettings($params)
+            ->apply()
+            ->getImage();
+    }
+
+    return $im;
+}
+
+function changeImage(&$im, array $data)
+{
     foreach ($data as $action => $val) {
         switch ($action) {
             case 'rotate':
-                $image->rotate($im, $val);
+                rotate($im, $val);
                 break;
             case 'size':
-                (($data['forcesize'] === true) ? $image->forceResize($im, $val) : $image->resize($im, $val));
+                $data['forcesize'] === true ? forceResize($im, $val) : resize($im, $val);
                 break;
             case 'filter':
-                $image->filter($im, $val);
+                filter($im, $val);
                 break;
         }
     }
@@ -358,7 +511,7 @@ function changeImage(&$im, $data)
 function render($variables = null)
 {
     if (is_array($variables)) {
-        extract($variables);
+        extract($variables, EXTR_OVERWRITE);
     }
     include ROOT . DS . 'template.php';
 }
@@ -422,9 +575,8 @@ function serveFile($filename, $filename_output = false, $mime = 'application/oct
     $byte_range = $filesize_bytes - $byte_offset;
 
     header('Content-Length: ' . $byte_range);
-    header('Expires: ' . date('D, d M Y H:i:s', time() + 60 * 60 * 24 * $expiry) . ' GMT');
+    header('Expires: ' . (new \DateTime())->modify('+' . $expiry . ' days')->format('D, d M Y H:i:s') . ' GMT');
 
-    $buffer = '';
     $bytes_remaining = $byte_range;
 
     $handle = fopen($filename, 'rb');
@@ -500,62 +652,82 @@ function serveMP4($path, $hash, $null)
         }
         fclose($fp);
         exit();
-    } else {
-        die('file not found');
     }
+
+    die('file not found');
 }
 
-function cidr_match($ip, $range)
+/**
+ * @param string $ip
+ * @param string $range
+ *
+ * @return bool
+ */
+function cidrMatch(string $ip, string $range): bool
 {
     list($subnet, $bits) = explode('/', $range);
-    $ip = ip2long($ip);
+
+    $ipInt  = ip2long($ip);
     $subnet = ip2long($subnet);
-    $mask = -1 << (32 - $bits);
-    $subnet &= $mask; // nb: in case the supplied subnet wasn't correctly aligned
-    return ($ip & $mask) == $subnet;
+    $mask   = -1 << (32 - $bits);
+    $subnet &= $mask; // Nb: in case the supplied subnet wasn't correctly aligned.
+
+    return ($ipInt & $mask) === $subnet;
 }
 
-function isIP($ip)
+/**
+ * @param string $ip
+ *
+ * @return bool
+ */
+function isIP(string $ip): bool
 {
-    return filter_var($ip, FILTER_VALIDATE_IP);
+    return filter_var($ip, FILTER_VALIDATE_IP) !== false;
 }
 
-function getRandomString($length = 32, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyz')
+/**
+ * @param int $length
+ * @param string $keySpace
+ *
+ * @return string
+ */
+function getRandomString(int $length = 32, string $keySpace = '0123456789abcdefghijklmnopqrstuvwxyz'): string
 {
     $str = '';
-    $max = mb_strlen($keyspace, '8bit') - 1;
+    $max = mb_strlen($keySpace, '8bit') - 1;
+
     for ($i = 0; $i < $length; ++$i) {
-        $str .= $keyspace[rand(0, $max)];
+        $str .= $keySpace[random_int(0, $max)];
     }
+
     return $str;
 }
 
-function startsWith($haystack, $needle)
+/**
+ * @param string $haystack
+ * @param string $needle
+ *
+ * @return bool
+ */
+function startsWith(string $haystack, string $needle): bool
 {
-    $length = strlen($needle);
-    return (substr($haystack, 0, $length) === $needle);
+    return strpos($haystack, $needle) === 0;
 }
 
-function endswith($string, $test)
+/**
+ * @param int $bytes
+ * @param int $precision
+ *
+ * @return string
+ */
+function renderSize(int $bytes, int $precision = 2): string
 {
-    $strlen = strlen($string);
-    $testlen = strlen($test);
-    if ($testlen > $strlen) {
-        return false;
-    }
-    return substr_compare($string, $test, $strlen - $testlen, $testlen) === 0;
-}
-
-function renderSize($bytes, $precision = 2)
-{
-    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
     $bytes = max($bytes, 0);
     $pow   = floor(($bytes ? log($bytes) : 0) / log(1024));
     $pow   = min($pow, count($units) - 1);
 
-    // Uncomment one of the following alternatives
-    $bytes /= pow(1024, $pow);
-    // $bytes /= (1 << (10 * $pow));
+    $bytes /= (1024 ** $pow);
 
     return round($bytes, $precision) . ' ' . $units[$pow];
 }
