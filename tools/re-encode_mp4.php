@@ -1,5 +1,7 @@
 <?php
 
+use PictShare\Classes\Autoloader;
+
 /**
  * MP4 re-encoder.
  *
@@ -18,8 +20,11 @@ if (PHP_SAPI !== 'cli') {
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', __DIR__ . DS . '..');
 
+require_once ROOT . DS . 'Classes/Autoloader.php';
 require_once ROOT . DS . 'inc/config.inc.php';
 require_once ROOT . DS . 'inc/core.php';
+
+Autoloader::init();
 
 $pm            = new PictshareModel();
 $dir           = ROOT . DS . 'upload' . DS;
@@ -66,7 +71,7 @@ if (\count($localFiles) === 0) {
 echo '[i] Got ' . count($localFiles) . " files\n";
 echo "[i] Starting to convert\n";
 
-foreach ($localfiles as $hash) {
+foreach ($localFiles as $hash) {
     $img = $dir . $hash . DS . $hash;
     $tmp = ROOT . DS . 'tmp' . DS . $hash;
 

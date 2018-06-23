@@ -1,5 +1,8 @@
 <?php
 
+use \PictShare\Classes\Autoloader;
+use \PictShare\Classes\FileSizeFormatter;
+
 /**
  * Cleanup.
  *
@@ -19,8 +22,11 @@ if (PHP_SAPI !== 'cli') {
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', __DIR__ . DS . '..');
 
+require_once ROOT . DS . 'Classes/Autoloader.php';
 require_once ROOT . DS . 'inc/config.inc.php';
 require_once ROOT . DS . 'inc/core.php';
+
+Autoloader::init();
 
 $pm            = new PictshareModel();
 $sim           = false;
@@ -88,4 +94,4 @@ foreach ($localFiles as $hash) {
     }
 }
 
-echo "\n[!] Finished! Deleted " . renderSize($sumSize) . "\n";
+echo "\n[!] Finished! Deleted " . FileSizeFormatter::format($sumSize) . "\n";

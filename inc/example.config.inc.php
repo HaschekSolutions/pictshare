@@ -51,7 +51,8 @@ define('UPLOAD_CODE', false);
 //if set to a string, this string must be provided in the URL to use any options (filters, resizes, etc..)
 //you can set multiple codes by;separating;them;with;semicolons
 //if set to false, everybody can use options on all images
-//if image change code is not provided but the requested image (with options) already exists, it will render to the user just fine
+//if image change code is not provided but the requested image (with options) already exists,
+//it will render to the user just fine
 define('IMAGE_CHANGE_CODE', false);
 
 // shall we log all uploaders IP addresses?
@@ -85,5 +86,5 @@ define('SHOW_ERRORS', false);
 //define('BACKBLAZE_BUCKET_ID', '');
 //define('BACKBLAZE_BUCKET_NAME', '');
 //define('BACKBLAZE_AUTODOWNLOAD', true);   //if true, will download images from backblaze if not found local
-//define('BACKBLAZE_AUTOUPLOAD', true);     //if true, will upload images to backblaze when they are uploaded to pictshare
-//define('BACKBLAZE_AUTODELETE', true);     //if true, will delete images from backblaze if they are deleted from pictshare
+//define('BACKBLAZE_AUTOUPLOAD', true);     //if true, will upload images to backblaze when they are uploaded
+//define('BACKBLAZE_AUTODELETE', true);     //if true, will delete images from backblaze if they are deleted

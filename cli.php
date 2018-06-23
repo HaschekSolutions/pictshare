@@ -1,5 +1,7 @@
 <?php
 
+use PictShare\Classes\Autoloader;
+
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', dirname(__FILE__));
 define('CLI', true);
@@ -22,7 +24,11 @@ if (SHOW_ERRORS) {
 } else {
     ini_set('display_errors', 'Off');
 }
+
+require_once ROOT . DS . 'Classes/Autoloader.php';
 require_once ROOT . DS . 'inc' . DS . 'core.php';
+
+Autoloader::init();
 
 $action = $argv[2];
 $params = $argv;

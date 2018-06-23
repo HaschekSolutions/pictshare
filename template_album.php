@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title><?php echo(defined('TITLE') ? TITLE : 'PictShare image hosting'); ?></title>
-        
+
         <!-- Bootstrap -->
         <link href="<?php echo PATH; ?>css/bootstrap.min.css" rel="stylesheet">
 
@@ -42,7 +42,7 @@
                 }
                 ?>
             }
-            
+
         </style>
 
     </HEAD>
@@ -58,8 +58,14 @@
                     </div>
                 </div>
             </div>
-            
-            <footer>(c)<?php echo date("y");?> by<br/><a href="https://haschek.solutions" target="_blank"><img height="30" src="<?php echo PATH; ?>css/imgs/hs_logo.png" /></a></footer>
+
+            <footer>
+                (c)<?php echo date('y');?> by
+                <br/>
+                <a href="https://haschek.solutions" target="_blank">
+                    <img height="30" src="<?php echo PATH; ?>css/imgs/hs_logo.png" />
+                </a>
+            </footer>
       </div>
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

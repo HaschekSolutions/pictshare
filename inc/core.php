@@ -2,82 +2,6 @@
 
 use PictShare\Classes\FilterFactory;
 
-spl_autoload_register('autoload');
-
-/**
- * Old autoloader, for backwards compatibility.
- *
- * @TODO: When everything is converted over to the namespace autoloader, remove this.
- *
- * @deprecated
- *
- * @param $className
- *
- * @return bool
- */
-function deprecatedAutoload(string $className): bool
-{
-    if (file_exists(ROOT . DS . 'models' . DS . strtolower($className) . '.php')) {
-        include_once ROOT . DS . 'models' . DS . strtolower($className) . '.php';
-
-        return true;
-    }
-
-    return false;
-}
-
-/**
- * New autoloader, supporting namespaces. PSR-4 style.
- *
- * @param $className
- *
- * @return bool
- *
- * @throws \DomainException
- */
-function namespaceAutoloader(string $className): bool
-{
-    $prefix = 'PictShare\\';
-    // Does the class use this namespace prefix?
-    $len = mb_strlen($prefix);
-
-    if (strncmp($prefix, $className, $len) !== 0) {
-        var_export(strncmp($prefix, $className, $len));
-        return false;
-    }
-
-    $relativeClass = mb_substr($className, $len);
-    $baseDir       = __DIR__ . '/../';
-    $endPath       = str_replace('\\', '/', $relativeClass).'.php';
-    $file          = $baseDir . $endPath;
-
-    if (file_exists($file) === true) {
-        include_once $file;
-
-        return false;
-    }
-
-    throw new \DomainException('Class ' . $className . ' not found.');
-}
-
-/**
- * Temporary shim around the real autoloader.
- *
- * @TODO When the majority of classes have been refactored, try the new loader first.
- * @TODO Drop the old loader completely.
- *
- * @param $className
- */
-function autoload($className)
-{
-    // Old style first.
-    $loaded = deprecatedAutoload($className);
-
-    if (!$loaded) {
-        namespaceAutoloader($className);
-    }
-}
-
 function getUserIP()
 {
     $client  = @$_SERVER['HTTP_CLIENT_IP'];
@@ -111,21 +35,6 @@ function removeMagicQuotes()
         $_POST   = stripSlashesDeep($_POST);
         $_COOKIE = stripSlashesDeep($_COOKIE);
     }
-}
-
-function aasort(&$array, $key)
-{
-    $sorter = array();
-    $ret = array();
-    reset($array);
-    foreach ($array as $ii => $va) {
-        $sorter[$ii] = $va[$key];
-    }
-    asort($sorter);
-    foreach ($sorter as $ii => $va) {
-        $ret[$ii] = $array[$ii];
-    }
-    $array = $ret;
 }
 
 function callHook()
@@ -172,6 +81,9 @@ function whatToDo($url)
 
 function renderAlbum($data)
 {
+    $size    = 300;
+    $filters = '';
+
     if ($data['filter']) {
         $filters = implode('/', $data['filter']) . '/';
     }
@@ -220,7 +132,8 @@ function renderImage($data)
     if (file_exists($cachepath)) {
         $path = $cachepath;
         $cached = true;
-    } elseif (MAX_RESIZED_IMAGES > -1 && $pm->countResizedImages($hash) > MAX_RESIZED_IMAGES) { //if the number of max resized images is reached, just show the real one
+    } elseif (MAX_RESIZED_IMAGES > -1 && $pm->countResizedImages($hash) > MAX_RESIZED_IMAGES) {
+        // If the number of max resized images is reached, just show the real one.
         $path = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
     }
 
@@ -306,7 +219,8 @@ function renderImage($data)
                 $path = $cachepath;
             }
 
-            if (file_exists($cachepath) && filesize($cachepath) == 0) { //if there was an error and the file is 0 bytes, use the original
+            if (file_exists($cachepath) && filesize($cachepath) === 0) {
+                // If there was an error and the file is 0 bytes, use the original.
                 $cachepath = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
             }
 
@@ -370,35 +284,35 @@ function forceResize(&$img, $size)
     $maxHeight = ($maxHeight > $height ? $height : $maxHeight);
 
 
-    $dst_img = imagecreatetruecolor($maxWidth, $maxHeight);
-    $src_img = $img;
+    $dstImg = imagecreatetruecolor($maxWidth, $maxHeight);
+    $srcImg = $img;
 
     $palsize = imagecolorstotal($img);
     for ($i = 0; $i < $palsize; $i++) {
         $colors = imagecolorsforindex($img, $i);
-        imagecolorallocate($dst_img, $colors['red'], $colors['green'], $colors['blue']);
+        imagecolorallocate($dstImg, $colors['red'], $colors['green'], $colors['blue']);
     }
 
-    imagefill($dst_img, 0, 0, IMG_COLOR_TRANSPARENT);
-    imagesavealpha($dst_img, true);
-    imagealphablending($dst_img, true);
+    imagefill($dstImg, 0, 0, IMG_COLOR_TRANSPARENT);
+    imagesavealpha($dstImg, true);
+    imagealphablending($dstImg, true);
 
-    $width_new = $height * $maxWidth / $maxHeight;
-    $height_new = $width * $maxHeight / $maxWidth;
+    $newWidth = $height * $maxWidth / $maxHeight;
+    $newHeight = $width * $maxHeight / $maxWidth;
     // If the new width is greater than the actual width of the image,
     // then the height is too large and the rest cut off, or vice versa.
-    if ($width_new > $width) {
+    if ($newWidth > $width) {
         //cut point by height
-        $h_point = (($height - $height_new) / 2);
+        $hPoint = (($height - $newHeight) / 2);
         //copy image
-        imagecopyresampled($dst_img, $src_img, 0, 0, 0, $h_point, $maxWidth, $maxHeight, $width, $height_new);
+        imagecopyresampled($dstImg, $srcImg, 0, 0, 0, $hPoint, $maxWidth, $maxHeight, $width, $newHeight);
     } else {
         //cut point by width
-        $w_point = (($width - $width_new) / 2);
-        imagecopyresampled($dst_img, $src_img, 0, 0, $w_point, 0, $maxWidth, $maxHeight, $width_new, $height);
+        $wPoint = (($width - $newWidth) / 2);
+        imagecopyresampled($dstImg, $srcImg, 0, 0, $wPoint, 0, $maxWidth, $maxHeight, $newWidth, $height);
     }
 
-    $img = $dst_img;
+    $img = $dstImg;
 }
 
 /**
@@ -712,22 +626,4 @@ function getRandomString(int $length = 32, string $keySpace = '0123456789abcdefg
 function startsWith(string $haystack, string $needle): bool
 {
     return strpos($haystack, $needle) === 0;
-}
-
-/**
- * @param int $bytes
- * @param int $precision
- *
- * @return string
- */
-function renderSize(int $bytes, int $precision = 2): string
-{
-    $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
-    $bytes = max($bytes, 0);
-    $pow   = floor(($bytes ? log($bytes) : 0) / log(1024));
-    $pow   = min($pow, count($units) - 1);
-
-    $bytes /= (1024 ** $pow);
-
-    return round($bytes, $precision) . ' ' . $units[$pow];
 }
