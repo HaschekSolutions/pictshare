@@ -12,10 +12,10 @@ class LightFilter extends AbstractFilter
     const ALPHA_KEY      = 'alpha';
     const BRIGHTNESS_KEY = 'brightness';
 
-    const RED_DEFAULT        = 0;
-    const GREEN_DEFAULT      = 70;
+    const RED_DEFAULT        = 100;
+    const GREEN_DEFAULT      = 50;
     const BLUE_DEFAULT       = 0;
-    const ALPHA_DEFAULT      = 30;
+    const ALPHA_DEFAULT      = 10;
     const BRIGHTNESS_DEFAULT = 10;
 
     /**

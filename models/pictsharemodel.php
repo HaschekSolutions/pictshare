@@ -1,5 +1,7 @@
 <?php
 
+use PictShare\Classes\FilterFactory;
+
 class PictshareModel
 {
     public function backend($params)
@@ -96,7 +98,7 @@ class PictshareModel
                     $data['album'][] = $el;
                 }
                 $data['hash'] = $el;
-            } elseif (BACKBLAZE === true && $this->couldThisBeAnImage($el) && BACKBLAZE_AUTODOWNLOAD === true) { //looks like it might be a hash but didn't find it here. Let's see
+            } elseif (defined('BACKBLAZE') && BACKBLAZE === true && $this->couldThisBeAnImage($el) && defined('BACKBLAZE_AUTODOWNLOAD') && BACKBLAZE_AUTODOWNLOAD === true) { //looks like it might be a hash but didn't find it here. Let's see
                 $b = new Backblaze();
                 if ($b->download($el)) { //if the backblaze download function says it's an image, we'll take it
                     $data['hash'] = $el;
@@ -205,7 +207,7 @@ class PictshareModel
         rmdir($base_path);
 
         //delete from backblaze if configured
-        if (BACKBLAZE === true && BACKBLAZE_AUTODELETE === true) {
+        if (defined('BACKBLAZE') && BACKBLAZE === true && defined('BACKBLAZE_AUTODELETE') && BACKBLAZE_AUTODELETE === true) {
             $b = new Backblaze();
             $b->deleteFile($hash);
         }
@@ -241,29 +243,7 @@ class PictshareModel
             }
         }
 
-        switch ($var) {
-            case 'negative':
-            case 'grayscale':
-            case 'brightness':
-            case 'edgedetect':
-            case 'smooth':
-            case 'contrast':
-            case 'blur':
-            case 'sepia':
-            case 'sharpen':
-            case 'emboss':
-            case 'cool':
-            case 'light':
-            case 'aqua':
-            case 'fuzzy':
-            case 'boost':
-            case 'gray':
-            case 'pixelate':
-                return true;
-
-            default:
-                return false;
-        }
+        return FilterFactory::isValidFilter($var);
     }
 
     public function isRotation($var)
@@ -510,7 +490,7 @@ class PictshareModel
             fclose($fh);
         }
 
-        if (BACKBLAZE === true && BACKBLAZE_AUTOUPLOAD === true) {
+        if (defined('BACKBLAZE') && BACKBLAZE === true && defined('BACKBLAZE_AUTOUPLOAD') && BACKBLAZE_AUTOUPLOAD === true) {
             $b = new Backblaze();
             $b->upload($hash);
         }

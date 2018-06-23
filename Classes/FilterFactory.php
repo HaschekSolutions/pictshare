@@ -55,4 +55,14 @@ class FilterFactory
 
         return new $className();
     }
+
+    /**
+     * @param string $filterUrlName
+     *
+     * @return bool
+     */
+    public static function isValidFilter(string $filterUrlName): bool
+    {
+        return \array_key_exists($filterUrlName, self::FILTER_MAP);
+    }
 }

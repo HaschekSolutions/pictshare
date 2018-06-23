@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PictShare\Classes\Filters;
 
-class GreyscaleFilter extends AbstractFilter
+class GrayscaleFilter extends AbstractFilter
 {
     /**
      * @inheritdoc
