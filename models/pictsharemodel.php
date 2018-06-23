@@ -166,7 +166,7 @@ class PictshareModel
         ksort($data);
         unset($data['raw']);
 
-        $name = false;
+        $name = [];
 
         foreach ($data as $key => $val) {
             if ($key !== 'hash') {
@@ -180,7 +180,7 @@ class PictshareModel
             }
         }
 
-        if (is_array($name)) {
+        if (\count($name) > 0) {
             $name = implode('.', $name);
         }
 
@@ -308,7 +308,9 @@ class PictshareModel
             ];
         }
 
-        $tempfile = ROOT . DS . 'tmp' . DS . md5(random_int(1, 999) * random_int(0, 10000) + time());
+        $randomNumber = random_int(1, 999) * random_int(0, 10000) + time();
+
+        $tempfile = ROOT . DS . 'tmp' . DS . md5((string) $randomNumber);
         file_put_contents($tempfile, file_get_contents($url));
 
         //remove all exif data from jpeg
@@ -493,7 +495,8 @@ class PictshareModel
 
     public function translate($index, $params = '')
     {
-        $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+        $lang  = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+        $words = [];
 
         switch ($lang) {
             case 'de':
@@ -1053,11 +1056,11 @@ class PictshareModel
 
     private function isProperMP4($filename): bool
     {
-        $file = escapeshellarg($filename);
-        $tmp = ROOT . DS . 'tmp' . DS . md5(time() + random_int(1, 10000)) . '.' . random_int(1, 10000) . '.log';
-        $bin = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
-
-        $cmd = "$bin -i $file > $tmp 2>> $tmp";
+        $file         = escapeshellarg($filename);
+        $randomNumber = time() + random_int(1, 10000);
+        $tmp          = ROOT . DS . 'tmp' . DS . md5((string) $randomNumber) . '.' . random_int(1, 10000) . '.log';
+        $bin          = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $cmd          = "$bin -i $file > $tmp 2>> $tmp";
 
         system($cmd);
 

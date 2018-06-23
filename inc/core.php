@@ -49,6 +49,7 @@ function whatToDo($url)
     $pm = new PictshareModel();
 
     $data = $pm->urlToData($url);
+    $vars = null;
 
     if (!is_array($data) || !$data['hash']) {
         if ((UPLOAD_FORM_LOCATION && $url == UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION)) {
@@ -66,7 +67,9 @@ function whatToDo($url)
         if (!$vars && LOW_PROFILE) {
             header('HTTP/1.0 404 Not Found');
             exit();
-        } elseif (!$vars) {
+        }
+
+        if (!$vars) {
             $vars['content'] = $pm->translate(12);
             $vars['slogan'] = $pm->translate(2);
         }

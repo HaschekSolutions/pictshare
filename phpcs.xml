@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<ruleset name="PHP_CodeSniffer">
+    <file>Classes</file>
+    <file>inc</file>
+    <file>models</file>
+    <file>Tests</file>
+    <file>tools</file>
+    <file>backend.php</file>
+    <file>cli.php</file>
+    <file>index.php</file>
+    <file>template.php</file>
+    <file>template_album.php</file>
+    <file>template_album_embed.php</file>
+    <file>template_mp4.php</file>
+
+    <arg name="basepath" value="." />
+    <arg name="colors" />
+    <arg name="parallel" value="75" />
+    <arg value="np" />
+
+    <!-- Don't hide tokenizer exceptions -->
+    <rule ref="Internal.Tokenizer.Exception">
+        <type>error</type>
+    </rule>
+
+    <!-- Include rule sets -->
+    <rule ref="PSR1" />
+    <rule ref="PSR2" />
+    <rule ref="Generic" />
+    <rule ref="Zend" />
+    <rule ref="Squiz" />
+    <rule ref="MySource" />
+    <rule ref="PEAR" />
+
+    <rule ref="Generic.WhiteSpace.DisallowSpaceIndent"><severity>0</severity></rule>
+    <rule ref="Generic.PHP.ClosingPHPTag"><severity>0</severity></rule>
+    <rule ref="Generic.Classes.OpeningBraceSameLine"><severity>0</severity></rule>
+    <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie"><severity>0</severity></rule>
+    <rule ref="Generic.Files.LowercasedFilename"><severity>0</severity></rule>
+    <rule ref="Generic.Arrays.DisallowShortArraySyntax"><severity>0</severity></rule>
+    <rule ref="Generic.Commenting.DocComment"><severity>0</severity></rule>
+    <rule ref="Generic.Files.EndFileNoNewline"><severity>0</severity></rule>
+    <rule ref="Generic.PHP.UpperCaseConstant"><severity>0</severity></rule>
+    <rule ref="Generic.Formatting.NoSpaceAfterCast"><severity>0</severity></rule>
+    <rule ref="Generic.Formatting.SpaceAfterNot"><severity>0</severity></rule>
+
+    <rule ref="Zend.NamingConventions.ValidVariableName.PrivateNoUnderscore"><severity>0</severity></rule>
+
+    <rule ref="Squiz.Files.FileExtension.ClassFound"><severity>0</severity></rule>
+    <rule ref="Squiz.WhiteSpace.FunctionClosingBraceSpace"><severity>0</severity></rule>
+    <rule ref="Squiz.Commenting.FileComment"><severity>0</severity></rule>
+    <rule ref="Squiz.Commenting.ClassComment"><severity>0</severity></rule>
+    <rule ref="Squiz.Commenting.DocCommentAlignment.SpaceAfterStar"><severity>0</severity></rule>
+    <rule ref="Squiz.WhiteSpace.MemberVarSpacing.FirstIncorrect"><severity>0</severity></rule>
+    <rule ref="Squiz.WhiteSpace.FunctionSpacing.Before"><severity>0</severity></rule>
+    <rule ref="Squiz.WhiteSpace.FunctionSpacing.After"><severity>0</severity></rule>
+    <rule ref="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore"><severity>0</severity></rule>
+    <rule ref="Squiz.NamingConventions.ValidFunctionName.PrivateNoUnderscore"><severity>0</severity></rule>
+    <rule ref="Squiz.Commenting.FunctionComment.IncorrectParamVarName"><severity>0</severity></rule>
+    <rule ref="Squiz.Commenting.FunctionComment.InvalidReturn"><severity>0</severity></rule>
+    <rule ref="Squiz.WhiteSpace.ObjectOperatorSpacing.Before"><severity>0</severity></rule>
+    <rule ref="Squiz.Operators.ComparisonOperatorUsage.ImplicitTrue"><severity>0</severity></rule>
+    <rule ref="Squiz.Operators.ComparisonOperatorUsage.NotAllowed"><severity>0</severity></rule>
+    <rule ref="Squiz.PHP.DisallowComparisonAssignment.AssignedComparison"><severity>0</severity></rule>
+    <rule ref="Squiz.Formatting.OperatorBracket.MissingBrackets"><severity>0</severity></rule>
+    <rule ref="Squiz.Strings.ConcatenationSpacing"><severity>0</severity></rule>
+
+    <rule ref="MySource.Commenting.FunctionComment.IncorrectParamVarName"><severity>0</severity></rule>
+    <rule ref="MySource.Commenting.FunctionComment.InvalidReturn"><severity>0</severity></rule>
+    <rule ref="MySource.Channels.IncludeSystem.NotIncludedExtends"><severity>0</severity></rule>
+    <rule ref="MySource.Channels.IncludeSystem.NotIncludedCall"><severity>0</severity></rule>
+    <rule ref="MySource.Debug.DebugCode.Found"><severity>0</severity></rule>
+
+    <rule ref="PEAR.Commenting.ClassComment"><severity>0</severity></rule>
+    <rule ref="PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore"><severity>0</severity></rule>
+
+    <!-- PEAR uses warnings for inline control structures, so switch back to errors -->
+    <rule ref="Generic.ControlStructures.InlineControlStructure">
+        <properties>
+            <property name="error" value="true" />
+        </properties>
+    </rule>
+
+    <!-- Only one argument per line in multi-line function calls -->
+    <rule ref="PEAR.Functions.FunctionCallSignature">
+        <properties>
+            <property name="allowMultipleArguments" value="false" />
+        </properties>
+    </rule>
+
+    <!-- Have 12 chars padding maximum and always show as errors -->
+    <rule ref="Generic.Formatting.MultipleStatementAlignment">
+        <properties>
+            <property name="maxPadding" value="12" />
+            <property name="error" value="true" />
+        </properties>
+    </rule>
+
+    <!-- Ban some functions -->
+    <rule ref="Generic.PHP.ForbiddenFunctions">
+        <properties>
+            <property name="forbiddenFunctions" type="array">
+                <element key="sizeof" value="count" />
+                <element key="delete" value="unset" />
+                <element key="print" value="echo" />
+                <element key="is_null" value="null" />
+                <element key="create_function" value="null" />
+                <element key="die" value="null" />
+                <element key="exit" value="null" />
+                <element key="dump" value="null" />
+                <element key="var_dump" value="null" />
+                <element key="var_export" value="null" />
+            </property>
+        </properties>
+    </rule>
+</ruleset>

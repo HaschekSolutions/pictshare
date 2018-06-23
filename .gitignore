@@ -1,1 +1,7 @@
-test.php
+.idea/
+.php_cs.cache
+composer
+inc/config.inc.php
+tmp/
+upload/
+vendor/
