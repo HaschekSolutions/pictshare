@@ -9,18 +9,21 @@ interface StorageProviderInterface
     /**
      * Get a file.
      *
-     * @param string $fileName
+     * @param string $originalFileName
+     * @param string $variationFileName
      *
-     * @return bool
+     * @return bool|string
      */
-    public function get(string $fileName): bool;
+    public function get(string $originalFileName, string $variationFileName);
 
     /**
      * Save a file.
      *
-     * @param string $fileName
+     * @param string $originalFileName
+     * @param string $variationFileName
+     * @param string $fileContent
      */
-    public function save(string $fileName);
+    public function save(string $originalFileName, string $variationFileName, string $fileContent);
 
     /**
      * Delete a file.

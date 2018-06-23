@@ -100,8 +100,13 @@ class PictshareModel
                 }
                 $data['hash'] = $el;
             } elseif (defined('BACKBLAZE') && BACKBLAZE === true && $this->couldThisBeAnImage($el) && defined('BACKBLAZE_AUTODOWNLOAD') && BACKBLAZE_AUTODOWNLOAD === true) { //looks like it might be a hash but didn't find it here. Let's see
-                $b = StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER);
-                if ($b->get($el)) { // If the backblaze get function says it's an image, we'll take it.
+                $fileContent = StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER)
+                    ->get($el, $el);
+
+                if ($fileContent) { // If the backblaze get function says it's an image, we'll take it.
+                    StorageProviderFactory::getStorageProvider(StorageProviderFactory::LOCAL_PROVIDER)
+                        ->save($el, $el, $fileContent);
+
                     $data['hash'] = $el;
                 }
             } elseif ($el == 'mp4' || $el == 'raw' || $el == 'preview' || $el == 'webm' || $el == 'ogg') {
@@ -116,9 +121,6 @@ class PictshareModel
                 $data['rotate'] = $el;
             } elseif ($this->isFilter($el)) {
                 $data['filter'][] = $el;
-            } elseif ($legacy = $this->isLegacyThumbnail($el)) { //so old uploads will still work
-                $data['hash'] = $legacy['hash'];
-                $data['size'] = $legacy['size'];
             } elseif ($el == 'forcesize') {
                 $data['forcesize'] = true;
             } elseif (strlen(MASTER_DELETE_CODE) > 10 && $el == 'delete_' . strtolower(MASTER_DELETE_CODE)) {
@@ -173,7 +175,7 @@ class PictshareModel
 
     public function deleteImage($hash)
     {
-        //delete hash from hashes.csv
+        // Delete hash from hashes.csv.
         $tmpname = ROOT . DS . 'upload' . DS . 'delete_temp.csv';
         $csv = ROOT . DS . 'upload' . DS . 'hashes.csv';
         $fptemp = fopen($tmpname, 'wb');
@@ -189,46 +191,19 @@ class PictshareModel
         fclose($fptemp);
         unlink($csv);
         rename($tmpname, $csv);
-        //unlink($tmpname);
 
-        //delete actual image
-        $base_path = ROOT . DS . 'upload' . DS . $hash . DS;
-        if (!is_dir($base_path)) {
-            return false;
-        }
-        if ($handle = opendir($base_path)) {
-            while (false !== ($entry = readdir($handle))) {
-                if ($entry != "." && $entry != "..") {
-                    unlink($base_path . $entry);
-                }
-            }
-            closedir($handle);
-        }
+        // Delete from the local filesystem.
+        StorageProviderFactory::getStorageProvider(StorageProviderFactory::LOCAL_PROVIDER)
+            ->delete($hash);
 
-        rmdir($base_path);
-
-        //delete from backblaze if configured
-        if (defined('BACKBLAZE') && BACKBLAZE === true && defined('BACKBLAZE_AUTODELETE') && BACKBLAZE_AUTODELETE === true) {
+        // Delete from backblaze if configured.
+        if (defined('BACKBLAZE')
+            && BACKBLAZE === true
+            && defined('BACKBLAZE_AUTODELETE')
+            && BACKBLAZE_AUTODELETE === true
+        ) {
             StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER)
                 ->delete($hash);
-        }
-
-        return true;
-    }
-
-    public function isLegacyThumbnail($val)
-    {
-        if (strpos($val, '_')) {
-            $a = explode('_', $val);
-            $size = $a[0];
-            $hash = $a[1];
-            if (!$this->isSize($size) || !$this->isImage($hash)) {
-                return false;
-            }
-
-            return array('hash' => $hash,'size' => $size);
-        } else {
-            return false;
         }
     }
 
@@ -259,28 +234,10 @@ class PictshareModel
         }
     }
 
-    public function renderLegacyResized($path)
-    {
-        $a = explode('_', $path);
-        if (count($a) !== 2) {
-            return false;
-        }
-
-        $hash = $a[1];
-        $size = $a[0];
-
-        if (!$this->hashExists($hash)) {
-            return false;
-        }
-
-        renderResizedImage($size, $hash);
-    }
-
     public function getCacheName($data)
     {
         ksort($data);
         unset($data['raw']);
-        //unset($data['preview']);
         $name = false;
         foreach ($data as $key => $val) {
             if ($key != 'hash') {
@@ -473,14 +430,15 @@ class PictshareModel
             return array('status' => 'OK','type' => $type,'hash' => $hash,'url' => DOMAINPATH . PATH . $hash,'domain' => DOMAINPATH);
         }
 
-        mkdir(ROOT . DS . 'upload' . DS . $hash);
-        $file = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+        $fileContent = file_get_contents($url);
 
-        file_put_contents($file, file_get_contents($url));
+        StorageProviderFactory::getStorageProvider(StorageProviderFactory::LOCAL_PROVIDER)
+            ->save($hash, $hash, $fileContent);
+
         unlink($tempfile);
 
         //re-render new mp4 by calling the re-encode script
-        if ($type == 'mp4' && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        if ($type === 'mp4' && stripos(PHP_OS, 'WIN')) {
             system('nohup php ' . ROOT . DS . 'tools' . DS . 're-encode_mp4.php force ' . $hash . ' > /dev/null 2> /dev/null &');
         }
 
@@ -490,9 +448,13 @@ class PictshareModel
             fclose($fh);
         }
 
-        if (defined('BACKBLAZE') && BACKBLAZE === true && defined('BACKBLAZE_AUTOUPLOAD') && BACKBLAZE_AUTOUPLOAD === true) {
+        if (defined('BACKBLAZE')
+            && BACKBLAZE === true
+            && defined('BACKBLAZE_AUTOUPLOAD')
+            && BACKBLAZE_AUTOUPLOAD === true
+        ) {
             StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER)
-                ->save($hash);
+                ->save($hash, $hash, $fileContent);
         }
 
         return array('status' => 'OK','type' => $type,'hash' => $hash,'url' => DOMAINPATH . PATH . $hash,'domain' => DOMAINPATH,'deletecode' => $this->generateDeleteCodeForImage($hash));
@@ -679,7 +641,7 @@ class PictshareModel
         while (($line = fgets($fp)) !== false) {
             $line = trim($line);
             if (!$line) {
-                contine;
+                continue;
             }
             $sha_upload = substr($line, 0, 40);
             if ($sha_upload == $sha) { //when it's a duplicate return the hash of the original file
@@ -779,9 +741,8 @@ class PictshareModel
         trigger_error('########## FILETYPE: ' . $info['mime']);
 
         $f = finfo_open();
-        $type = $this->isTypeAllowed(finfo_buffer($f, $data, FILEINFO_MIME_TYPE));
 
-        return $type;
+        return $this->isTypeAllowed(finfo_buffer($f, $data, FILEINFO_MIME_TYPE));
     }
 
     public function base64ToImage($base64_string, $output_file, $type)
@@ -819,7 +780,6 @@ class PictshareModel
                 break;
         }
 
-        //$imageSave = imagejpeg($source,$output_file,100);
         imagedestroy($source);
 
         return $type;
@@ -829,9 +789,8 @@ class PictshareModel
     {
         $base_path = ROOT . DS . 'upload' . DS . $hash . DS;
         $path = $base_path . $hash;
-        $type = $this->isTypeAllowed($this->getTypeOfFile($path));
 
-        return $type;
+        return $this->isTypeAllowed($this->getTypeOfFile($path));
     }
 
     public function isProperMP4($filename)

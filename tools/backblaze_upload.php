@@ -36,6 +36,8 @@ if (\in_array('recentlyrendered', $argv, true)) {
     $recentOnly = true;
 }
 
+$localStorageProvider = StorageProviderFactory::getStorageProvider(StorageProviderFactory::LOCAL_PROVIDER);
+
 /** @var \PictShare\Classes\StorageProviders\BackblazeStorageProvider $b */
 $b = StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER);
 echo '[i] Loading file list from Backblaze ..';
@@ -76,7 +78,8 @@ foreach ($localFiles as $hash) {
         echo "  [!] $hash not found on BB. Uploading...";
 
         if ($sim !== true) {
-            $b->save($hash);
+            $localFileContent = $localStorageProvider->get($hash, $hash);
+            $b->save($hash, $hash, $localFileContent);
         }
 
         $uploadSize += filesize($dir . $hash . DS . $hash);

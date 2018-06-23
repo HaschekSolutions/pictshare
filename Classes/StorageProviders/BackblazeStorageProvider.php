@@ -10,6 +10,7 @@ namespace PictShare\Classes\StorageProviders;
  * @author Christian Haschek <christian@haschek.at>
  *
  * @TODO Refactor all the duplicate curl* calls.
+ * @TODO Remove the local filesystem dependencies. Let those be handled by LocalStorageProvider.
  */
 class BackblazeStorageProvider implements StorageProviderInterface
 {
@@ -91,17 +92,17 @@ class BackblazeStorageProvider implements StorageProviderInterface
     }
 
     /**
-     * @param string $hash
+     * @inheritdoc
      *
-     * @return bool
+     * @throws \RuntimeException
      */
-    final public function get(string $hash): bool
+    final public function get(string $originalFileName, string $variationFileName)
     {
-        if (file_exists($this->localBaseDir . $hash . DS . $hash)) {
+        if (file_exists($this->localBaseDir . $originalFileName . DS . $variationFileName)) {
             return false;
         }
 
-        $uri     = $this->dlURL . '/file/' . $this->bucketName . '/' . $hash;
+        $uri     = $this->dlURL . '/file/' . $this->bucketName . '/' . $variationFileName;
         $session = curl_init($uri);
 
         $headers = [
@@ -122,38 +123,26 @@ class BackblazeStorageProvider implements StorageProviderInterface
             return false;
         }
 
-        $dirName = $this->localBaseDir . $hash;
-
-        if (!mkdir($dirName) && !is_dir($dirName)) {
-            return false;
-        }
-
-        $fileName = $dirName . DS . $hash;
-
-        file_put_contents($fileName, $response);
-
-        return true;
+        return $response;
     }
 
     /**
-     * @param string $hash
+     * @inheritdoc
      */
-    final public function save(string $hash)
+    final public function save(string $originalFileName, string $variationFileName, string $fileContent)
     {
         if (!$this->ulURL) {
             $this->getUploadInfo();
         }
 
-        $fileName    = $this->localBaseDir . $hash . DS . $hash;
-        $handle      = fopen($fileName, 'rb');
-        $fileContent = fread($handle, filesize($fileName));
-        $session     = curl_init($this->ulURL);
+        $fileName = $this->localBaseDir . $originalFileName . DS . $variationFileName;
+        $session  = curl_init($this->ulURL);
 
         curl_setopt($session, CURLOPT_POSTFIELDS, $fileContent);
 
         $headers = [
             'Authorization: '     . $this->ulToken,
-            'X-Bz-File-Name: '    . $hash,
+            'X-Bz-File-Name: '    . $variationFileName,
             'X-Bz-Content-Sha1: ' . sha1_file($fileName),
             'Content-Type: text/plain',
         ];
@@ -165,7 +154,7 @@ class BackblazeStorageProvider implements StorageProviderInterface
     }
 
     /**
-     * @param string $hash
+     * @inheritdoc
      */
     final public function delete(string $hash)
     {
@@ -291,7 +280,7 @@ class BackblazeStorageProvider implements StorageProviderInterface
 
         $data = json_decode($response, true);
 
-        if (is_array($data)) {
+        if (\is_array($data)) {
             foreach ($data['buckets'] as $bucket) {
                 if ((int) $bucket['bucketId'] === $bucketId) {
                     return $bucket['bucketName'];
