@@ -54,7 +54,8 @@ class Image
 
         $width_new = $height * $maxWidth / $maxHeight;
         $height_new = $width * $maxHeight / $maxWidth;
-        //if the new width is greater than the actual width of the image, then the height is too large and the rest cut off, or vice versa
+        // If the new width is greater than the actual width of the image,
+        // then the height is too large and the rest cut off, or vice versa.
         if ($width_new > $width) {
             //cut point by height
             $h_point = (($height - $height_new) / 2);
@@ -71,6 +72,9 @@ class Image
 
     /**
      * From: https://stackoverflow.com/questions/4590441/php-thumbnail-image-resizing-with-proportions
+     *
+     * @param $img
+     * @param int $size
      */
     public function resize(&$img, $size)
     {
@@ -121,7 +125,7 @@ class Image
 
     /**
      * @param $im
-     * @param $vars
+     * @param array $vars
      *
      * @return resource GD image resource
      */

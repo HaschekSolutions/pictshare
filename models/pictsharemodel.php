@@ -1,6 +1,7 @@
 <?php
 
 use PictShare\Classes\FilterFactory;
+use PictShare\Classes\StorageProviderFactory;
 
 class PictshareModel
 {
@@ -99,8 +100,8 @@ class PictshareModel
                 }
                 $data['hash'] = $el;
             } elseif (defined('BACKBLAZE') && BACKBLAZE === true && $this->couldThisBeAnImage($el) && defined('BACKBLAZE_AUTODOWNLOAD') && BACKBLAZE_AUTODOWNLOAD === true) { //looks like it might be a hash but didn't find it here. Let's see
-                $b = new Backblaze();
-                if ($b->download($el)) { //if the backblaze download function says it's an image, we'll take it
+                $b = StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER);
+                if ($b->get($el)) { // If the backblaze get function says it's an image, we'll take it.
                     $data['hash'] = $el;
                 }
             } elseif ($el == 'mp4' || $el == 'raw' || $el == 'preview' || $el == 'webm' || $el == 'ogg') {
@@ -208,10 +209,9 @@ class PictshareModel
 
         //delete from backblaze if configured
         if (defined('BACKBLAZE') && BACKBLAZE === true && defined('BACKBLAZE_AUTODELETE') && BACKBLAZE_AUTODELETE === true) {
-            $b = new Backblaze();
-            $b->deleteFile($hash);
+            StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER)
+                ->delete($hash);
         }
-
 
         return true;
     }
@@ -491,8 +491,8 @@ class PictshareModel
         }
 
         if (defined('BACKBLAZE') && BACKBLAZE === true && defined('BACKBLAZE_AUTOUPLOAD') && BACKBLAZE_AUTOUPLOAD === true) {
-            $b = new Backblaze();
-            $b->upload($hash);
+            StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER)
+                ->save($hash);
         }
 
         return array('status' => 'OK','type' => $type,'hash' => $hash,'url' => DOMAINPATH . PATH . $hash,'domain' => DOMAINPATH,'deletecode' => $this->generateDeleteCodeForImage($hash));

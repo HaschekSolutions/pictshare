@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace PictShare\Classes\StorageProviders;
+
 /**
  * Backblaze B2 wrapper without external dependencies.
  *
@@ -9,7 +11,7 @@ declare(strict_types=1);
  *
  * @TODO Refactor all the duplicate curl* calls.
  */
-class Backblaze
+class BackblazeStorageProvider implements StorageProviderInterface
 {
     const GET_UPLOAD_URL_ENDPOINT      = '/b2api/v1/b2_get_upload_url';
     const LIST_FILE_NAMES_ENDPOINT     = '/b2api/v1/b2_list_file_names';
@@ -69,12 +71,11 @@ class Backblaze
      */
     public function __construct()
     {
-        if (
-            !defined('BACKBLAZE')
-            || (defined('BACKBLAZE') && BACKBLAZE !== true)
-            || !defined('BACKBLAZE_ID')
-            || !defined('BACKBLAZE_KEY')
-            || !defined('BACKBLAZE_BUCKET_ID')
+        if (!\defined('BACKBLAZE')
+            || (\defined('BACKBLAZE') && BACKBLAZE !== true)
+            || !\defined('BACKBLAZE_ID')
+            || !\defined('BACKBLAZE_KEY')
+            || !\defined('BACKBLAZE_BUCKET_ID')
         ) {
             return;
         }
@@ -82,7 +83,7 @@ class Backblaze
         $this->authorize();
 
         $this->bucketId   = BACKBLAZE_BUCKET_ID;
-        $this->bucketName = ((defined('BACKBLAZE_BUCKET_NAME') && BACKBLAZE_BUCKET_NAME !== '')
+        $this->bucketName = ((\defined('BACKBLAZE_BUCKET_NAME') && BACKBLAZE_BUCKET_NAME !== '')
             ? BACKBLAZE_BUCKET_NAME
             : $this->bucketIdToName($this->bucketId));
 
@@ -91,39 +92,10 @@ class Backblaze
 
     /**
      * @param string $hash
-     */
-    public function upload(string $hash)
-    {
-        if (!$this->ulURL) {
-            $this->getUploadInfo();
-        }
-
-        $fileName    = $this->localBaseDir . $hash . DS . $hash;
-        $handle      = fopen($fileName, 'rb');
-        $fileContent = fread($handle, filesize($fileName));
-        $session     = curl_init($this->ulURL);
-
-        curl_setopt($session, CURLOPT_POSTFIELDS, $fileContent);
-
-        $headers = [
-            'Authorization: '     . $this->ulToken,
-            'X-Bz-File-Name: '    . $hash,
-            'X-Bz-Content-Sha1: ' . sha1_file($fileName),
-            'Content-Type: text/plain',
-        ];
-
-        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($session, CURLOPT_POST, true);
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
-        curl_close($session);
-    }
-
-    /**
-     * @param string $hash
      *
      * @return bool
      */
-    public function download(string $hash): bool
+    final public function get(string $hash): bool
     {
         if (file_exists($this->localBaseDir . $hash . DS . $hash)) {
             return false;
@@ -166,7 +138,36 @@ class Backblaze
     /**
      * @param string $hash
      */
-    public function deleteFile(string $hash)
+    final public function save(string $hash)
+    {
+        if (!$this->ulURL) {
+            $this->getUploadInfo();
+        }
+
+        $fileName    = $this->localBaseDir . $hash . DS . $hash;
+        $handle      = fopen($fileName, 'rb');
+        $fileContent = fread($handle, filesize($fileName));
+        $session     = curl_init($this->ulURL);
+
+        curl_setopt($session, CURLOPT_POSTFIELDS, $fileContent);
+
+        $headers = [
+            'Authorization: '     . $this->ulToken,
+            'X-Bz-File-Name: '    . $hash,
+            'X-Bz-Content-Sha1: ' . sha1_file($fileName),
+            'Content-Type: text/plain',
+        ];
+
+        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($session, CURLOPT_POST, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
+        curl_close($session);
+    }
+
+    /**
+     * @param string $hash
+     */
+    final public function delete(string $hash)
     {
         $fileId  = $this->fileExistsInBucket($hash);
         $session = curl_init($this->apiURL . self::DELETE_FILE_VERSION_ENDPOINT);
@@ -191,39 +192,11 @@ class Backblaze
     }
 
     /**
-     * Authorize with BackBlaze.
-     */
-    public function authorize()
-    {
-        $credentials = base64_encode(BACKBLAZE_ID . ':' . BACKBLAZE_KEY);
-        $session     = curl_init(self::AUTHORIZE_URL);
-
-        $headers = [
-            'Accept: application/json',
-            'Authorization: Basic ' . $credentials,
-        ];
-
-        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($session, CURLOPT_HTTPGET, true);
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
-
-        $response = curl_exec($session);
-
-        curl_close($session);
-
-        $data = json_decode($response, true);
-
-        $this->token  = $data['authorizationToken'];
-        $this->apiURL = $data['apiUrl'];
-        $this->dlURL  = $data['downloadUrl'];
-    }
-
-    /**
      * @param string|null $startFileName
      *
      * @return array
      */
-    public function getAllFilesInBucket(string $startFileName = null): array
+    final public function getAllFilesInBucket(string $startFileName = null): array
     {
         $session = curl_init($this->apiURL . self::LIST_FILE_NAMES_ENDPOINT);
 
@@ -260,6 +233,34 @@ class Backblaze
         }
 
         return $this->files;
+    }
+
+    /**
+     * Authorize with BackBlaze.
+     */
+    private function authorize()
+    {
+        $credentials = base64_encode(BACKBLAZE_ID . ':' . BACKBLAZE_KEY);
+        $session     = curl_init(self::AUTHORIZE_URL);
+
+        $headers = [
+            'Accept: application/json',
+            'Authorization: Basic ' . $credentials,
+        ];
+
+        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($session, CURLOPT_HTTPGET, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($session);
+
+        curl_close($session);
+
+        $data = json_decode($response, true);
+
+        $this->token  = $data['authorizationToken'];
+        $this->apiURL = $data['apiUrl'];
+        $this->dlURL  = $data['downloadUrl'];
     }
 
     /**
