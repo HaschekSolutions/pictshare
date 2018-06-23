@@ -9,7 +9,7 @@ use PictShare\Classes\Filters\FilterInterface;
 class FilterFactory
 {
     /**
-     * Maps of filter names from the URL, to class names.
+     * Maps filter names from the URL, to class names.
      *
      * @TODO Get rid of this. We can get the classes to define their own URL name.
      */

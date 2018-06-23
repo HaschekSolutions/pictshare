@@ -1,284 +1,257 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Backblaze B2 wrapper without external dependencies.
  *
  * @author Christian Haschek <christian@haschek.at>
+ *
+ * @TODO Refactor all the duplicate curl* calls.
  */
 class Backblaze
 {
+    const GET_UPLOAD_URL_ENDPOINT      = '/b2api/v1/b2_get_upload_url';
+    const LIST_FILE_NAMES_ENDPOINT     = '/b2api/v1/b2_list_file_names';
+    const LIST_BUCKETS_ENDPOINT        = '/b2api/v1/b2_list_buckets';
+    const DELETE_FILE_VERSION_ENDPOINT = '/b2api/v1/b2_delete_file_version';
+    const AUTHORIZE_URL                = 'https://api.backblazeb2.com/b2api/v1/b2_authorize_account';
+    const LOCAL_UPLOAD_DIR             = 'upload';
+
+    /**
+     * @var string
+     */
     private $token;
-    private $apiURL;
-    private $bucket;
-    private $dlURL;
-    private $ulURL;
+
+    /**
+     * @var string
+     */
     private $ulToken;
-    private $bucket_name;
+
+    /**
+     * @var string
+     */
+    private $apiURL;
+
+    /**
+     * @var string
+     */
+    private $dlURL;
+
+    /**
+     * @var string
+     */
+    private $ulURL;
+
+    /**
+     * @var int
+     */
+    private $bucketId;
+
+    /**
+     * @var string
+     */
+    private $bucketName;
+
+    /**
+     * @var array
+     */
     private $files;
 
+    /**
+     * @var string
+     */
+    private $localBaseDir;
+
+
+    /**
+     * Backblaze constructor.
+     */
     public function __construct()
     {
-        if (BACKBLAZE !== true || !defined('BACKBLAZE_ID') || !defined('BACKBLAZE_KEY') || !defined('BACKBLAZE_BUCKET_ID')) {
+        if (
+            !defined('BACKBLAZE')
+            || (defined('BACKBLAZE') && BACKBLAZE !== true)
+            || !defined('BACKBLAZE_ID')
+            || !defined('BACKBLAZE_KEY')
+            || !defined('BACKBLAZE_BUCKET_ID')
+        ) {
             return;
         }
 
         $this->authorize();
-        $this->bucket = BACKBLAZE_BUCKET_ID;
-        $this->bucket_name = ((defined('BACKBLAZE_BUCKET_NAME') && BACKBLAZE_BUCKET_NAME !== '') ? BACKBLAZE_BUCKET_NAME : $this->bucketIdToName($this->bucket));
+
+        $this->bucketId   = BACKBLAZE_BUCKET_ID;
+        $this->bucketName = ((defined('BACKBLAZE_BUCKET_NAME') && BACKBLAZE_BUCKET_NAME !== '')
+            ? BACKBLAZE_BUCKET_NAME
+            : $this->bucketIdToName($this->bucketId));
+
+        $this->localBaseDir = ROOT . DS . self::LOCAL_UPLOAD_DIR . DS;
     }
 
-    public function authorize()
-    {
-        $account_id = BACKBLAZE_ID; // Obtained from your B2 account page
-        $application_key = BACKBLAZE_KEY; // Obtained from your B2 account page
-        $credentials = base64_encode($account_id . ':' . $application_key);
-        $url = 'https://api.backblazeb2.com/b2api/v1/b2_authorize_account';
-
-        $session = curl_init($url);
-
-        // Add headers
-        $headers = array();
-        $headers[] = 'Accept: application/json';
-        $headers[] = 'Authorization: Basic ' . $credentials;
-        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);  // Add headers
-
-        curl_setopt($session, CURLOPT_HTTPGET, true);  // HTTP GET
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true); // Receive server response
-        $server_output = curl_exec($session);
-        curl_close($session);
-        $data = json_decode($server_output, true);
-
-        $this->token = $data['authorizationToken'];
-        $this->apiURL = $data['apiUrl'];
-        $this->dlURL = $data['downloadUrl'];
-    }
-
-    public function upload($hash)
+    /**
+     * @param string $hash
+     */
+    public function upload(string $hash)
     {
         if (!$this->ulURL) {
             $this->getUploadInfo();
         }
 
-        $file_name = $hash;
-        $my_file = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
-        $handle = fopen($my_file, 'rb');
-        $read_file = fread($handle, filesize($my_file));
+        $fileName    = $this->localBaseDir . $hash . DS . $hash;
+        $handle      = fopen($fileName, 'rb');
+        $fileContent = fread($handle, filesize($fileName));
+        $session     = curl_init($this->ulURL);
 
-        $upload_url = $this->ulURL; // Provided by b2_get_upload_url
-        $upload_auth_token = $this->ulToken; // Provided by b2_get_upload_url
-        $bucket_id = $this->bucket;  // The ID of the bucket
-        $content_type = 'text/plain';
-        $sha1_of_file_data = sha1_file($my_file);
+        curl_setopt($session, CURLOPT_POSTFIELDS, $fileContent);
 
-        $session = curl_init($upload_url);
+        $headers = [
+            'Authorization: '     . $this->ulToken,
+            'X-Bz-File-Name: '    . $hash,
+            'X-Bz-Content-Sha1: ' . sha1_file($fileName),
+            'Content-Type: text/plain',
+        ];
 
-        // Add read file as post field
-        curl_setopt($session, CURLOPT_POSTFIELDS, $read_file);
-
-        // Add headers
-        $headers = array();
-        $headers[] = 'Authorization: ' . $upload_auth_token;
-        $headers[] = 'X-Bz-File-Name: ' . $file_name;
-        $headers[] = 'Content-Type: ' . $content_type;
-        $headers[] = 'X-Bz-Content-Sha1: ' . $sha1_of_file_data;
         curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
-
-        curl_setopt($session, CURLOPT_POST, true); // HTTP POST
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);  // Receive server response
-        $server_output = curl_exec($session); // Let's do this!
-        curl_close($session); // Clean up
-        //var_dump($server_output); // Tell me about the rabbits, George!
+        curl_setopt($session, CURLOPT_POST, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
+        curl_close($session);
     }
 
-    public function getUploadInfo()
+    /**
+     * @param string $hash
+     *
+     * @return bool
+     */
+    public function download(string $hash): bool
     {
-        $api_url = $this->apiURL; // From b2_authorize_account call
-        $auth_token = $this->token; // From b2_authorize_account call
-        $bucket_id = $this->bucket;  // The ID of the bucket you want to upload to
-
-        $session = curl_init($api_url .  '/b2api/v1/b2_get_upload_url');
-
-        // Add post fields
-        $data = array('bucketId' => $bucket_id);
-        $post_fields = json_encode($data);
-        curl_setopt($session, CURLOPT_POSTFIELDS, $post_fields);
-
-        // Add headers
-        $headers = array();
-        $headers[] = 'Authorization: ' . $auth_token;
-        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
-
-        curl_setopt($session, CURLOPT_POST, true); // HTTP POST
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);  // Receive server response
-        $server_output = curl_exec($session); // Let's do this!
-        curl_close($session); // Clean up
-        $data = json_decode($server_output, true); // Tell me about the rabbits, George!
-        $this->ulURL = $data['uploadUrl'];
-        $this->ulToken = $data['authorizationToken'];
-    }
-
-    public function download($hash)
-    {
-        if (file_exists(ROOT . DS . 'upload' . DS . $hash . DS . $hash)) {
+        if (file_exists($this->localBaseDir . $hash . DS . $hash)) {
             return false;
         }
-        $download_url = $this->dlURL; // From b2_authorize_account call
-        $bucket_name = $this->bucket_name;  // The NAME of the bucket you want to download from
-        $file_name = $hash; // The name of the file you want to download
-        $auth_token = $this->token; // From b2_authorize_account call
-        $uri = $download_url . '/file/' . $bucket_name . '/' . $file_name;
 
+        $uri     = $this->dlURL . '/file/' . $this->bucketName . '/' . $hash;
         $session = curl_init($uri);
 
-        // Add headers
-        $headers = array();
-        $headers[] = 'Authorization: ' . $auth_token;
+        $headers = [
+            'Authorization: ' . $this->token,
+        ];
+
         curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($session, CURLOPT_HTTPGET, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
 
-        curl_setopt($session, CURLOPT_HTTPGET, true); // HTTP POST
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);  // Receive server response
-        $server_output = curl_exec($session); // Let's do this!
-        curl_close($session); // Clean up
-        $is_binary = preg_match('~[^\x20-\x7E\t\r\n]~', $server_output); // Tell me about the rabbits, George!
+        $response = curl_exec($session);
 
-        if (!$is_binary) {
+        curl_close($session);
+
+        $isBinary = preg_match('~[^\x20-\x7E\t\r\n]~', $response);
+
+        if (!$isBinary) {
             return false;
         }
 
-        mkdir(ROOT . DS . 'upload' . DS . $hash);
-        $file = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
-        
-        file_put_contents($file, $server_output);
+        $dirName = $this->localBaseDir . $hash;
+
+        if (!mkdir($dirName) && !is_dir($dirName)) {
+            return false;
+        }
+
+        $fileName = $dirName . DS . $hash;
+
+        file_put_contents($fileName, $response);
+
         return true;
     }
 
-    public function bucketIdToName($bucketId)
+    /**
+     * @param string $hash
+     */
+    public function deleteFile(string $hash)
     {
-        $api_url = $this->apiURL; // From b2_authorize_account call
-        $auth_token = $this->token; // From b2_authorize_account call
-        $account_id = BACKBLAZE_ID;
+        $fileId  = $this->fileExistsInBucket($hash);
+        $session = curl_init($this->apiURL . self::DELETE_FILE_VERSION_ENDPOINT);
 
-        $session = curl_init($api_url .  '/b2api/v1/b2_list_buckets');
+        $data = [
+            'fileId'   => $fileId,
+            'fileName' => $hash,
+        ];
+        $postFields = json_encode($data);
 
-        // Add post fields
-        $data = array('accountId' => $account_id);
-        $post_fields = json_encode($data);
-        curl_setopt($session, CURLOPT_POSTFIELDS, $post_fields);
+        curl_setopt($session, CURLOPT_POSTFIELDS, $postFields);
 
-        // Add headers
-        $headers = array();
-        $headers[] = 'Authorization: ' . $auth_token;
+        $headers = [
+            'Authorization: ' . $this->token,
+        ];
+
         curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
-
-        curl_setopt($session, CURLOPT_POST, true); // HTTP POST
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);  // Receive server response
-        $server_output = curl_exec($session); // Let's do this!
-        curl_close($session); // Clean up
-        $data = json_decode($server_output, true); // Tell me about the rabbits, George!
-
-        if (is_array($data)) {
-            foreach ($data['buckets'] as $bucket) {
-                if ((int) $bucket['bucketId'] === $this->bucket) {
-                    return $bucket['bucketName'];
-                }
-            }
-        }
-
-        return false;
+        curl_setopt($session, CURLOPT_POST, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
+        curl_exec($session);
+        curl_close($session);
     }
 
-    public function deleteFile($hash, $file_id = false)
+    /**
+     * Authorize with BackBlaze.
+     */
+    public function authorize()
     {
-        $api_url = $this->apiURL; // From b2_authorize_account call
-        $auth_token = $this->token; // From b2_authorize_account call
-        $file_name = $hash; // The file name of the file you want to delete
-        if (!$file_id) {
-            $file_id = $this->fileExistsInBucket($hash);
-        }
+        $credentials = base64_encode(BACKBLAZE_ID . ':' . BACKBLAZE_KEY);
+        $session     = curl_init(self::AUTHORIZE_URL);
 
-        $session = curl_init($api_url .  '/b2api/v1/b2_delete_file_version');
+        $headers = [
+            'Accept: application/json',
+            'Authorization: Basic ' . $credentials,
+        ];
 
-        // Add post fields
-        $data = array('fileId' => $file_id, 'fileName' => $file_name);
-        $post_fields = json_encode($data);
-        curl_setopt($session, CURLOPT_POSTFIELDS, $post_fields);
-
-        // Add headers
-        $headers = array();
-        $headers[] = 'Authorization: ' . $auth_token;
         curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($session, CURLOPT_HTTPGET, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
 
-        curl_setopt($session, CURLOPT_POST, true); // HTTP POST
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);  // Receive server response
-        $server_output = curl_exec($session); // Let's do this!
-        curl_close($session); // Clean up
+        $response = curl_exec($session);
+
+        curl_close($session);
+
+        $data = json_decode($response, true);
+
+        $this->token  = $data['authorizationToken'];
+        $this->apiURL = $data['apiUrl'];
+        $this->dlURL  = $data['downloadUrl'];
     }
 
-    public function fileExistsInBucket($hash)
+    /**
+     * @param string|null $startFileName
+     *
+     * @return array
+     */
+    public function getAllFilesInBucket(string $startFileName = null): array
     {
-        $api_url = $this->apiURL; // From b2_authorize_account call
-        $auth_token = $this->token; // From b2_authorize_account call
-        $bucket_id = $this->bucket;  // The ID of the bucket
+        $session = curl_init($this->apiURL . self::LIST_FILE_NAMES_ENDPOINT);
 
-        $session = curl_init($api_url .  '/b2api/v1/b2_list_file_names');
+        $data = [
+            'bucketId'      => $this->bucketId,
+            'startFileName' => $startFileName
+        ];
+        $postFields = json_encode($data);
 
-        // Add post fields
-        $data = array('bucketId' => $bucket_id,
-                      'startFileName' => $hash);
-        $post_fields = json_encode($data);
-        curl_setopt($session, CURLOPT_POSTFIELDS, $post_fields);
+        curl_setopt($session, CURLOPT_POSTFIELDS, $postFields);
 
-        // Add headers
-        $headers = array();
-        $headers[] = 'Authorization: ' . $auth_token;
+        $headers = [
+            'Authorization: ' . $this->token,
+        ];
+
         curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($session, CURLOPT_POST, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
 
-        curl_setopt($session, CURLOPT_POST, true); // HTTP POST
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);  // Receive server response
-        $server_output = curl_exec($session); // Let's do this!
-        curl_close($session); // Clean up
-        $data = json_decode($server_output, true);
+        $response = curl_exec($session);
 
-        foreach ($data['files'] as $file) {
-            //it's either the first one or it doesn't exist
-            if ($file['fileName'] === $hash) {
-                return $file['fileId'];
-            }
+        curl_close($session);
 
-            return false;
-        }
-
-        return false;
-    }
-
-    public function getAllFilesInBucket($startFileName = null)
-    {
-        $api_url = $this->apiURL; // From b2_authorize_account call
-        $auth_token = $this->token; // From b2_authorize_account call
-        $bucket_id = $this->bucket;  // The ID of the bucket
-
-        $session = curl_init($api_url .  '/b2api/v1/b2_list_file_names');
-
-        // Add post fields
-        $data = array('bucketId' => $bucket_id,
-                      'startFileName' => $startFileName);
-        $post_fields = json_encode($data);
-        curl_setopt($session, CURLOPT_POSTFIELDS, $post_fields);
-
-        // Add headers
-        $headers = array();
-        $headers[] = 'Authorization: ' . $auth_token;
-        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
-
-        curl_setopt($session, CURLOPT_POST, true); // HTTP POST
-        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);  // Receive server response
-        $server_output = curl_exec($session); // Let's do this!
-        curl_close($session); // Clean up
-        $data = json_decode($server_output, true);
+        $data = json_decode($response, true);
 
         foreach ($data['files'] as $file) {
             $name = $file['fileName'];
-            $id = $file['fileId'];
+            $id   = $file['fileId'];
             $this->files[$name] = $id;
         }
 
@@ -287,5 +260,113 @@ class Backblaze
         }
 
         return $this->files;
+    }
+
+    /**
+     * @param int $bucketId
+     *
+     * @return string|null
+     */
+    private function bucketIdToName(int $bucketId)
+    {
+        $session = curl_init($this->apiURL . self::LIST_BUCKETS_ENDPOINT);
+
+        $data = ['accountId' => BACKBLAZE_ID];
+        $postFields = json_encode($data);
+
+        curl_setopt($session, CURLOPT_POSTFIELDS, $postFields);
+
+        $headers = [
+            'Authorization: ' . $this->token,
+        ];
+
+        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($session, CURLOPT_POST, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($session);
+
+        curl_close($session);
+
+        $data = json_decode($response, true);
+
+        if (is_array($data)) {
+            foreach ($data['buckets'] as $bucket) {
+                if ((int) $bucket['bucketId'] === $bucketId) {
+                    return $bucket['bucketName'];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $hash
+     *
+     * @return int|null
+     */
+    private function fileExistsInBucket(string $hash)
+    {
+        $session = curl_init($this->apiURL . self::LIST_FILE_NAMES_ENDPOINT);
+
+        $data = [
+            'bucketId'      => $this->bucketId,
+            'startFileName' => $hash
+        ];
+        $postFields = json_encode($data);
+
+        curl_setopt($session, CURLOPT_POSTFIELDS, $postFields);
+
+        $headers = [
+            'Authorization: ' . $this->token,
+        ];
+
+        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($session, CURLOPT_POST, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($session);
+
+        curl_close($session);
+
+        $data = json_decode($response, true);
+        $file = \reset($data['files']); // It's either the first one or it doesn't exist.
+
+        if ($file['fileName'] === $hash) {
+            return (int) $file['fileId'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the upload URL and auth token.
+     */
+    private function getUploadInfo()
+    {
+        $session = curl_init($this->apiURL . self::GET_UPLOAD_URL_ENDPOINT);
+
+        $data = ['bucketId' => $this->bucketId];
+        $postFields = json_encode($data);
+
+        curl_setopt($session, CURLOPT_POSTFIELDS, $postFields);
+
+        $headers = [
+            'Authorization: ' . $this->token,
+        ];
+
+        curl_setopt($session, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($session, CURLOPT_POST, true);
+        curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($session);
+
+        curl_close($session);
+
+        $data = json_decode($response, true);
+
+        $this->ulURL   = $data['uploadUrl'];
+        $this->ulToken = $data['authorizationToken'];
     }
 }
