@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PictShare\Classes;
 
+use PictShare\Classes\Exceptions\ClassNotFoundException;
+
 class Autoloader
 {
     /**
@@ -19,8 +21,8 @@ class Autoloader
      */
     public static function deprecatedAutoload(string $className): bool
     {
-        if (file_exists(ROOT . DS . 'models' . DS . strtolower($className) . '.php')) {
-            include_once ROOT . DS . 'models' . DS . strtolower($className) . '.php';
+        if (file_exists(BASE_DIR . 'models/' . strtolower($className) . '.php')) {
+            include_once BASE_DIR . 'models/' . strtolower($className) . '.php';
 
             return true;
         }
@@ -48,9 +50,8 @@ class Autoloader
         }
 
         $relativeClass = mb_substr($className, $len);
-        $baseDir       = __DIR__ . '/../';
         $endPath       = str_replace('\\', '/', $relativeClass) . '.php';
-        $file          = $baseDir . $endPath;
+        $file          = BASE_DIR . $endPath;
 
         if (file_exists($file) === true) {
             include_once $file;
@@ -58,7 +59,7 @@ class Autoloader
             return true;
         }
 
-        throw new \DomainException('Class ' . $className . ' not found.');
+        throw new ClassNotFoundException('Class ' . $className . ' not found.');
     }
 
     /**

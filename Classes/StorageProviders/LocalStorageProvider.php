@@ -6,8 +6,6 @@ namespace PictShare\Classes\StorageProviders;
 
 class LocalStorageProvider implements StorageProviderInterface
 {
-    const LOCAL_UPLOAD_DIR = 'upload';
-
     /**
      * @var string
      */
@@ -19,7 +17,7 @@ class LocalStorageProvider implements StorageProviderInterface
      */
     public function __construct()
     {
-        $this->localBaseDir = ROOT . DS . self::LOCAL_UPLOAD_DIR . DS;
+        $this->localBaseDir = UPLOAD_DIR;
     }
 
     /**
@@ -45,7 +43,7 @@ class LocalStorageProvider implements StorageProviderInterface
             throw new \RuntimeException('Could not create directory: ' . $uploadDir);
         }
 
-        file_put_contents($uploadDir . DS . $variationFileName, $fileContent);
+        file_put_contents($uploadDir . '/' . $variationFileName, $fileContent);
     }
 
     /**
@@ -53,7 +51,7 @@ class LocalStorageProvider implements StorageProviderInterface
      */
     final public function delete(string $fileName)
     {
-        $basePath = $this->localBaseDir . $fileName . DS;
+        $basePath = $this->localBaseDir . $fileName . '/';
 
         if (!is_dir($basePath)) {
             return;
@@ -72,5 +70,23 @@ class LocalStorageProvider implements StorageProviderInterface
         }
 
         rmdir($basePath);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    final public function fileExists(string $fileName): bool
+    {
+        return file_exists($this->localBaseDir . $fileName . '/' . $fileName);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    final public function isEnabled(): bool
+    {
+        // Local storage needs to always been enabled.
+        // @TODO After refactoring, allow this to be disabled.
+        return true;
     }
 }

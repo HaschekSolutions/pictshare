@@ -1,10 +1,8 @@
 <?php
-define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', __DIR__ . DS . '..');
 
 echo "[i] Starting recreation of hashes.csv\n";
 
-$dir = ROOT . DS . 'upload' . DS;
+$dir = '../upload/';
 $dh  = opendir($dir);
 $fp  = fopen($dir . 'hashes.csv', 'wb');
 
@@ -13,7 +11,7 @@ if (!$fp) {
 }
 
 while (false !== ($hash = readdir($dh))) {
-    $img = $dir . $hash . DS . $hash;
+    $img = $dir . $hash . '/' . $hash;
 
     if ($hash === '.' || $hash === '..' || !file_exists($img)) {
         continue;

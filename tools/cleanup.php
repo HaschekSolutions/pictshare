@@ -19,19 +19,16 @@ if (PHP_SAPI !== 'cli') {
     exit('This script can only be called via CLI');
 }
 
-define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', __DIR__ . DS . '..');
-
-require_once ROOT . DS . 'Classes/Autoloader.php';
-require_once ROOT . DS . 'inc/config.inc.php';
-require_once ROOT . DS . 'inc/core.php';
+require_once '../Classes/Autoloader.php';
+require_once '../inc/config.inc.php';
+require_once '../inc/core.php';
 
 Autoloader::init();
 
 $pm            = new PictshareModel();
 $sim           = false;
 $allowSkipping = true;
-$dir           = ROOT . DS . 'upload' . DS;
+$dir           = UPLOAD_DIR;
 $dh            = opendir($dir);
 $localFiles    = [];
 $sumSize       = 0;
@@ -47,11 +44,11 @@ if (\in_array('noskip', $argv, true)) {
 }
 
 // Making sure ffmpeg is executable.
-system('chmod +x ' . ROOT . DS . 'bin' . DS . 'ffmpeg');
+system('chmod +x ' . BASE_DIR . 'bin/ffmpeg');
 
 echo '[i] Finding local mp4 files ..';
 while (false !== ($filename = readdir($dh))) {
-    $img = $dir . $filename . DS . $filename;
+    $img = $dir . $filename . '/' . $filename;
 
     if (!file_exists($img)) {
         continue;
@@ -74,7 +71,7 @@ echo ' done. Got ' . \count($localFiles) . " folders\n";
 echo "[i] Looking for files to clean up\n";
 
 foreach ($localFiles as $hash) {
-    $dir = ROOT . DS . 'upload' . DS . $hash . DS;
+    $dir = UPLOAD_DIR . $hash . '/';
     $dh  = opendir($dir);
 
     while (false !== ($filename = readdir($dh))) {

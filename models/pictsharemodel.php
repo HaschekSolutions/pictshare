@@ -1,5 +1,6 @@
 <?php
 
+use PictShare\Classes\Configuration;
 use PictShare\Classes\FileSizeFormatter;
 use PictShare\Classes\FilterFactory;
 use PictShare\Classes\StorageProviderFactory;
@@ -50,9 +51,9 @@ class PictshareModel
 
         $file = $this->getCacheName($data);
 
-        $path = ROOT . DS . 'upload' . DS . $hash . DS . $file;
+        $path = BASE_DIR . $hash . '/' . $file;
         if (!file_exists($path)) {
-            $path = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+            $path = BASE_DIR . $hash . '/' . $hash;
         }
         if (file_exists($path)) {
             $type = $this->getType($path);
@@ -111,15 +112,19 @@ class PictshareModel
                     $data['album'][] = $el;
                 }
                 $data['hash'] = $el;
-            } elseif (defined('BACKBLAZE') && BACKBLAZE === true && defined('BACKBLAZE_AUTODOWNLOAD') && BACKBLAZE_AUTODOWNLOAD === true && $this->couldThisBeAnImage($el)) { //looks like it might be a hash but didn't find it here. Let's see
-                $fileContent = StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER)
-                    ->get($el, $el);
+            } elseif (Configuration::isBackblazeAutoDownloadEnabled() && $this->couldThisBeAnImage($el)) {
+                // Looks like it might be a hash but didn't find it here. Let's see.
+                $localProvider = StorageProviderFactory::getStorageProvider(StorageProviderFactory::LOCAL_PROVIDER);
 
-                if ($fileContent) { // If the backblaze get function says it's an image, we'll take it.
-                    StorageProviderFactory::getStorageProvider(StorageProviderFactory::LOCAL_PROVIDER)
-                        ->save($el, $el, $fileContent);
+                if (!$localProvider->fileExists($el)) {
+                    $fileContent = StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER)
+                        ->get($el, $el);
 
-                    $data['hash'] = $el;
+                    if ($fileContent) { // If the backblaze get function says it's an image, we'll take it.
+                        $localProvider->save($el, $el, $fileContent);
+
+                        $data['hash'] = $el;
+                    }
                 }
             } elseif ($el === 'mp4' || $el === 'raw' || $el === 'preview' || $el === 'webm' || $el === 'ogg') {
                 $data[$el] = 1;
@@ -226,7 +231,7 @@ class PictshareModel
 
     public function countResizedImages(string $hash): int
     {
-        $fi = new FilesystemIterator(ROOT . DS . 'upload' . DS . $hash . DS, FilesystemIterator::SKIP_DOTS);
+        $fi = new FilesystemIterator(UPLOAD_DIR . $hash . '/', FilesystemIterator::SKIP_DOTS);
 
         return iterator_count($fi);
     }
@@ -310,7 +315,7 @@ class PictshareModel
 
         $randomNumber = random_int(1, 999) * random_int(0, 10000) + time();
 
-        $tempfile = ROOT . DS . 'tmp' . DS . md5((string) $randomNumber);
+        $tempfile = BASE_DIR . 'tmp/' . md5((string) $randomNumber);
         file_put_contents($tempfile, file_get_contents($url));
 
         //remove all exif data from jpeg
@@ -323,7 +328,7 @@ class PictshareModel
         $dup_id = $this->isDuplicate($url);
         if ($dup_id) {
             $hash = $dup_id;
-            $url = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+            $url = BASE_DIR . $hash . '/' . $hash;
         } else {
             $hash = $this->getNewHash($type);
             $this->saveSHAOfFile($url, $hash);
@@ -348,20 +353,16 @@ class PictshareModel
 
         //re-render new mp4 by calling the re-encode script
         if ($type === 'mp4' && stripos(strtoupper(PHP_OS), 'WIN')) {
-            system('nohup php ' . ROOT . DS . 'tools' . DS . 're-encode_mp4.php force ' . $hash . ' > /dev/null 2> /dev/null &');
+            system('nohup php ' . BASE_DIR . 'tools/re-encode_mp4.php force ' . $hash . ' > /dev/null 2> /dev/null &');
         }
 
         if (LOG_UPLOADER) {
-            $fh = fopen(ROOT . DS . 'upload' . DS . 'uploads.txt', 'ab');
+            $fh = fopen(UPLOAD_DIR . 'uploads.txt', 'ab');
             fwrite($fh, time() . ';' . $url . ';' . $hash . ';' . getUserIP() . "\n");
             fclose($fh);
         }
 
-        if (defined('BACKBLAZE')
-            && BACKBLAZE === true
-            && defined('BACKBLAZE_AUTOUPLOAD')
-            && BACKBLAZE_AUTOUPLOAD === true
-        ) {
+        if (Configuration::isBackblazeAutoUploadEnabled()) {
             StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER)
                 ->save($hash, $hash, $fileContent);
         }
@@ -450,7 +451,7 @@ class PictshareModel
     public function processUploads()
     {
         if ($_POST['submit'] !== $this->translate(3)) {
-            return false;
+            return null;
         }
 
         if (UPLOAD_CODE && !$this->uploadCodeExists($_REQUEST['upload_code'])) {
@@ -566,7 +567,7 @@ class PictshareModel
         }
 
         $hash = $this->getNewHash($type);
-        $file = ROOT . DS . 'tmp' . DS . $hash;
+        $file = BASE_DIR . 'tmp/' . $hash;
 
         $this->base64ToImage($data, $file, $type);
 
@@ -575,9 +576,9 @@ class PictshareModel
 
     public function resizeFFMPEG($data, $cachepath, $type = 'mp4'): string
     {
-        $file = ROOT . DS . 'upload' . DS . $data['hash'] . DS . $data['hash'];
+        $file = UPLOAD_DIR . $data['hash'] . '/' . $data['hash'];
         $file = escapeshellarg($file);
-        $bin  = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin  = escapeshellcmd(BASE_DIR . 'bin/ffmpeg');
         $size = $data['size'];
 
         if (!$size) {
@@ -605,7 +606,7 @@ class PictshareModel
 
     public function gifToMP4($gifpath, $target)
     {
-        $bin = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin = escapeshellcmd(BASE_DIR . 'bin/ffmpeg');
         $file = escapeshellarg($gifpath);
 
         if (!file_exists($target)) { //simple caching.. have to think of something better
@@ -619,7 +620,7 @@ class PictshareModel
 
     public function saveAsOGG($source, $target)
     {
-        $bin = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin = escapeshellcmd(BASE_DIR . 'bin/ffmpeg');
         $source = escapeshellarg($source);
         $target = escapeshellarg($target);
         $h265 = "$bin -y -i $source -vcodec libtheora -acodec libvorbis -qp 0 -f ogg $target";
@@ -628,7 +629,7 @@ class PictshareModel
 
     public function saveAsWebm($source, $target)
     {
-        $bin = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin = escapeshellcmd(BASE_DIR . 'bin/ffmpeg');
         $source = escapeshellarg($source);
         $target = escapeshellarg($target);
         $webm = "$bin -y -i $source -vcodec libvpx -acodec libvorbis -aq 5 -ac 2 -qmax 25 -f webm $target";
@@ -637,7 +638,7 @@ class PictshareModel
 
     public function saveFirstFrameOfMP4($path, $target)
     {
-        $bin = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin = escapeshellcmd(BASE_DIR . 'bin/ffmpeg');
         $file = escapeshellarg($path);
         $cmd = "$bin -y -i $file -vframes 1 -f image2 $target";
 
@@ -648,7 +649,7 @@ class PictshareModel
     public function getSizeOfMP4($video): array
     {
         $video = escapeshellarg($video);
-        $bin = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin = escapeshellcmd(BASE_DIR . 'bin/ffmpeg');
         $command = $bin . ' -i ' . $video . ' -vstats 2>&1';
         $output = shell_exec($command);
 
@@ -799,8 +800,8 @@ class PictshareModel
     private function deleteImage($hash)
     {
         // Delete hash from hashes.csv.
-        $tmpname = ROOT . DS . 'upload' . DS . 'delete_temp.csv';
-        $csv = ROOT . DS . 'upload' . DS . 'hashes.csv';
+        $tmpname = UPLOAD_DIR . 'delete_temp.csv';
+        $csv = UPLOAD_DIR . 'hashes.csv';
         $fptemp = fopen($tmpname, 'wb');
 
         if (($handle = fopen($csv, 'rb')) !== false) {
@@ -822,11 +823,7 @@ class PictshareModel
             ->delete($hash);
 
         // Delete from backblaze if configured.
-        if (defined('BACKBLAZE')
-            && BACKBLAZE === true
-            && defined('BACKBLAZE_AUTODELETE')
-            && BACKBLAZE_AUTODELETE === true
-        ) {
+        if (Configuration::isBackblazeAutoDeleteEnabled()) {
             StorageProviderFactory::getStorageProvider(StorageProviderFactory::BACKBLAZE_PROVIDER)
                 ->delete($hash);
         }
@@ -888,7 +885,7 @@ class PictshareModel
 
     private function hashExists($hash): bool
     {
-        return is_dir(ROOT . DS . 'upload' . DS . $hash);
+        return is_dir(UPLOAD_DIR . $hash);
     }
 
     private function getType($url)
@@ -900,7 +897,7 @@ class PictshareModel
     {
         while (1) {
             $code = getRandomString(32);
-            $file = ROOT . DS . 'upload' . DS . 'deletecodes' . DS . $code;
+            $file = UPLOAD_DIR . 'deletecodes/' . $code;
 
             if (file_exists($file)) {
                 continue;
@@ -924,7 +921,7 @@ class PictshareModel
             return false;
         }
 
-        $file = ROOT . DS . 'upload' . DS . 'deletecodes' . DS . $code;
+        $file = UPLOAD_DIR . 'deletecodes/' . $code;
 
         return file_exists($file);
     }
@@ -939,7 +936,7 @@ class PictshareModel
             return false;
         }
 
-        $file = ROOT . DS . 'upload' . DS . 'deletecodes' . DS . $code;
+        $file = UPLOAD_DIR . 'deletecodes/' . $code;
 
         if (!file_exists($file)) {
             return false;
@@ -957,7 +954,7 @@ class PictshareModel
 
     private function saveSHAOfFile($filePath, $hash)
     {
-        $sha_file = ROOT . DS . 'upload' . DS . 'hashes.csv';
+        $sha_file = UPLOAD_DIR . 'hashes.csv';
         $sha = sha1_file($filePath);
         $fp = fopen($sha_file, 'ab');
         fwrite($fp, "$sha;$hash\n");
@@ -966,7 +963,7 @@ class PictshareModel
 
     private function isDuplicate($file)
     {
-        $sha_file = ROOT . DS . 'upload' . DS . 'hashes.csv';
+        $sha_file = UPLOAD_DIR . 'hashes.csv';
         $sha = sha1_file($file);
         if (!file_exists($sha_file)) {
             return false;
@@ -1048,18 +1045,15 @@ class PictshareModel
 
     private function getTypeOfHash($hash)
     {
-        $base_path = ROOT . DS . 'upload' . DS . $hash . DS;
-        $path = $base_path . $hash;
-
-        return $this->isTypeAllowed($this->getTypeOfFile($path));
+        return $this->isTypeAllowed($this->getTypeOfFile(UPLOAD_DIR . $hash . '/' . $hash));
     }
 
     private function isProperMP4($filename): bool
     {
         $file         = escapeshellarg($filename);
         $randomNumber = time() + random_int(1, 10000);
-        $tmp          = ROOT . DS . 'tmp' . DS . md5((string) $randomNumber) . '.' . random_int(1, 10000) . '.log';
-        $bin          = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $tmp          = BASE_DIR . 'tmp/' . md5((string) $randomNumber) . '.' . random_int(1, 10000) . '.log';
+        $bin          = escapeshellcmd(BASE_DIR . 'bin/ffmpeg');
         $cmd          = "$bin -i $file > $tmp 2>> $tmp";
 
         system($cmd);
@@ -1084,7 +1078,7 @@ class PictshareModel
 
     private function saveAsMP4($source, $target)
     {
-        $bin = escapeshellcmd(ROOT . DS . 'bin' . DS . 'ffmpeg');
+        $bin = escapeshellcmd(BASE_DIR . 'bin/ffmpeg');
         $source = escapeshellarg($source);
         $target = escapeshellarg($target);
         $h265 = "$bin -y -i $source -an -c:v libx264 -qp 0 -f mp4 $target";

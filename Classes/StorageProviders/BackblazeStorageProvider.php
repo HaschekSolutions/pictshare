@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PictShare\Classes\StorageProviders;
 
+use PictShare\Classes\Configuration;
+
 /**
  * Backblaze B2 wrapper without external dependencies.
  *
@@ -19,7 +21,6 @@ class BackblazeStorageProvider implements StorageProviderInterface
     const LIST_BUCKETS_ENDPOINT        = '/b2api/v1/b2_list_buckets';
     const DELETE_FILE_VERSION_ENDPOINT = '/b2api/v1/b2_delete_file_version';
     const AUTHORIZE_URL                = 'https://api.backblazeb2.com/b2api/v1/b2_authorize_account';
-    const LOCAL_UPLOAD_DIR             = 'upload';
 
     /**
      * @var string
@@ -47,6 +48,16 @@ class BackblazeStorageProvider implements StorageProviderInterface
     private $ulURL;
 
     /**
+     * @var mixed
+     */
+    private $backblazeId;
+
+    /**
+     * @var string
+     */
+    private $backblazeKey;
+
+    /**
      * @var int
      */
     private $bucketId;
@@ -72,23 +83,19 @@ class BackblazeStorageProvider implements StorageProviderInterface
      */
     public function __construct()
     {
-        if (!\defined('BACKBLAZE')
-            || (\defined('BACKBLAZE') && BACKBLAZE !== true)
-            || !\defined('BACKBLAZE_ID')
-            || !\defined('BACKBLAZE_KEY')
-            || !\defined('BACKBLAZE_BUCKET_ID')
-        ) {
+        if (!$this->isEnabled()) {
             return;
         }
 
         $this->authorize();
 
-        $this->bucketId   = BACKBLAZE_BUCKET_ID;
-        $this->bucketName = ((\defined('BACKBLAZE_BUCKET_NAME') && BACKBLAZE_BUCKET_NAME !== '')
-            ? BACKBLAZE_BUCKET_NAME
-            : $this->bucketIdToName($this->bucketId));
+        $this->backblazeId  = Configuration::getValue(Configuration::BACKBLAZE_ID);
+        $this->backblazeKey = Configuration::getValue(Configuration::BACKBLAZE_KEY);
+        $this->bucketId     = Configuration::getValue(Configuration::BACKBLAZE_BUCKET_ID);
+        $this->bucketName   = Configuration::getValue(Configuration::BACKBLAZE_BUCKET_NAME)
+            ?? $this->bucketIdToName($this->bucketId);
 
-        $this->localBaseDir = ROOT . DS . self::LOCAL_UPLOAD_DIR . DS;
+        $this->localBaseDir = UPLOAD_DIR;
     }
 
     /**
@@ -98,10 +105,6 @@ class BackblazeStorageProvider implements StorageProviderInterface
      */
     final public function get(string $originalFileName, string $variationFileName)
     {
-        if (file_exists($this->localBaseDir . $originalFileName . DS . $variationFileName)) {
-            return false;
-        }
-
         $uri     = $this->dlURL . '/file/' . $this->bucketName . '/' . $variationFileName;
         $session = curl_init($uri);
 
@@ -135,7 +138,7 @@ class BackblazeStorageProvider implements StorageProviderInterface
             $this->getUploadInfo();
         }
 
-        $fileName = $this->localBaseDir . $originalFileName . DS . $variationFileName;
+        $fileName = $this->localBaseDir . $originalFileName . '/' . $variationFileName;
         $session  = curl_init($this->ulURL);
 
         curl_setopt($session, CURLOPT_POSTFIELDS, $fileContent);
@@ -178,6 +181,22 @@ class BackblazeStorageProvider implements StorageProviderInterface
         curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
         curl_exec($session);
         curl_close($session);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    final public function fileExists(string $fileName): bool
+    {
+        return $this->fileExistsInBucket($fileName) !== null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    final public function isEnabled(): bool
+    {
+        return Configuration::isBackblazeEnabled();
     }
 
     /**
@@ -229,7 +248,7 @@ class BackblazeStorageProvider implements StorageProviderInterface
      */
     private function authorize()
     {
-        $credentials = base64_encode(BACKBLAZE_ID . ':' . BACKBLAZE_KEY);
+        $credentials = base64_encode($this->backblazeId . ':' . $this->backblazeKey);
         $session     = curl_init(self::AUTHORIZE_URL);
 
         $headers = [
@@ -261,7 +280,7 @@ class BackblazeStorageProvider implements StorageProviderInterface
     {
         $session = curl_init($this->apiURL . self::LIST_BUCKETS_ENDPOINT);
 
-        $data = ['accountId' => BACKBLAZE_ID];
+        $data = ['accountId' => $this->backblazeId];
         $postFields = json_encode($data);
 
         curl_setopt($session, CURLOPT_POSTFIELDS, $postFields);

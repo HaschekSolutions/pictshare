@@ -14,12 +14,9 @@ if (PHP_SAPI !== 'cli') {
     exit('This script can only be called via CLI');
 }
 
-define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', __DIR__ . DS . '..');
-
-require_once ROOT . DS . 'Classes/Autoloader.php';
-require_once ROOT . DS . 'inc/config.inc.php';
-require_once ROOT . DS . 'inc/core.php';
+require_once '../Classes/Autoloader.php';
+require_once '../inc/config.inc.php';
+require_once '../inc/core.php';
 
 Autoloader::init();
 
@@ -27,7 +24,7 @@ $pm         = new PictshareModel();
 $sim        = false;
 $recentOnly = false;
 $uploadSize = 0;
-$dir        = ROOT . DS . 'upload' . DS;
+$dir        = UPLOAD_DIR;
 $dh         = opendir($dir);
 $localFiles = [];
 
@@ -51,7 +48,7 @@ echo ' done. Got ' . \count($remoteFiles) . " files\n";
 
 echo '[i] Loading local files ..';
 while (false !== ($filename = readdir($dh))) {
-    $img = $dir . $filename . DS . $filename;
+    $img = $dir . $filename . '/' . $filename;
 
     if (!file_exists($img)) {
         continue;
@@ -62,7 +59,7 @@ while (false !== ($filename = readdir($dh))) {
 
     if ($type) {
         if ($recentOnly === true) {
-            $recent = @file_get_contents($dir . $filename . DS . 'last_rendered.txt');
+            $recent = @file_get_contents($dir . $filename . '/last_rendered.txt');
             $lastRendered = \DateTime::createFromFormat('U', $recent);
             $oneYearAgo = (new \DateTime())->modify('-1 year');
 
@@ -87,7 +84,7 @@ foreach ($localFiles as $hash) {
             $b->save($hash, $hash, $localFileContent);
         }
 
-        $uploadSize += filesize($dir . $hash . DS . $hash);
+        $uploadSize += filesize($dir . $hash . '/' . $hash);
         echo " done.\tUploaded so far: " . FileSizeFormatter::format($uploadSize) . "\n";
     }
 }

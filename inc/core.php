@@ -24,8 +24,7 @@ function getUserIP()
 
 function stripSlashesDeep($value)
 {
-    $value = is_array($value) ? array_map('stripSlashesDeep', $value) : stripslashes($value);
-    return $value;
+    return is_array($value) ? array_map('stripSlashesDeep', $value) : stripslashes($value);
 }
 
 function removeMagicQuotes()
@@ -35,13 +34,6 @@ function removeMagicQuotes()
         $_POST   = stripSlashesDeep($_POST);
         $_COOKIE = stripSlashesDeep($_COOKIE);
     }
-}
-
-function callHook()
-{
-    global $url;
-
-    whatToDo($url);
 }
 
 function whatToDo($url)
@@ -106,9 +98,9 @@ function renderAlbum($data)
     }
 
     if ($data['embed'] === true) {
-        include ROOT . DS . 'template_album_embed.php';
+        include BASE_DIR . 'template_album_embed.php';
     } else {
-        include ROOT . DS . 'template_album.php';
+        include BASE_DIR . 'template_album.php';
     }
 }
 
@@ -121,7 +113,7 @@ function renderImage($data)
     }
 
     $pm = new PictshareModel();
-    $base_path = ROOT . DS . 'upload' . DS . $hash . DS;
+    $base_path = UPLOAD_DIR . $hash . '/';
     $path = $base_path . $hash;
     $type = $pm->isTypeAllowed($pm->getTypeOfFile($path));
     $cached = false;
@@ -137,7 +129,7 @@ function renderImage($data)
         $cached = true;
     } elseif (MAX_RESIZED_IMAGES > -1 && $pm->countResizedImages($hash) > MAX_RESIZED_IMAGES) {
         // If the number of max resized images is reached, just show the real one.
-        $path = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+        $path = BASE_DIR . $hash . '/' . $hash;
     }
 
     switch ($type) {
@@ -224,15 +216,15 @@ function renderImage($data)
 
             if (file_exists($cachepath) && filesize($cachepath) === 0) {
                 // If there was an error and the file is 0 bytes, use the original.
-                $cachepath = ROOT . DS . 'upload' . DS . $hash . DS . $hash;
+                $cachepath = BASE_DIR . $hash . '/' . $hash;
             }
 
             if ($data['webm']) {
-                $pm->saveAsWebm(ROOT . DS . 'upload' . DS . $hash . DS . $hash, $cachepath);
+                $pm->saveAsWebm(BASE_DIR . $hash . '/' . $hash, $cachepath);
             }
 
             if ($data['ogg']) {
-                $pm->saveAsOGG(ROOT . DS . 'upload' . DS . $hash . DS . $hash, $cachepath);
+                $pm->saveAsOGG(BASE_DIR . $hash . '/' . $hash, $cachepath);
             }
 
             if ($data['raw']) {
@@ -430,7 +422,7 @@ function render($variables = null)
     if (is_array($variables)) {
         extract($variables, EXTR_OVERWRITE);
     }
-    include ROOT . DS . 'template.php';
+    include BASE_DIR . 'template.php';
 }
 
 function renderMP4($path, $data)
@@ -445,7 +437,7 @@ function renderMP4($path, $data)
     $width = $info['width'];
     $height = $info['height'];
     $filesize = $urldata['humansize'];
-    include ROOT . DS . 'template_mp4.php';
+    include BASE_DIR . 'template_mp4.php';
 }
 
 //
@@ -508,7 +500,7 @@ function serveFile($filename, $filename_output = false, $mime = 'application/oct
         $chunksize_requested = min($buffer_size, $bytes_remaining);
         $buffer = fread($handle, $chunksize_requested);
         $chunksize_real = strlen($buffer);
-        if ($chunksize_real == 0) {
+        if ($chunksize_real === 0) {
             break;
         }
         $bytes_remaining -= $chunksize_real;
@@ -537,7 +529,7 @@ function serveMP4($path, $hash, $null)
                 header("Content-Range: bytes $start-$end/$size");
                 exit;
             }
-            if ($range == '-') {
+            if ($range === '-') {
                 $c_start = $size - substr($range, 1);
             } else {
                 $range = explode('-', $range);

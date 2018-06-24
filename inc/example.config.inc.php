@@ -88,3 +88,9 @@ define('SHOW_ERRORS', false);
 //define('BACKBLAZE_AUTODOWNLOAD', true);   //if true, will download images from backblaze if not found local
 //define('BACKBLAZE_AUTOUPLOAD', true);     //if true, will upload images to backblaze when they are uploaded
 //define('BACKBLAZE_AUTODELETE', true);     //if true, will delete images from backblaze if they are deleted
+
+// Base directory for the application (relative to this file).
+define('BASE_DIR', __DIR__ . '/../');
+
+// Directory in which to store uploads locally.
+define('UPLOAD_DIR', BASE_DIR . 'upload/');

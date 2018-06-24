@@ -31,4 +31,20 @@ interface StorageProviderInterface
      * @param string $fileName
      */
     public function delete(string $fileName);
+
+    /**
+     * Does the file exists on the StorageProvider.
+     *
+     * @param string $fileName
+     *
+     * @return bool
+     */
+    public function fileExists(string $fileName): bool;
+
+    /**
+     * Is the StorageProvider enabled.
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool;
 }

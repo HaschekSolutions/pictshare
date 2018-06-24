@@ -17,17 +17,14 @@ if (PHP_SAPI !== 'cli') {
     exit('This script can only be called via CLI');
 }
 
-define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', __DIR__ . DS . '..');
-
-require_once ROOT . DS . 'Classes/Autoloader.php';
-require_once ROOT . DS . 'inc/config.inc.php';
-require_once ROOT . DS . 'inc/core.php';
+require_once '../Classes/Autoloader.php';
+require_once '../inc/config.inc.php';
+require_once '../inc/core.php';
 
 Autoloader::init();
 
 $pm            = new PictshareModel();
-$dir           = ROOT . DS . 'upload' . DS;
+$dir           = UPLOAD_DIR;
 $dh            = opendir($dir);
 $localFiles    = [];
 $allowSkipping = true;
@@ -44,13 +41,13 @@ if (\in_array('noskip', $argv, true) || \in_array('force', $argv, true)) {
 }
 
 // Making sure ffmpeg is executable.
-system('chmod +x ' . ROOT . DS . 'bin' . DS . 'ffmpeg');
+system('chmod +x ' . BASE_DIR . 'bin/ffmpeg');
 
 if (\count($localFiles) === 0) {
     echo "[i] Finding local mp4 files\n";
 
     while (false !== ($filename = readdir($dh))) {
-        $img = $dir . $filename . DS . $filename;
+        $img = $dir . $filename . '/' . $filename;
 
         if (!file_exists($img)) {
             continue;
@@ -72,8 +69,8 @@ echo '[i] Got ' . count($localFiles) . " files\n";
 echo "[i] Starting to convert\n";
 
 foreach ($localFiles as $hash) {
-    $img = $dir . $hash . DS . $hash;
-    $tmp = ROOT . DS . 'tmp' . DS . $hash;
+    $img = $dir . $hash . '/' . $hash;
+    $tmp = BASE_DIR . 'tmp/' . $hash;
 
     if ($allowSkipping && file_exists($tmp)) {
         echo "Skipping $hash\n";
@@ -81,7 +78,7 @@ foreach ($localFiles as $hash) {
         continue;
     }
 
-    $cmd = ROOT . DS . 'bin' . DS . "ffmpeg -loglevel panic -y -i $img -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
+    $cmd = BASE_DIR . "bin/ffmpeg -loglevel panic -y -i $img -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
     echo "  [i] Converting $hash";
     system($cmd);
     echo "\tdone\n";

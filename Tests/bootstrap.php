@@ -9,3 +9,5 @@ use PictShare\Classes\Autoloader;
 require_once '../Classes/Autoloader.php';
 
 Autoloader::init();
+
+\define('BASE_DIR', __DIR__ . '/../');

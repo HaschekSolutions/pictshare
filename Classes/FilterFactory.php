@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PictShare\Classes;
 
+use PictShare\Classes\Exceptions\ClassNotFoundException;
 use PictShare\Classes\Filters\FilterInterface;
 
 class FilterFactory
@@ -49,7 +50,7 @@ class FilterFactory
     public static function getFilter(string $filterUrlName): FilterInterface
     {
         if (!\array_key_exists($filterUrlName, static::FILTER_MAP)) {
-            throw new \DomainException('Filter for URL name ' . $filterUrlName . ' not found.');
+            throw new ClassNotFoundException('Filter for URL name ' . $filterUrlName . ' not found.');
         }
 
         $className = __NAMESPACE__ . '\\Filters\\' . static::FILTER_MAP[$filterUrlName] . 'Filter';
