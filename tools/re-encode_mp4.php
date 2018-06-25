@@ -1,6 +1,7 @@
 <?php
 
 use PictShare\Classes\Autoloader;
+use PictShare\Models\BaseModel;
 
 /**
  * MP4 re-encoder.
@@ -19,18 +20,17 @@ if (PHP_SAPI !== 'cli') {
 
 require_once '../Classes/Autoloader.php';
 require_once '../inc/config.inc.php';
-require_once '../inc/core.php';
 
 Autoloader::init();
 
-$pm            = new PictshareModel();
+$model         = new BaseModel();
 $dir           = UPLOAD_DIR;
 $dh            = opendir($dir);
 $localFiles    = [];
 $allowSkipping = true;
 
 foreach ($argv as $arg) {
-    if ($pm->isImage($arg) && $pm->isTypeAllowed(pathinfo($dir . $arg, PATHINFO_EXTENSION)) === 'mp4') {
+    if ($model->isImage($arg) && $model->isTypeAllowed(pathinfo($dir . $arg, PATHINFO_EXTENSION)) === 'mp4') {
         $localFiles[] = $arg;
     }
 }
@@ -54,7 +54,7 @@ if (\count($localFiles) === 0) {
         }
 
         $type = pathinfo($img, PATHINFO_EXTENSION);
-        $type = $pm->isTypeAllowed($type);
+        $type = $model->isTypeAllowed($type);
         if ($type === 'mp4') {
             $localFiles[] = $filename;
         }

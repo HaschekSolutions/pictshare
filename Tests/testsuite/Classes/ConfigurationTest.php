@@ -39,4 +39,14 @@ class ConfigurationTest extends TestCase
 
         self::assertFalse($configuration::getValue(Configuration::BACKBLAZE));
     }
+
+    public function testBackblazeDefaultOff()
+    {
+        $configuration = new Configuration();
+
+        self::assertFalse($configuration::isBackblazeEnabled());
+        self::assertFalse($configuration::isBackblazeAutoDownloadEnabled());
+        self::assertFalse($configuration::isBackblazeAutoUploadEnabled());
+        self::assertFalse($configuration::isBackblazeAutoDeleteEnabled());
+    }
 }

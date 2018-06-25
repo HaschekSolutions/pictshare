@@ -6,6 +6,9 @@ namespace PictShare\Classes;
 
 use PictShare\Classes\StorageProviders\StorageProviderInterface;
 
+/**
+ * @TODO Inject new StorageProviders at runtime for unit tests?
+ */
 class StorageProviderFactory
 {
     const BACKBLAZE_PROVIDER = 'Backblaze';

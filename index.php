@@ -1,6 +1,7 @@
 <?php
 
 use PictShare\Classes\Autoloader;
+use PictShare\Controllers\FrontendController;
 
 session_cache_limiter('public');
 $expiry = 90; //days
@@ -28,11 +29,7 @@ if (SHOW_ERRORS) {
 }
 
 require_once 'Classes/Autoloader.php';
-require_once 'inc/core.php';
 
 Autoloader::init();
 
-$url = $_GET['url'];
-removeMagicQuotes();
-$GLOBALS['params'] = explode('/', $url);
-whatToDo($url);
+(new FrontendController())->get();

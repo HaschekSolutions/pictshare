@@ -13,6 +13,7 @@ class FilterFactory
      * Maps filter names from the URL, to class names.
      *
      * @TODO Get rid of this. We can get the classes to define their own URL name.
+     * @TODO We should be able to inject new filters at runtime. This will help with unit testing.
      */
     const FILTER_MAP = [
         'aqua' => 'Aqua',

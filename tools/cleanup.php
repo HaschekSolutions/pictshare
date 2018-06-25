@@ -2,6 +2,7 @@
 
 use \PictShare\Classes\Autoloader;
 use \PictShare\Classes\FileSizeFormatter;
+use PictShare\Models\BaseModel;
 
 /**
  * Cleanup.
@@ -21,11 +22,10 @@ if (PHP_SAPI !== 'cli') {
 
 require_once '../Classes/Autoloader.php';
 require_once '../inc/config.inc.php';
-require_once '../inc/core.php';
 
 Autoloader::init();
 
-$pm            = new PictshareModel();
+$model         = new BaseModel();
 $sim           = false;
 $allowSkipping = true;
 $dir           = UPLOAD_DIR;
@@ -55,7 +55,7 @@ while (false !== ($filename = readdir($dh))) {
     }
 
     $type = pathinfo($img, PATHINFO_EXTENSION);
-    $type = $pm->isTypeAllowed($type);
+    $type = $model->isTypeAllowed($type);
 
     if ($type) {
         $localFiles[] = $filename;

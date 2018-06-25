@@ -1,6 +1,7 @@
 <?php
 
 use PictShare\Classes\Autoloader;
+use PictShare\Models\BaseModel;
 
 /**
  * MP4 to webm and ogg converter.
@@ -21,14 +22,13 @@ if (PHP_SAPI !== 'cli') {
 
 require_once '../Classes/Autoloader.php';
 require_once '../inc/config.inc.php';
-require_once '../inc/core.php';
 
 Autoloader::init();
 
-$pm = new PictshareModel();
-$dir = UPLOAD_DIR;
-$dh  = opendir($dir);
-$localFiles = [];
+$model         = new BaseModel();
+$dir           = UPLOAD_DIR;
+$dh            = opendir($dir);
+$localFiles    = [];
 $allowSkipping = true;
 
 if (\in_array('noskip', $argv, true)) {
@@ -49,7 +49,7 @@ while (false !== ($filename = readdir($dh))) {
     }
 
     $type = pathinfo($img, PATHINFO_EXTENSION);
-    $type = $pm->isTypeAllowed($type);
+    $type = $model->isTypeAllowed($type);
 
     if ($type === 'mp4') {
         $localFiles[] = $filename;

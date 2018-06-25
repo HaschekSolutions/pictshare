@@ -6,4 +6,20 @@
             <directory>testsuite</directory>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">../Classes</directory>
+            <directory suffix=".php">../inc</directory>
+            <directory suffix=".php">../models</directory>
+            <directory suffix=".php">../tools</directory>
+            <file>../backend.php</file>
+            <file>../cli.php</file>
+            <file>../index.php</file>
+            <file>../template.php</file>
+            <file>../template_album.php</file>
+            <file>../template_album_embed.php</file>
+            <file>../template_mp4.php</file>
+        </whitelist>
+    </filter>
 </phpunit>

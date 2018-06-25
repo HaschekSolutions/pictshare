@@ -1,6 +1,7 @@
 <?php
 
 use PictShare\Classes\Autoloader;
+use PictShare\Controllers\BackendController;
 
 session_cache_limiter('public');
 $expiry = 90; //days
@@ -30,32 +31,7 @@ if (SHOW_ERRORS) {
 }
 
 require_once 'Classes/Autoloader.php';
-require_once 'inc/core.php';
 
 Autoloader::init();
 
-$pm = new PictshareModel();
-
-header('Content-Type: application/json; charset=utf-8');
-
-if (UPLOAD_CODE !== false && !$pm->uploadCodeExists($_REQUEST['upload_code'])) {
-    exit(json_encode(['status' => 'ERR','reason' => 'Wrong upload code provided']));
-}
-
-if ($_REQUEST['getimage']) {
-    $url = $_REQUEST['getimage'];
-
-    echo json_encode($pm->uploadImageFromURL($url));
-} elseif ($_FILES['postimage']) {
-    $image = $_FILES['postimage'];
-    echo json_encode($pm->processSingleUpload('postimage'));
-} elseif ($_REQUEST['base64']) {
-    $data = $_REQUEST['base64'];
-    echo json_encode($pm->uploadImageFromBase64($data));
-} elseif ($_REQUEST['geturlinfo']) {
-    echo json_encode($pm->getURLInfo($_REQUEST['geturlinfo']));
-} elseif ($_REQUEST['a'] === 'oembed') {
-    echo json_encode($pm->oembed($_REQUEST['url'], $_REQUEST['t']));
-} else {
-    echo json_encode(array('status' => 'ERR','reason' => 'NO_VALID_COMMAND'));
-}
+(new BackendController())->get();

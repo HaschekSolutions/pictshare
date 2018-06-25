@@ -1,6 +1,11 @@
 <?php
 
 use PictShare\Classes\Autoloader;
+use PictShare\Controllers\CliController;
+
+if (PHP_SAPI !== 'cli') {
+    exit('This script can only be called via CLI');
+}
 
 define('PATH', ((dirname($_SERVER['PHP_SELF']) === '/' || dirname($_SERVER['PHP_SELF']) === '\\' || dirname($_SERVER['PHP_SELF']) === '/index.php' || dirname($_SERVER['PHP_SELF']) === '/backend.php') ? '/' : dirname($_SERVER['PHP_SELF']) . '/'));
 
@@ -23,15 +28,7 @@ if (SHOW_ERRORS) {
 }
 
 require_once 'Classes/Autoloader.php';
-require_once 'inc/core.php';
 
 Autoloader::init();
 
-$action = $argv[2];
-$params = $argv;
-
-//lose first param (self name)
-array_shift($params);
-
-$model = new PictshareModel();
-$model->backend($params);
+(new CliController())->setArgs($argv)->get();
