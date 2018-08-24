@@ -67,8 +67,6 @@ class Backblaze
         $content_type = "text/plain";
         $sha1_of_file_data = sha1_file($my_file);
 
-        var_dump($upload_url);exit();
-
         $session = curl_init($upload_url);
 
         // Add read file as post field
@@ -113,10 +111,7 @@ class Backblaze
         curl_close ($session); // Clean up
         $data = json_decode($server_output,true); // Tell me about the rabbits, George!
         $this->ulURL = $data['uploadUrl'];
-        var_dump("upload url at load: ".$data['uploadUrl']);
         $this->ulToken = $data['authorizationToken'];
-
-        var_dump($data);
     }
 
     function download($hash)
