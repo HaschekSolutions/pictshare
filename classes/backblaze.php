@@ -111,7 +111,10 @@ class Backblaze
         curl_close ($session); // Clean up
         $data = json_decode($server_output,true); // Tell me about the rabbits, George!
         $this->ulURL = $data['uploadUrl'];
+        //var_dump("upload url at load: ".$data['uploadUrl']);
         $this->ulToken = $data['authorizationToken'];
+
+        //var_dump($data);
     }
 
     function download($hash)

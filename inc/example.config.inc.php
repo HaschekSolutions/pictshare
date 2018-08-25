@@ -87,3 +87,11 @@ define('SHOW_ERRORS', false);
 //define('BACKBLAZE_AUTODOWNLOAD', true);   //if true, will download images from backblaze if not found local
 //define('BACKBLAZE_AUTOUPLOAD', true);     //if true, will upload images to backblaze when they are uploaded to pictshare
 //define('BACKBLAZE_AUTODELETE', true);     //if true, will delete images from backblaze if they are deleted from pictshare
+
+//If you have a NAS or some cifs or nfs mounted drive, you can specify this here as a folder
+//if a requested hash is not found locally, its looked up on this location. This allows for mounted external spaces
+//or just backups on a second drive.
+//Also new hashes will be uploaded there (just the originals, not resizes)
+//value should be a path **without tailing slash**!
+
+define('ALT_FOLDER','/mnt');

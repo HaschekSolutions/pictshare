@@ -94,6 +94,16 @@ class PictshareModel extends Model
 				}
 				$data['hash']=$el;
 			}
+			else if(defined('ALT_FOLDER') && ALT_FOLDER && $this->couldThisBeAnImage($el)) //check alternative folder for the hash
+			{
+				$altname=ALT_FOLDER.DS.$el;
+				//var_dump($altname);
+				if(file_exists($altname))
+				{
+					$this->uploadImageFromURL($altname,$el);
+					$data['hash'] = $el;
+				}
+			}
 			else if(BACKBLAZE === true && $this->couldThisBeAnImage($el) && BACKBLAZE_AUTODOWNLOAD ===true) //looks like it might be a hash but didn't find it here. Let's see
 			{
 				$b = new Backblaze();
@@ -210,6 +220,16 @@ class PictshareModel extends Model
 		}
 		
 		rmdir($base_path);
+
+		//delete from alt folder if configured
+		if(defined('ALT_FOLDER') && ALT_FOLDER)
+		{
+			$altname=ALT_FOLDER.DS.$hash;
+			if(file_exists($altname))
+			{
+				unlink($altname);
+			}
+		}
 
 		//delete from backblaze if configured
 		if(BACKBLAZE===true && BACKBLAZE_AUTODELETE===true)
@@ -444,7 +464,7 @@ class PictshareModel extends Model
 		return $this->isTypeAllowed($this->getTypeOfFile($url));
 	}
 
-	function uploadImageFromURL($url)
+	function uploadImageFromURL($url,$forcehash=false)
 	{
 		$type = $this->getTypeOfFile($url);
 		$type = $this->isTypeAllowed($type);
@@ -466,12 +486,12 @@ class PictshareModel extends Model
 		$dup_id = $this->isDuplicate($url);
 		if($dup_id)
 		{
-			$hash = $dup_id;
+			$hash = $forcehash?$forcehash:$dup_id;
 			$url = ROOT.DS.'upload'.DS.$hash.DS.$hash;
 		}
 		else
 		{
-			$hash = $this->getNewHash($type);
+			$hash = $forcehash?$forcehash:$this->getNewHash($type);
 			$this->saveSHAOfFile($url,$hash);
 		}
 		
@@ -497,6 +517,15 @@ class PictshareModel extends Model
 			fclose($fh);
 		}
 
+		if(defined('ALT_FOLDER') && ALT_FOLDER)
+		{
+			$altname=ALT_FOLDER.DS.$hash;
+			if(!file_exists($altname))
+			{
+				copy($file,$altname);
+			}
+		}
+
 		if(BACKBLAZE===true && BACKBLAZE_AUTOUPLOAD===true)
 		{
 			$b = new Backblaze();
@@ -512,6 +541,8 @@ class PictshareModel extends Model
 		{
 			$code = getRandomString(32);
 			$file = ROOT.DS.'upload'.DS.'deletecodes'.DS.$code;
+			if(!is_dir(ROOT.DS.'upload'.DS.'deletecodes'))
+				mkdir(ROOT.DS.'upload'.DS.'deletecodes');
 			if(file_exists($file)) continue;
 			file_put_contents($file,$hash);
 			return $code;
