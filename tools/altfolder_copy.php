@@ -53,7 +53,7 @@ while (false !== ($hash = readdir($dh))) {
     {
         if(file_exists(ALT_FOLDER.DS.$hash))
         {
-            echo "  [!] Skipping existing $hash\n";
+            echo "\n  [!] Skipping existing $hash\n";
             ++$skips;
             $skipsize+=$thissize;
         }
@@ -70,7 +70,7 @@ while (false !== ($hash = readdir($dh))) {
     {
         ++$errors;
         $errorsize+=$thissize;
-        echo "  [X] ERROR $hash not allowed format: $info\n";
+        echo "\n  [X] ERROR $hash not allowed format: $info\n";
     }
         
 }
