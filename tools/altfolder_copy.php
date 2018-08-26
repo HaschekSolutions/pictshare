@@ -51,7 +51,7 @@ while (false !== ($hash = readdir($dh))) {
         else
         {
             ++$copied;
-            echo "[i] Copying $hash\t to ".ALT_FOLDER.DS.$hash."                     \r";
+            echo "[i] Copying $hash   to   ".ALT_FOLDER.DS.$hash."                     \r";
             if($sim===false)
                 copy($img,ALT_FOLDER.DS.$hash);
         }
