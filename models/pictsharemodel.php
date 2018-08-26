@@ -448,6 +448,7 @@ class PictshareModel extends Model
 			
 			case 'image/jpeg':	return 'jpg';
 			case 'jpeg':		return 'jpg';
+			case 'jpg':			return 'jpg';
 			case 'pjpeg':		return 'jpg';
 			
 			case 'image/gif':	return 'gif';
