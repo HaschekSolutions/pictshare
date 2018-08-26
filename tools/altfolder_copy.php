@@ -37,15 +37,15 @@ $localfiles = array();
 while (false !== ($hash = readdir($dh))) {
     $img = $dir.$hash.DS.$hash;
     if(!file_exists($img)) continue;
-    $type = pathinfo($img, PATHINFO_EXTENSION);
-    $type = $pm->isTypeAllowed($type);
+    $info = pathinfo($img, PATHINFO_EXTENSION);
+    $type = $pm->isTypeAllowed($info);
     if($type)
     {
         ++$allhashes;
         //$localfiles[] = $hash;
         if(file_exists(ALT_FOLDER.DS.$hash))
         {
-            echo "  [!] Skipping $hash because it already exists in ".ALT_FOLDER."\n";
+            echo "  [!] Skipping existing $hash\n";
             ++$skips;
         }
         else
@@ -56,6 +56,8 @@ while (false !== ($hash = readdir($dh))) {
                 copy($img,ALT_FOLDER.DS.$hash);
         }
     }
+    else
+        echo "  [X] ERROR $hash not allowed format: $info\n";
 }
 
 echo "\n[i] Done\n";
