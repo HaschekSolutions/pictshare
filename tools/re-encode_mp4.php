@@ -48,7 +48,7 @@ if(count($localfiles)==0)
     while (false !== ($filename = readdir($dh))) {
         $img = $dir.$filename.DS.$filename;
         if(!file_exists($img)) continue;
-        $type = pathinfo($img, PATHINFO_EXTENSION);
+        $type = strtolower(pathinfo($img, PATHINFO_EXTENSION));
         $type = $pm->isTypeAllowed($type);
         if($type=='mp4')
             $localfiles[] = $filename;

@@ -439,6 +439,7 @@ class PictshareModel extends Model
 
 	function isTypeAllowed($type)
 	{
+		$type=strtolower($type);
 		switch($type)
 		{
 			case 'image/png':	return 'png';

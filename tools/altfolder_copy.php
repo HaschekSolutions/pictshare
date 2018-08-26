@@ -44,7 +44,7 @@ while (false !== ($hash = readdir($dh))) {
     if($hash=='.'||$hash=='..') continue;
     $img = $dir.$hash.DS.$hash;
     if(!file_exists($img)) continue;
-    $info = pathinfo($img, PATHINFO_EXTENSION);
+    $info = strtolower(pathinfo($img, PATHINFO_EXTENSION));
     $thissize = filesize($img);
     $type = $pm->isTypeAllowed($info);
     ++$allhashes;
