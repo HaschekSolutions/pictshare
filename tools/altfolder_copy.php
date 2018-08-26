@@ -34,34 +34,66 @@ echo "[i] Looping through local files\n";
 $dir = ROOT.DS.'upload'.DS;
 $dh  = opendir($dir);
 $localfiles = array();
+
+$allhashes=0;$allsize=0;
+$skips=0;$skipsize=0;
+$copied=0;$copysize=0;
+$errors=0;$errorsize=0;
+
 while (false !== ($hash = readdir($dh))) {
+    if($hash=='.'||$hash=='..') continue;
     $img = $dir.$hash.DS.$hash;
     if(!file_exists($img)) continue;
     $info = pathinfo($img, PATHINFO_EXTENSION);
+    $thissize = filesize($img);
     $type = $pm->isTypeAllowed($info);
+    ++$allhashes;
+    $allsize+=$thissize;
     if($type)
     {
-        ++$allhashes;
-        //$localfiles[] = $hash;
         if(file_exists(ALT_FOLDER.DS.$hash))
         {
             echo "  [!] Skipping existing $hash\n";
             ++$skips;
+            $skipsize+=$thissize;
         }
         else
         {
             ++$copied;
+            $copysize+=$thissize;
             echo "[i] Copying $hash   to   ".ALT_FOLDER.DS.$hash."                     \r";
             if($sim===false)
                 copy($img,ALT_FOLDER.DS.$hash);
         }
     }
     else
+    {
+        ++$errors;
+        $errorsize+=$thissize;
         echo "  [X] ERROR $hash not allowed format: $info\n";
+    }
+        
 }
 
 echo "\n[i] Done\n";
 echo "\n----------- STATS ----------\n\n";
-echo "   All files found:\t$allhashes\n";
-echo "   Copied files:\t$copied\n";
-echo "   Skipped files:\t$skips\n";
+echo "   All files found:\t$allhashes\t".renderSize($allsize)."\n";
+echo "   Copied files:\t$copied\t".renderSize($copysize)."\n";
+echo "   Skipped files:\t$skips\t".renderSize($skipsize)."\n";
+echo "   Erroneous files:\t$errors\t".renderSize($errorsize)."\n";
+echo "\n";
+
+
+function renderSize($bytes, $precision = 2) { 
+    $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
+
+    $bytes = max($bytes, 0); 
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
+    $pow = min($pow, count($units) - 1); 
+
+    // Uncomment one of the following alternatives
+    $bytes /= pow(1024, $pow);
+    // $bytes /= (1 << (10 * $pow)); 
+
+    return round($bytes, $precision) . ' ' . $units[$pow]; 
+} 
