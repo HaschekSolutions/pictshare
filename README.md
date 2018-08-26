@@ -79,17 +79,6 @@ By using this compose file, you should know that:
 - (optional) You can and should put a [nginx](https://www.nginx.com/) proxy before the Apache server. That thing is just insanely fast with static content like images.
 - (optional) To secure your traffic I'd highly recommend getting an [SSL Cert](https://letsencrypt.org/) for your server if you don't already have one.
 
-
-UPDATES
-========
-- Nov. 23: Added support for MP4 uploads and conversion from gif to MP4
-- Nov. 12: Created new git project: [Pictshare stats](https://github.com/chrisiaut/pictshare_stats)
-- Nov. 07: Added 9 new (instagram-like) filters
-- Nov. 06: Master delete code. One code to delete them all
-- Nov. 01: [Restricted uploads and option-use](#restriction-settings)
-- Oct. 30: [Rotations and filters](#smart-query-system)
-- Oct. 10: [Album functionality](#smart-query-system) finally ready
-
 ## Why would I want to host my own images?
 If you own a server (even a home server) you can host your own PictShare instance so you have full control over your content and can delete images hasslefree.
 
@@ -106,10 +95,12 @@ If you're a blogger like myself, you can use it as storage for your images so th
 - MP4 resizing
 - PictShare removes all exif data so you can upload photos from your phone and all GPS tags and camera model info get wiped
 - Smart [resize, filter and rotation](#smart-query-system) features
+- Generate gradients by specifying only a size. eg: https://pictshare.net/800x200
 - Duplicates don't take up space. If the exact same images is uploaded twice, the second upload will link to the first
 - You can control who can upload images or use filters/resizes by defining an [upload-code](#restriction-settings)
 - You can set a code in your ```/inc/config.inc.php``` (MASTER_DELETE_CODE) that, if appended to any URL of an Image, will delete the image and all cached versions of it from the server
 - Detailed traffic and view statistics of your images via [Pictshare stats](https://github.com/chrisiaut/pictshare_stats)
+- For more configuration possibilities check out the ```/inc/example.config.inc.php``` file
 
 ## Smart query system
 PictShare images can be changed after upload just by modifying the URL. It works like this:

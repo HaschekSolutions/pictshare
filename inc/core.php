@@ -84,7 +84,26 @@ function whatToDo($url)
     
     $data = $pm->urlToData($url);
     
-    if(!is_array($data) || !$data['hash'])
+    if(!$data['hash'] && $data['size']) //if there is only a size but no hash, generate a pattern
+    {
+        $sd = $pm->sizeStringToWidthHeight($data['size']);
+        $width = ($sd['width'] <= 2000)?$sd['width']:2000;
+        $height = ($sd['height'] <= 2000)?$sd['height']:2000;
+
+        $cachefile = ROOT.DS.'tmp'.DS.$width .'x'.$height.'.png';
+        if(!file_exists($cachefile))
+        {
+            $image=$pm->gradient($width, $height, array('#A7FF78', '#A7FF78', '#78FFD4', '#78FFD4'));
+            imagepng($image,$cachefile);
+        }
+        else 
+            $image = imagecreatefrompng($cachefile);
+        header('Content-type: image/png');
+        imagepng($image);
+        imagedestroy($image);
+        exit();
+    }
+    else if(!is_array($data) || !$data['hash'])
     {
         if((UPLOAD_FORM_LOCATION && $url==UPLOAD_FORM_LOCATION) || (!UPLOAD_FORM_LOCATION))
         {
