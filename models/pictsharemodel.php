@@ -522,7 +522,7 @@ class PictshareModel extends Model
 		if(defined('ALT_FOLDER') && ALT_FOLDER)
 		{
 			$altname=ALT_FOLDER.DS.$hash;
-			if(!file_exists($altname))
+			if(!file_exists($altname) && is_dir(ALT_FOLDER))
 			{
 				copy($file,$altname);
 			}
