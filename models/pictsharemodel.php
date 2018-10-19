@@ -371,7 +371,9 @@ class PictshareModel extends Model
 		<FORM id="form" enctype="multipart/form-data" method="post">
 		<div id="formular">
 			'.$upload_code_form.'
-			<strong>'.$this->translate(4).': </strong><input class="input" type="file" name="pic[]" multiple><div class="clear"></div>
+			<strong>'.$this->translate(4).': </strong><br/><input class="input" type="file" name="pic[]" multiple><div class="clear"></div>
+			<div class="clear"></div><br>
+			<strong>'.$this->translate(22).': </strong><br/><input style="width:80%" type="text" name="picurl" /><div class="clear"></div>
 			<div class="clear"></div><br>
 		</div>
 			<INPUT class="btn" style="font-size:15px;font-weight:bold;background-color:#74BDDE;padding:3px;" type="submit" id="submit" name="submit" value="'.$this->translate(3).'" onClick="setTimeout(function(){document.getElementById(\'submit\').disabled = \'disabled\';}, 1);$(\'#movingBallG\').fadeIn()">
@@ -662,6 +664,42 @@ class PictshareModel extends Model
 			}
 		}
 
+		if($_REQUEST['picurl'])
+		{
+			$url = $_REQUEST['picurl'];
+			if(startsWith($url,'http://') || startsWith($url,'https://'))
+			{
+				$size_mb = remote_filesize($url)*0.000001;
+				$maxsize = (int)(ini_get('upload_max_filesize'));
+				if(endswith($maxsize,'MB'))
+				{
+					$maxsize = substr($maxsize,0,strpos($maxsize,'MB'));
+				}
+				else $maxsize = 20;
+				if($size_mb <= $maxsize) //if the file is within maxsize lets download it
+				{
+					$name = basename($url);//md5(rand(1,9999)*rand(1,99999));
+    				file_put_contents(ROOT.DS.'tmp'.DS.$name, file_get_contents($url));
+					$data = $this->uploadImageFromURL(ROOT.DS.'tmp'.DS.$name);
+					if($data['status']=='OK')
+					{
+						if($data['deletecode'])
+							$deletecode = '<br/><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'/delete_'.$data['deletecode'].'">Delete image</a>';
+						else $deletecode = '';
+						if($data['type']=='mp4')
+							$o.= '<div><h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'">'.$data['hash'].'</a>'.$deletecode.'</div>';
+						else
+							$o.= '<div><h2>'.$this->translate(4).' '.++$i.'</h2><a target="_blank" href="'.DOMAINPATH.PATH.$data['hash'].'"><img src="'.DOMAINPATH.PATH.'300/'.$data['hash'].'" /></a>'.$deletecode.'</div>';
+
+						$hashes[] = $data['hash'];
+					}
+					unlink(ROOT.DS.'tmp'.DS.$name);
+				}
+				else
+					$o.= '<div><h2>Error</h2>File '.$url.' is too large. Max upload size: '.$maxsize.'MB</div>';
+			}
+		}
+
 		if(count($hashes)>1)
 		{
 			$albumlink = DOMAINPATH.PATH.implode('/',$hashes);
@@ -735,6 +773,7 @@ class PictshareModel extends Model
 		    	$words[19] = $params[0].' Aufrufe aus '.$params[1];
 				$words[20] = 'Upload-Code';
 				$words[21] = 'Falscher Upload Code eingegeben. Upload abgebrochen';
+				$words[22] = 'URL für den Upload';
 
 		    break;
 
@@ -761,6 +800,7 @@ class PictshareModel extends Model
 		    	$words[19] = $params[0].' views from '.$params[1];
 				$words[20] = 'Upload code';
 				$words[21] = 'Invalid upload code provided';
+				$words[22] = 'URL to upload';
 		}
 
 		return $words[$index];
