@@ -71,6 +71,8 @@ foreach($localfiles as $hash)
         $cmd = ROOT.DS.'bin'.DS."ffmpeg -loglevel panic -y -i $img -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
         echo "  [i] Converting $hash";
         system($cmd);
+        if(defined('ALT_FOLDER') && ALT_FOLDER && isdir(ALT_FOLDER))
+            copy($img,ALT_FOLDER.DS.$hash);
         echo "\tdone\n";
     }
 
