@@ -8,7 +8,7 @@
 * usage: php re-encode_mp4.php [noogg] [nowebm] [noskip]
 *
 * Params:
-* noskip => Won't skip existing videos (re-renders them)
+* altfolder => Will check the altfolder (if exists) for falsly encoded files
 */ 
 
 
@@ -31,13 +31,34 @@ foreach($argv as $arg)
         $localfiles[] = $arg;
 }
 
-if(in_array('noskip',$argv) || in_array('force',$argv))
+if(in_array('altfolder',$argv) && defined('ALT_FOLDER') && ALT_FOLDER && is_dir(ALT_FOLDER) )
 {
-    echo "Won't skip existing files\n\n";
-    $allowskipping = false;
+    echo "[i] Checking only the alt folder\n";
+    $dir = ALT_FOLDER.DS;
+    $dh  = opendir($dir);
+    while (false !== ($filename = readdir($dh))) {
+        $img = $dir.$filename;
+        $hash = $filename;
+        echo "\r[$filename]               ";
+        if(!file_exists($img)) continue;
+        $type = strtolower(pathinfo($img, PATHINFO_EXTENSION));
+        $type = $pm->isTypeAllowed($type);
+        if($type=='mp4')
+        {
+            echo "\n [i] $filename is ..\t";
+            $valid = checkFileForValidMP4($img);
+            $tmp = ROOT.DS.'tmp'.DS.$hash;
+            $cmd = ROOT.DS.'bin'.DS."ffmpeg -loglevel panic -y -i $img -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
+            echo ($valid?'Valid'."\n":'Not valid => Converting..');
+            if(!$valid)
+            {
+                system($cmd);
+                echo " done\n";
+                unlink($tmp);
+            }
+        }
+    }
 }
-else
-    $allowskipping = true;
 
 //making sure ffmpeg is executable
 system("chmod +x ".ROOT.DS.'bin'.DS.'ffmpeg');
@@ -65,22 +86,10 @@ echo "[i] Checking hashes for wrongly encoded ones\n";
 foreach($localfiles as $akey => $hash)
 {
     $mp4 = $dir.$hash.DS.$hash;
-    $cmd = ROOT.DS.'bin'.DS."ffmpeg -i $mp4 -hide_banner 2> ".ROOT.DS.'tmp'.DS.$hash.'.txt';
-    system($cmd);
-    $results = file(ROOT.DS.'tmp'.DS.$hash.'.txt');
-    foreach($results as $l)
+    if(checkFileForValidMP4($mp4))
     {
-        $elements = explode(':',trim($l));
-        $key=trim(array_shift($elements));
-        $value = trim(implode(':',$elements));
-        if($key=='encoder')
-        {
-            if(startsWith(strtolower($value),'lav'))
-            {
-                echo " [i] Removing $hash because it's already correctly encoded\n";
-                unset($localfiles[$akey]);
-            }
-        }
+        echo " [i] Removing $hash because it's already correctly encoded\n";
+        unset($localfiles[$akey]);
     }
 }
 
@@ -96,4 +105,27 @@ foreach($localfiles as $hash)
         copy($mp4,ALT_FOLDER.DS.$hash);
     echo "\tdone\n";
 
+}
+
+function checkFileForValidMP4($file)
+{
+    $hash = md5($file);
+    $cmd = ROOT.DS.'bin'.DS."ffmpeg -i $file -hide_banner 2> ".ROOT.DS.'tmp'.DS.$hash.'.txt';
+    system($cmd);
+    $results = file(ROOT.DS.'tmp'.DS.$hash.'.txt');
+    foreach($results as $l)
+    {
+        $elements = explode(':',trim($l));
+        $key=trim(array_shift($elements));
+        $value = trim(implode(':',$elements));
+        if($key=='encoder')
+        {
+            if(startsWith(strtolower($value),'lav'))
+            {
+                return true;
+            } else return false;
+        }
+    }
+    unlink(ROOT.DS.'tmp'.DS.$hash.'.txt');
+    return false;
 }
