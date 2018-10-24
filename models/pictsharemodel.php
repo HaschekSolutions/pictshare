@@ -509,7 +509,7 @@ class PictshareModel extends Model
 		unlink($tempfile);
 
 		//re-render new mp4 by calling the re-encode script
-		if($type=='mp4' && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
+		if($type=='mp4')
 		{
 			system("nohup php ".ROOT.DS.'tools'.DS.'re-encode_mp4.php force '.$hash." > /dev/null 2> /dev/null &");
 		}
