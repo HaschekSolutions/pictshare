@@ -88,7 +88,7 @@ foreach($localfiles as $akey => $hash)
     $mp4 = $dir.$hash.DS.$hash;
     if(checkFileForValidMP4($mp4))
     {
-        echo " [i] Removing $hash because it's already correctly encoded\n";
+        echo " [i] Skipping $hash because it's already correctly encoded\n";
         unset($localfiles[$akey]);
     }
 }
