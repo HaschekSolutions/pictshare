@@ -78,6 +78,7 @@ define('SHOW_ERRORS', false);
 //remove comments to use
 
 /* BACKBLAZE B2 */
+//========
 /* You can find your info here: https://secure.backblaze.com/b2_buckets.htm */
 //define('BACKBLAZE',true); //true=>use backblaze false=>don't
 //define('BACKBLAZE_ID','');
@@ -88,10 +89,21 @@ define('SHOW_ERRORS', false);
 //define('BACKBLAZE_AUTOUPLOAD', true);     //if true, will upload images to backblaze when they are uploaded to pictshare
 //define('BACKBLAZE_AUTODELETE', true);     //if true, will delete images from backblaze if they are deleted from pictshare
 
+
+//Backup Folder
+//========
 //If you have a NAS or some cifs or nfs mounted drive, you can specify this here as a folder
 //if a requested hash is not found locally, its looked up on this location. This allows for mounted external spaces
 //or just backups on a second drive.
-//Also new hashes will be uploaded there (just the originals, not resizes)
+//Also new hashes will be uploaded/copied there (just the originals, not resizes)
 //value should be a path **without tailing slash**!
 
-define('ALT_FOLDER','/mnt');
+//define('ALT_FOLDER','/mnt');
+
+//FFMPEG
+//========
+//If you are using PictShare on some other machine than x64 linux (eg raspberry pi or windows) the builtin ffmpeg binary won't work
+//this is why you can define an alternative path to the ffmpeg binary here.
+
+//define('FFMPEG_BINARY','/usr/bin/ffmpeg');
+

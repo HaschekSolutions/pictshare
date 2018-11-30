@@ -895,7 +895,7 @@ class PictshareModel extends Model
 	{
 		$file = escapeshellarg($filename);
 		$tmp = ROOT.DS.'tmp'.DS.md5(time()+rand(1,10000)).'.'.rand(1,10000).'.log';
-		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$bin = escapeshellcmd(FFMPEG_BINARY);
 		
 		$cmd = "$bin -i $file > $tmp 2>> $tmp";
 
@@ -921,7 +921,7 @@ class PictshareModel extends Model
 		$file = ROOT.DS.'upload'.DS.$data['hash'].DS.$data['hash'];
 		$file = escapeshellarg($file);
 		$tmp = '/dev/null';
-		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$bin = escapeshellcmd(FFMPEG_BINARY);
 		
 		$size = $data['size'];
 		
@@ -949,7 +949,7 @@ class PictshareModel extends Model
 
 	function gifToMP4($gifpath,$target)
 	{
-		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$bin = escapeshellcmd(FFMPEG_BINARY);
 		$file = escapeshellarg($gifpath);
 		
 		if(!file_exists($target)) //simple caching.. have to think of something better
@@ -964,7 +964,7 @@ class PictshareModel extends Model
 
 	function saveAsMP4($source,$target)
 	{
-		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$bin = escapeshellcmd(FFMPEG_BINARY);
 		$source = escapeshellarg($source);
 		$target = escapeshellarg($target);
 		$h265 = "$bin -y -i $source -an -c:v libx264 -qp 0 -f mp4 $target";
@@ -973,7 +973,7 @@ class PictshareModel extends Model
 
 	function saveAsOGG($source,$target)
 	{
-		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$bin = escapeshellcmd(FFMPEG_BINARY);
 		$source = escapeshellarg($source);
 		$target = escapeshellarg($target);
 		$h265 = "$bin -y -i $source -vcodec libtheora -acodec libvorbis -qp 0 -f ogg $target";
@@ -983,7 +983,7 @@ class PictshareModel extends Model
 	function saveAsWebm($source,$target)
 	{
 		return false;
-		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$bin = escapeshellcmd(FFMPEG_BINARY);
 		$source = escapeshellarg($source);
 		$target = escapeshellarg($target);
 		$webm = "$bin -y -i $source -vcodec libvpx -acodec libvorbis -aq 5 -ac 2 -qmax 25 -f webm $target";
@@ -992,7 +992,7 @@ class PictshareModel extends Model
 
 	function saveFirstFrameOfMP4($path,$target)
 	{
-		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$bin = escapeshellcmd(FFMPEG_BINARY);
 		$file = escapeshellarg($path);
 		$cmd = "$bin -y -i $file -vframes 1 -f image2 $target";
 		
@@ -1003,7 +1003,7 @@ class PictshareModel extends Model
 	function getSizeOfMP4($video)
 	{
 		$video = escapeshellarg($video);
-		$bin = escapeshellcmd(ROOT.DS.'bin'.DS.'ffmpeg');
+		$bin = escapeshellcmd(FFMPEG_BINARY);
 	    $command = $bin . ' -i ' . $video . ' -vstats 2>&1';  
 	    $output = shell_exec($command);  
 

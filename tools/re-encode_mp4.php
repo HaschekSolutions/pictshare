@@ -48,7 +48,7 @@ if(in_array('altfolder',$argv) && defined('ALT_FOLDER') && ALT_FOLDER && is_dir(
             echo "\n [i] $filename is ..\t";
             $valid = checkFileForValidMP4($img);
             $tmp = ROOT.DS.'tmp'.DS.$hash;
-            $cmd = ROOT.DS.'bin'.DS."ffmpeg -loglevel panic -y -i $img -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
+            $cmd = FFMPEG_BINARY." -loglevel panic -y -i $img -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
             echo ($valid?'Valid'."\n":'Not valid => Converting..');
             if(!$valid)
             {
@@ -98,7 +98,7 @@ foreach($localfiles as $hash)
 {
     $mp4 = $dir.$hash.DS.$hash;
     $tmp = ROOT.DS.'tmp'.DS.$hash;
-    $cmd = ROOT.DS.'bin'.DS."ffmpeg -loglevel panic -y -i $mp4 -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $mp4";
+    $cmd = FFMPEG_BINARY." -loglevel panic -y -i $mp4 -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $mp4";
     echo "  [i] Converting '$hash'";
     system($cmd);
     if(defined('ALT_FOLDER') && ALT_FOLDER && is_dir(ALT_FOLDER))
@@ -110,7 +110,7 @@ foreach($localfiles as $hash)
 function checkFileForValidMP4($file)
 {
     $hash = md5($file);
-    $cmd = ROOT.DS.'bin'.DS."ffmpeg -i $file -hide_banner 2> ".ROOT.DS.'tmp'.DS.$hash.'.txt';
+    $cmd = FFMPEG_BINARY." -i $file -hide_banner 2> ".ROOT.DS.'tmp'.DS.$hash.'.txt';
     system($cmd);
     $results = file(ROOT.DS.'tmp'.DS.$hash.'.txt');
     foreach($results as $l)

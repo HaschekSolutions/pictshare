@@ -65,7 +65,7 @@ foreach($localfiles as $hash)
         else
         {
             echo "  [OGG] User wants OGG. Will do.. ";
-            $cmd = "../bin/ffmpeg -y -i $img -loglevel panic -vcodec libtheora -an $tmp && cp $tmp $ogg";
+            $cmd = FFMPEG_BINARY." -y -i $img -loglevel panic -vcodec libtheora -an $tmp && cp $tmp $ogg";
             system($cmd);
             echo "done\n";
         }
@@ -80,7 +80,7 @@ foreach($localfiles as $hash)
         else
         {
             echo "  [WEBM] User wants WEBM. Will do.. ";
-            $cmd = "../bin/ffmpeg -y -i $img -loglevel panic -c:v libvpx -crf 10 -b:v 1M $tmp && cp $tmp $webm";
+            $cmd = FFMPEG_BINARY." -y -i $img -loglevel panic -c:v libvpx -crf 10 -b:v 1M $tmp && cp $tmp $webm";
             system($cmd);
             echo "done\n";
         }

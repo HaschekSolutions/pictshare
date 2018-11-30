@@ -26,3 +26,4 @@ services:
     - ALLOW_BLOATING=
     - FORCE_DOMAIN=
     - SHOW_ERRORS=
+    - FFMPEG_BINARY=
