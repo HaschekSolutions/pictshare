@@ -700,7 +700,7 @@ class PictshareModel extends Model
 			}
 		}
 
-		if(count($hashes)>1)
+		if(is_array($hashes) && count($hashes)>1)
 		{
 			$albumlink = DOMAINPATH.PATH.implode('/',$hashes);
 			$o.='<hr/><h1>Album link</h1><a href="'.$albumlink.'" >'.$albumlink.'</a>';
