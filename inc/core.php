@@ -1,7 +1,7 @@
 <?php
 spl_autoload_register('autoload');
 
-if(!defined('FFMPEG_BINARY') || !FFMPEG_BINARY)
+if(!defined('FFMPEG_BINARY') || !FFMPEG_BINARY )
     define('FFMPEG_BINARY',ROOT.DS.'bin'.DS.'ffmpeg');
 
 function autoload($className)
