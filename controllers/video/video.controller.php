@@ -55,7 +55,7 @@ class VideoController
         }
         else
         {
-            $data = array('url'=>implode('/',$url),'hash'=>$hash,'filesize'=>renderSize(filesize($path)),'content'=>htmlentities(file_get_contents($path)));
+            $data = array('url'=>implode('/',$url),'hash'=>$hash,'filesize'=>renderSize(filesize($path)));
             renderTemplate('video',$data);
         }
     }
