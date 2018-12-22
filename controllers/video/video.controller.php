@@ -20,7 +20,8 @@ class VideoController
             $s = sizeStringToWidthHeight($size);
             $width = $s['width'];
             $newpath = ROOT.DS.'data'.DS.$hash.DS.$width.'_'.$hash;
-            $this->resize($path,$newpath,$width);
+            if(!file_exists($newpath))
+                $this->resize($path,$newpath,$width);
             $path = $newpath;
         }
         
