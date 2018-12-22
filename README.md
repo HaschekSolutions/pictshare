@@ -20,10 +20,10 @@ PictShare is a selfhostable, open source image, video and text hosting as well a
 - [x] Write permission detection
 
 ### Image hosting
-- [x] Upload of images
 - [ ] Resizing
 - [ ] Filters
 - [ ] Gif to mp4 conversion
+- [x] Upload of images
 
 ### Text file hosting
 - [x] Upload of text files
@@ -36,6 +36,7 @@ PictShare is a selfhostable, open source image, video and text hosting as well a
 
 ### MP4 hosting
 - [ ] Resizing
+- [x] Preview image generation
 - [x] Upload of videos
 - [x] Automatic conversion if not mobile friendly or wrong encoder used
 - [x] Render template for videos

@@ -14,6 +14,18 @@ class VideoController
 
         if(in_array('raw',$url))
             $this->serveMP4($path,$hash);
+        else if(in_array('preview',$url))
+        {
+            $preview = ROOT.DS.'data'.DS.$hash.DS.'preview.jpg';
+            if(!file_exists($preview))
+            {
+                $this->saveFirstFrameOfMP4($path,$preview);
+            }
+
+            header ("Content-type: image/jpeg");
+            readfile($preview);
+            
+        }
         else if(in_array('download',$url))
         {
             if (file_exists($path)) {
@@ -174,4 +186,13 @@ class VideoController
         unlink(ROOT.DS.'tmp'.DS.$hash.'.txt');
         return false;
     }
+
+    function saveFirstFrameOfMP4($path,$target)
+	{
+		$bin = escapeshellcmd(FFMPEG_BINARY);
+		$file = escapeshellarg($path);
+		$cmd = "$bin -y -i $file -vframes 1 -f image2 $target";
+		
+		system($cmd);
+	}
 }
