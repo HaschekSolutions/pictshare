@@ -111,6 +111,10 @@ foreach($localfiles as $hash)
     system($cmd);
     if(defined('ALT_FOLDER') && ALT_FOLDER && is_dir(ALT_FOLDER))
         copy($mp4,ALT_FOLDER.DS.$hash);
+
+    //file got a new hash so add that as well
+    addSha1($hash,sha1_file($mp4));
+    
     echo "\tdone\n";
 
 }

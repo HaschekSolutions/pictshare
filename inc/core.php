@@ -253,6 +253,8 @@ function getTypeOfFile($url)
 	return $type;
 }
 
+function isFolderWritable($dir){return is_writable($dir);}
+
 function getRandomString($length=32, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyz')
 {
     $str = '';
@@ -300,7 +302,26 @@ function getUserIP()
 	return $ip;
 }
 
-function isFolderWritable($dir)
+// checks the list of uploaded files for this hash
+function sha1Exists($sha1)
 {
-    return is_writable($dir);
+    $handle = fopen(ROOT.DS.'data'.DS.'sha1.csv', "r");
+    if ($handle) {
+        while (($line = fgets($handle)) !== false) {
+            if(substr($line,0,40)==$sha1) return trim(substr($line,41));
+        }
+
+        fclose($handle);
+    }
+    return false;
+}
+
+//adds new sha to  the hash list
+function addSha1($hash,$sha1)
+{
+    if(sha1Exists($sha1)) return;
+    $fp = fopen(ROOT.DS.'data'.DS.'sha1.csv','a');
+    fwrite($fp,"$sha1;$hash\n");
+    fclose($fp);
+    return true;
 }

@@ -13,3 +13,29 @@ PictShare is a selfhostable, open source image, video and text hosting as well a
 - Added URL shortening
 - Added WebP to images (and conversion from jpg,png to webp)
 - Massive code rework. Actually we designed it from the ground up to be more modular and easier to debug
+
+## Status
+
+- [x] Duplicate detection
+- [x] Write permission detection
+
+### Image hosting
+- [x] Upload of images
+- [ ] Resizing
+- [ ] Filters
+- [ ] Gif to mp4 conversion
+
+### Text file hosting
+- [x] Upload of text files
+- [x] Render template for text files
+- [x] Raw data view
+- [x] Downloadable
+
+### URL shortening
+- [ ] Upload of links to shorten
+
+### MP4 hosting
+- [ ] Resizing
+- [x] Upload of videos
+- [x] Automatic conversion if not mobile friendly or wrong encoder used
+- [x] Render template for videos

@@ -28,6 +28,8 @@ class ImageController
                 $res = imagecreatefromjpeg($tmpfile);
                 imagejpeg($res, $tmpfile, (defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
                 $ext = 'jpg';
+
+                $newsha1 = sha1_file($tmpfile);
             break;
 
             default:
@@ -38,6 +40,9 @@ class ImageController
         {
             $hash = getNewHash($ext,6);
         }
+
+        if($newsha1)
+            addSha1($hash,$newsha1);
 
         mkdir(ROOT.DS.'data'.DS.$hash);
 		$file = ROOT.DS.'data'.DS.$hash.DS.$hash;

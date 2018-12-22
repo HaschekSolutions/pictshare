@@ -23,12 +23,17 @@ else if(!isFolderWritable(ROOT.DS.'tmp'))
 // check for POST upload
 if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
 {
+    //check for duplicates
+    $sha1 = sha1_file($_FILES['file']["tmp_name"]);
+    $hash = sha1Exists($sha1);
+    if($hash)
+        exit(json_encode(array('status'=>'ok','hash'=>$hash,'url'=>URL.$hash)));
+
     //get the file type
     $type = getTypeOfFile($_FILES['file']["tmp_name"]);
-    //@todo: check for duplicates here
 
     //cross check filetype for controllers
-
+    //
     //image?
     if(in_array($type,(new ImageController)->getRegisteredExtensions()))
     {
@@ -46,7 +51,12 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
     }
 
     if(!$answer)
-        $answer = array('status'=>'err','reason'=>'Unknown error');
+        $answer = array('status'=>'err','reason'=>'Unsupported filetype');
+
+    if($answer['hash'])
+        addSha1($answer['hash'],$sha1);
 
     echo json_encode($answer);
 }
+else
+    exit(json_encode(array('status'=>'err','reason'=>'Upload error')));
