@@ -29,7 +29,7 @@ if(in_array('sim',$argv))
 }
 else $sim = false;
 
-$dir = ROOT.DS.'upload'.DS;
+$dir = ROOT.DS.'data'.DS;
 $dh  = opendir($dir);
 $localfiles = array();
 
@@ -63,7 +63,7 @@ $sumsize = 0;
 echo "[i] Looking for files to clean up\n";
 foreach($localfiles as $hash)
 {
-    $dir = ROOT.DS.'upload'.DS.$hash.DS;
+    $dir = ROOT.DS.'data'.DS.$hash.DS;
     $dh  = opendir($dir);
 
     while (false !== ($filename = readdir($dh))) {

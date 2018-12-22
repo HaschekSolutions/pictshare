@@ -41,7 +41,7 @@ $uploadsize = 0;
 
 
 //gather local data
-$dir = ROOT.DS.'upload'.DS;
+$dir = ROOT.DS.'data'.DS;
 $dh  = opendir($dir);
 $localfiles = array();
 
