@@ -40,6 +40,12 @@ class ImageController
         {
             $hash = getNewHash($ext,6);
         }
+        else
+        {
+            $hash.='.'.$ext;
+            if(isExistingHash($hash))
+                return array('status'=>'err','reason'=>'Custom hash already exists');
+        }
 
         if($newsha1)
             addSha1($hash,$newsha1);

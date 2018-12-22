@@ -35,7 +35,7 @@ PictShare is a selfhostable, open source image, video and text hosting as well a
 - [ ] Upload of links to shorten
 
 ### MP4 hosting
-- [ ] Resizing
+- [x] Resizing
 - [x] Preview image generation
 - [x] Upload of videos
 - [x] Automatic conversion if not mobile friendly or wrong encoder used

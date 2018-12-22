@@ -113,7 +113,7 @@ function getExtensionOfFilename($file)
 
 function sizeStringToWidthHeight($size)
 {
-	if(!$size || !$this->isSize($size)) return false;
+	if(!$size || !isSize($size)) return false;
 	if(!is_numeric($size))
         $size = explode('x',$size);
 
@@ -324,4 +324,13 @@ function addSha1($hash,$sha1)
     fwrite($fp,"$sha1;$hash\n");
     fclose($fp);
     return true;
+}
+
+function isSize($var)
+{
+	if(is_numeric($var)) return true;
+	$a = explode('x',$var);
+	if(count($a)!=2 || !is_numeric($a[0]) || !is_numeric($a[1])) return false;
+	
+	return true;
 }

@@ -38,8 +38,8 @@
     <body id="body">
 
         <div id="container">
-            <video id="video" poster="<?php echo URL.'preview/'.$hash; ?>" preload="auto" autoplay="autoplay" controls muted="muted" loop="loop" webkit-playsinline>   
-                <source src="<?php echo '/raw/mp4/'.$hash; ?>" type="video/mp4">
+            <video id="video" poster="<?php echo URL.$url.'/preview/'.$hash; ?>" preload="auto" autoplay="autoplay" controls muted="muted" loop="loop" webkit-playsinline>   
+                <source src="<?php echo URL.$url.'/raw' ?>" type="video/mp4">
                 <?php
                     if(file_exists(ROOT.DS.'data'.DS.$hash.DS.'webm_1.'.$hash))
                         echo '<source src="'.URL.'raw/webm/'.$hash.'" type="video/webm">'."\n";
@@ -48,7 +48,7 @@
                 ?>
             </video>
         </div>
-            <small><?php echo $filesize; ?> <a href="/<?php echo $url.'/raw' ?>">Raw</a> <a href="/<?php echo $url.'/download' ?>">Download</a></a></small>
+            <small><?php echo $filesize; ?> <a href="/<?php echo URL.$url.'/raw' ?>">Raw</a> <a href="/<?php echo URL.$url.'/download' ?>">Download</a></a></small>
             
             <script>
                 var hadToResizeW = false;

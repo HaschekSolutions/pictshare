@@ -10,13 +10,26 @@ class VideoController
         $path = ROOT.DS.'data'.DS.$hash.DS.$hash;
 
         //@todo: - resize by changing $path
-        //       - preview images
 
+        //check if video should be resized
+        foreach($url as $u)
+            if(isSize($u)==true)
+                $size = $u;
+        if($size)
+        {
+            $s = sizeStringToWidthHeight($size);
+            $width = $s['width'];
+            $newpath = ROOT.DS.'data'.DS.$hash.DS.$width.'_'.$hash;
+            $this->resize($path,$newpath,$width);
+            $path = $newpath;
+        }
+        
+        
         if(in_array('raw',$url))
             $this->serveMP4($path,$hash);
         else if(in_array('preview',$url))
         {
-            $preview = ROOT.DS.'data'.DS.$hash.DS.'preview.jpg';
+            $preview = $path.'_preview.jpg';
             if(!file_exists($preview))
             {
                 $this->saveFirstFrameOfMP4($path,$preview);
@@ -51,6 +64,12 @@ class VideoController
     {
         if($hash===false)
             $hash = getNewHash('mp4',6);
+        else
+        {
+            $hash.='.mp4';
+            if(isExistingHash($hash))
+                return array('status'=>'err','reason'=>'Custom hash already exists');
+        }
 
         mkdir(ROOT.DS.'data'.DS.$hash);
 		$file = ROOT.DS.'data'.DS.$hash.DS.$hash;
@@ -194,5 +213,20 @@ class VideoController
 		$cmd = "$bin -y -i $file -vframes 1 -f image2 $target";
 		
 		system($cmd);
+    }
+    
+    function resize($in,$out,$width)
+	{
+		$file = escapeshellarg($in);
+		$tmp = '/dev/null';
+		$bin = escapeshellcmd(FFMPEG_BINARY);
+		
+		$addition = '-c:v libx264 -profile:v baseline -level 3.0 -pix_fmt yuv420p';
+        $height = 'trunc(ow/a/2)*2';
+		
+		$cmd = "$bin -i $file -y -vf scale=\"$width:$height\" $addition $out";
+		system($cmd);
+		
+		return (file_exists($out) && filesize($out)>0);
 	}
 }

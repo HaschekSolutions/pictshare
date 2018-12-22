@@ -38,6 +38,12 @@ class TextController
         {
             $hash = getNewHash('txt',6);
         }
+        else
+        {
+            $hash.='.txt';
+            if(isExistingHash($hash))
+                return array('status'=>'err','reason'=>'Custom hash already exists');
+        }
 
         mkdir(ROOT.DS.'data'.DS.$hash);
 		$file = ROOT.DS.'data'.DS.$hash.DS.$hash;

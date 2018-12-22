@@ -15,10 +15,13 @@ require_once(ROOT . DS . 'controllers' . DS. 'text'. DS . 'text.controller.php')
 require_once(ROOT . DS . 'controllers' . DS. 'url'. DS . 'url.controller.php');
 require_once(ROOT . DS . 'controllers' . DS. 'video'. DS . 'video.controller.php');
 
+// check write permissions first
 if(!isFolderWritable(ROOT.DS.'data'))
     exit(json_encode(array('status'=>'err','reason'=>'Data directory not writable')));
 else if(!isFolderWritable(ROOT.DS.'tmp'))
     exit(json_encode(array('status'=>'err','reason'=>'Temp directory not writable')));
+
+$hash = sanatizeString(trim($_REQUEST['hash']))?sanatizeString(trim($_REQUEST['hash'])):false;
 
 // check for POST upload
 if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
@@ -37,17 +40,17 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
     //image?
     if(in_array($type,(new ImageController)->getRegisteredExtensions()))
     {
-        $answer = (new ImageController())->handleUpload($_FILES['file']['tmp_name']);
+        $answer = (new ImageController())->handleUpload($_FILES['file']['tmp_name'],$hash);
     }
     //or, a text
     else if($type=='text')
     {
-        $answer = (new TextController())->handleUpload($_FILES['file']['tmp_name']);
+        $answer = (new TextController())->handleUpload($_FILES['file']['tmp_name'],$hash);
     }
     //or, a video
     else if(in_array($type,(new VideoController)->getRegisteredExtensions()))
     {
-        $answer = (new VideoController())->handleUpload($_FILES['file']['tmp_name']);
+        $answer = (new VideoController())->handleUpload($_FILES['file']['tmp_name'],$hash);
     }
 
     if(!$answer)
