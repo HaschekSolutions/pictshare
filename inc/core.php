@@ -299,3 +299,8 @@ function getUserIP()
 	}
 	return $ip;
 }
+
+function isFolderWritable($dir)
+{
+    return is_writable($dir);
+}

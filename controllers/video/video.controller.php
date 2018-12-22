@@ -37,25 +37,16 @@ class VideoController
 
     public function handleUpload($tmpfile,$hash=false)
     {
-        $fh = fopen(ROOT.DS.'log'.DS.'video.log', 'a'); //////
-        fwrite($fh, "[1] $tmpfile was uploaded\n");
-
         if($hash===false)
             $hash = getNewHash('mp4',6);
-
-        fwrite($fh, "[2] $tmpfile got the hash $hash\n");
 
         mkdir(ROOT.DS.'data'.DS.$hash);
 		$file = ROOT.DS.'data'.DS.$hash.DS.$hash;
 		
         move_uploaded_file($tmpfile, $file);
 
-        fwrite($fh, "[3] Was it already correclty encoded? ".($this->rightEncodedMP4($file)?'yes':'no'));
-
         if(!$this->rightEncodedMP4($file))
             system("nohup php ".ROOT.DS.'tools'.DS.'re-encode_mp4.php force '.$hash." > /dev/null 2> /dev/null &");
-
-        fclose($fh);
 
         if(defined('ALT_FOLDER') && ALT_FOLDER)
         {

@@ -15,6 +15,10 @@ require_once(ROOT . DS . 'controllers' . DS. 'text'. DS . 'text.controller.php')
 require_once(ROOT . DS . 'controllers' . DS. 'url'. DS . 'url.controller.php');
 require_once(ROOT . DS . 'controllers' . DS. 'video'. DS . 'video.controller.php');
 
+if(!isFolderWritable(ROOT.DS.'data'))
+    exit(json_encode(array('status'=>'err','reason'=>'Data directory not writable')));
+else if(!isFolderWritable(ROOT.DS.'tmp'))
+    exit(json_encode(array('status'=>'err','reason'=>'Temp directory not writable')));
 
 // check for POST upload
 if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
