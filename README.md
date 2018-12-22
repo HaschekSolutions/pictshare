@@ -6,6 +6,7 @@ PictShare is a selfhostable, open source image, video and text hosting as well a
 [![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
 
 # This is the development branch for Version 2 do not use in production
+Test site: https://dev.pictshare.net/ (only sometimes on)
 
 ## New Features in v2:
 

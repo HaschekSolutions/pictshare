@@ -53,7 +53,8 @@ class ImageController
         mkdir(ROOT.DS.'data'.DS.$hash);
 		$file = ROOT.DS.'data'.DS.$hash.DS.$hash;
 		
-        move_uploaded_file($tmpfile, $file);
+        copy($tmpfile, $file);
+        unlink($tmpfile);
 
         if(defined('ALT_FOLDER') && ALT_FOLDER)
         {

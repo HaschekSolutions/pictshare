@@ -75,7 +75,8 @@ class VideoController
         mkdir(ROOT.DS.'data'.DS.$hash);
 		$file = ROOT.DS.'data'.DS.$hash.DS.$hash;
 		
-        move_uploaded_file($tmpfile, $file);
+        copy($tmpfile, $file);
+        unlink($tmpfile);
 
         if(!$this->rightEncodedMP4($file))
             system("nohup php ".ROOT.DS.'tools'.DS.'re-encode_mp4.php force '.$hash." > /dev/null 2> /dev/null &");
