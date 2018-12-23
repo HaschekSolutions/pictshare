@@ -40,6 +40,9 @@
                     <h4><?php echo $slogan; ?></h4>
                     <div class="well">
                         <div id="uploadinfo"></div>
+                        <?php 
+                            echo "Max Upload size: ". (int)(ini_get('upload_max_filesize'))."MB / File";
+                        ?>
                             <form class="dropzone well" id="dropzone" method="post" action="/api/upload.php" enctype="multipart/form-data">
                                 <div class="fallback">
                                         <input name="file" type="file" multiple />

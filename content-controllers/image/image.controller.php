@@ -126,7 +126,44 @@ class ImageController implements ContentController
                         break;
 
                         case 'mp4':
+                            $mp4path = ROOT.DS.'data'.DS.$hash.DS.$hash.'mp4';
+                            if(!file_exists($mp4path))
+                                $this->gifToMP4($path,$mp4path);
+                            $path = $mp4path;
                             
+                                if(in_array('raw',$url))
+                                (new VideoController())->serveMP4($path,$hash);
+                                else if(in_array('preview',$url))
+                                {
+                                    $preview = $path.'_preview.jpg';
+                                    if(!file_exists($preview))
+                                    {
+                                        (new VideoController())->saveFirstFrameOfMP4($path,$preview);
+                                    }
+                        
+                                    header ("Content-type: image/jpeg");
+                                    readfile($preview);
+                                    
+                                }
+                                else if(in_array('download',$url))
+                                {
+                                    if (file_exists($path)) {
+                                        header('Content-Description: File Transfer');
+                                        header('Content-Type: application/octet-stream');
+                                        header('Content-Disposition: attachment; filename="'.basename($path).'"');
+                                        header('Expires: 0');
+                                        header('Cache-Control: must-revalidate');
+                                        header('Pragma: public');
+                                        header('Content-Length: ' . filesize($path));
+                                        readfile($path);
+                                        exit;
+                                    }
+                                }
+                                else
+                                {
+                                    $data = array('url'=>implode('/',$url),'hash'=>$hash,'filesize'=>renderSize(filesize($path)));
+                                    renderTemplate('video',$data);
+                                }
                         break;
                     }
                 }
@@ -167,6 +204,20 @@ class ImageController implements ContentController
     {
         return imagecreatefromstring(file_get_contents($path));
     }
+
+    function gifToMP4($gifpath,$target)
+	{
+		$bin = escapeshellcmd(FFMPEG_BINARY);
+		$file = escapeshellarg($gifpath);
+		
+		if(!file_exists($target)) //simple caching.. have to think of something better
+		{
+			$cmd = "$bin -f gif -y -i $file -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" -f mp4 $target";
+			system($cmd);
+		}
+		
+		return $target;
+	}
 
     function saveObjOfImage($im,$path,$type)
     {

@@ -23,16 +23,17 @@ Test site: https://dev.pictshare.net/ (only sometimes on)
 - [x] URL
 - [x] LOG_UPLOADER
 - [x] FFMPEG_BINARY
-- [ ] PNG_COMPRESSION
-- [ ] JPEG_COMPRESSION
+- [x] PNG_COMPRESSION
+- [x] JPEG_COMPRESSION
+- [x] WEBP_COMPRESSION
 - [ ] MASTER_DELETE_CODE
 - [ ] MASTER_DELETE_IP
 - [ ] UPLOAD_CODE
 
 ### Image hosting
-- [ ] Resizing
+- [X] Resizing
 - [ ] Filters
-- [ ] Gif to mp4 conversion
+- [x] Gif to mp4 conversion
 - [x] Upload of images
 
 ### Text file hosting
