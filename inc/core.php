@@ -31,7 +31,25 @@ function architect($url)
     foreach($u as $el)
     {
         if(isExistingHash($el))
+        {
             $hash = $el;
+            break;
+        }
+        if($hash === false && mightBeAHash($el))
+        {
+            if(!$sc)
+                $sc = getStorageControllers();
+            foreach($sc as $contr)
+            {
+                $c = new $contr();
+                if($c->isEnabled()===true && $c->hashExists($el)) 
+                {
+                    $c->pullFile($el);
+                    $hash = $el;
+                    break;
+                }
+            }
+        } 
     }
 
     //we didn't find a hash. Well let's just display the webpage instead
@@ -67,7 +85,7 @@ function architect($url)
             (new VideoController())->handleHash($hash,$u);
         }
         //very odd. We know it's a valid hash but no controller says it's one of their kids
-        //oh well, just show the main website
+        //oh well
         else
         {
             var_dump("odd err");
@@ -93,11 +111,24 @@ function isExistingHash($hash)
     return is_dir(ROOT.DS.'data'.DS.$hash);
 }
 
+function mightBeAHash($string)
+{
+	$len = strlen($string);
+	$dot = strpos($string,'.');
+    if(substr_count($string,'.')!=1) return false;
+    if(!$dot) return false;
+    $afterdot = substr($string,$dot+1);
+
+    //@todo: maybe pull all allowed types and compare to afterdot
+    return ($afterdot && strlen($afterdot)>=2 && strlen($afterdot)<=5 );
+}
 
 function autoload($className)
 {
-	if (file_exists(ROOT . DS . 'controllers' . DS . strtolower($className) . '.php'))
-		require_once(ROOT . DS . 'controllers' . DS . strtolower($className) . '.php');
+	if (file_exists(ROOT . DS . 'content-controllers' . DS . strtolower($className) . '.php'))
+        require_once(ROOT . DS . 'content-controllers' . DS . strtolower($className) . '.php');
+    if (file_exists(ROOT . DS . 'interfaces' . DS . strtolower($className) . '.interface.php'))
+		require_once(ROOT . DS . 'interfaces' . DS . strtolower($className) . '.interface.php');
 }
 
 function renderTemplate($template,$vars=false)
@@ -225,8 +256,7 @@ function getTypeOfFile($url)
     $fi = new finfo(FILEINFO_MIME);
     $type = $fi->buffer(file_get_contents($url, false, null, -1, 1024));
     
-	//to catch a strange error for PHP7 and Alpine Linux
-	//if the file seems to be a stream, use unix file command
+    // on linux use the "file" command or it will handle everything as octet-stream
 	if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' && startsWith($type,'application/octet-stream'))
 	{
 		$content_type = exec("file -bi " . escapeshellarg($url));
@@ -333,4 +363,23 @@ function isSize($var)
 	if(count($a)!=2 || !is_numeric($a[0]) || !is_numeric($a[1])) return false;
 	
 	return true;
+}
+
+function getStorageControllers()
+{
+    $controllers = array();
+    if ($handle = opendir(ROOT.DS.'storage-controllers')) {
+        while (false !== ($entry = readdir($handle))) {
+            if ($entry != "." && $entry != "..") {
+                if(endswith($entry,'.controller.php'))
+                {
+                    $controllers[] = ucfirst(substr($entry,0,-15)).'Storage';
+                    include_once(ROOT.DS.'storage-controllers'.DS.$entry);
+                }
+            }
+        }
+        closedir($handle);
+    }
+
+    return $controllers;
 }

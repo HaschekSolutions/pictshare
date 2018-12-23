@@ -1,7 +1,4 @@
-# PictShare
-**[Live Demo](https://www.pictshare.net)**
-PictShare is a selfhostable, open source image, video and text hosting as well as URL shortening service with a simple API.
-
+# PictShare version 2
 ---
 [![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
 
@@ -19,6 +16,18 @@ Test site: https://dev.pictshare.net/ (only sometimes on)
 
 - [x] Duplicate detection
 - [x] Write permission detection
+
+### Config options
+
+- [x] ALT_FOLDER
+- [x] URL
+- [x] LOG_UPLOADER
+- [x] FFMPEG_BINARY
+- [ ] PNG_COMPRESSION
+- [ ] JPEG_COMPRESSION
+- [ ] MASTER_DELETE_CODE
+- [ ] MASTER_DELETE_IP
+- [ ] UPLOAD_CODE
 
 ### Image hosting
 - [ ] Resizing

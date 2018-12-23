@@ -8,7 +8,7 @@
  *  - Conversion jpg,png to webp
  */
 
-class ImageController
+class ImageController implements ContentController
 {
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('png','bmp','gif','jpg','jpeg','x-png','ico','webp');}
@@ -55,15 +55,6 @@ class ImageController
 		
         copy($tmpfile, $file);
         unlink($tmpfile);
-
-        if(defined('ALT_FOLDER') && ALT_FOLDER)
-        {
-            $altname=ALT_FOLDER.DS.$hash;
-            if(!file_exists($altname) && is_dir(ALT_FOLDER))
-            {
-                copy($file,$altname);
-            }
-        }
 
         if(defined('LOG_UPLOADER') && LOG_UPLOADER)
 		{

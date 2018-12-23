@@ -1,6 +1,6 @@
 <?php 
 
-class VideoController
+class VideoController implements ContentController
 {
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('mp4','ogg','webm');}
@@ -80,15 +80,6 @@ class VideoController
 
         if(!$this->rightEncodedMP4($file))
             system("nohup php ".ROOT.DS.'tools'.DS.'re-encode_mp4.php force '.$hash." > /dev/null 2> /dev/null &");
-
-        if(defined('ALT_FOLDER') && ALT_FOLDER)
-        {
-            $altname=ALT_FOLDER.DS.$hash;
-            if(!file_exists($altname) && is_dir(ALT_FOLDER))
-            {
-                copy($file,$altname);
-            }
-        }
 
         if(defined('LOG_UPLOADER') && LOG_UPLOADER)
 		{

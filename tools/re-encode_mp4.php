@@ -26,7 +26,7 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
 //loading core and controllers
 include_once(ROOT.DS.'inc'.DS.'core.php');
-require_once(ROOT . DS . 'controllers' . DS. 'video'. DS . 'video.controller.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'video'. DS . 'video.controller.php');
 
 if(!defined('FFMPEG_BINARY')||FFMPEG_BINARY=='' || !FFMPEG_BINARY) exit('Error: FFMPEG_BINARY not defined, no clue where to look');
 

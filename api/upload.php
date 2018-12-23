@@ -10,10 +10,10 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
 //loading core and controllers
 include_once(ROOT . DS . 'inc' .         DS. 'core.php');
-require_once(ROOT . DS . 'controllers' . DS. 'image'. DS . 'image.controller.php');
-require_once(ROOT . DS . 'controllers' . DS. 'text'. DS . 'text.controller.php');
-require_once(ROOT . DS . 'controllers' . DS. 'url'. DS . 'url.controller.php');
-require_once(ROOT . DS . 'controllers' . DS. 'video'. DS . 'video.controller.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'image'. DS . 'image.controller.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'text'. DS . 'text.controller.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'url'. DS . 'url.controller.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'video'. DS . 'video.controller.php');
 
 // check write permissions first
 if(!isFolderWritable(ROOT.DS.'data'))
@@ -57,7 +57,18 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
         $answer = array('status'=>'err','reason'=>'Unsupported filetype');
 
     if($answer['hash'])
+    {
+        //add this sha1 to the list
         addSha1($answer['hash'],$sha1);
+
+        // Lets' check all storage controllers and tell them that a new file was uploaded
+        $sc = getStorageControllers();
+        foreach($sc as $contr)
+        {
+            if((new $contr())->isEnabled()===true)
+                (new $contr())->pushFile($answer['hash']);
+        }
+    }
 
     echo json_encode($answer);
 }

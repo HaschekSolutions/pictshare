@@ -10,10 +10,10 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
 //loading core and controllers
 include_once(ROOT.DS.'inc'.DS.'core.php');
-require_once(ROOT . DS . 'controllers' . DS. 'image'. DS . 'image.controller.php');
-require_once(ROOT . DS . 'controllers' . DS. 'text'. DS . 'text.controller.php');
-require_once(ROOT . DS . 'controllers' . DS. 'url'. DS . 'url.controller.php');
-require_once(ROOT . DS . 'controllers' . DS. 'video'. DS . 'video.controller.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'image'. DS . 'image.controller.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'text'. DS . 'text.controller.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'url'. DS . 'url.controller.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'video'. DS . 'video.controller.php');
 
 
 //send the URL to the architect. It'll know what to do
