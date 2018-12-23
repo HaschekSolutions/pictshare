@@ -5,6 +5,15 @@
 # This is the development branch for Version 2 do not use in production
 Test site: https://dev.pictshare.net/ (only sometimes on)
 
+Table of contents
+=================
+* [Installation](/rtfm/INSTALL.md)
+* [Docker](/rtfm/DOCKER.md)
+* [API](/rtfm/API.md)
+* [Addons/Integration](/rtfm/INTEGRATIONS.md)
+
+---
+
 ## New Features in v2:
 
 - Added text hosting (like pastebin)
@@ -12,10 +21,15 @@ Test site: https://dev.pictshare.net/ (only sometimes on)
 - Added WebP to images (and conversion from jpg,png to webp)
 - Massive code rework. Actually we designed it from the ground up to be more modular and easier to debug
 
+## Breaking changes
+
+- New API system. Only single file uploads now via /api/upload.php (POST var name is "file"). [read more..](/rtfm/API.md)
+
 ## Status
 
 - [x] Duplicate detection
 - [x] Write permission detection
+- [ ] Upload via link
 
 ### Config options
 
