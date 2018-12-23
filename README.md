@@ -51,3 +51,10 @@ Test site: https://dev.pictshare.net/ (only sometimes on)
 - [x] Upload of videos
 - [x] Automatic conversion if not mobile friendly or wrong encoder used
 - [x] Render template for videos
+
+
+---
+
+This is a [HASCHEK SOLUTIONS](https://haschek.solutions) project
+
+[![HS logo](https://pictshare.net/css/imgs/hs_logo.png)](https://haschek.solutions)
