@@ -69,8 +69,75 @@ class ImageController implements ContentController
     public function handleHash($hash,$url)
     {
         $path = ROOT.DS.'data'.DS.$hash.DS.$hash;
-
         $type = getExtensionOfFilename($hash);
+
+        //get all our sub files where all the good functions lie
+        include_once(dirname(__FILE__).DS.'resize.php');
+        include_once(dirname(__FILE__).DS.'filters.php');
+        include_once(dirname(__FILE__).DS.'conversion.php');
+
+        //don't do this if it's a gif because PHP can't handle animated gifs
+        if($type!='gif')
+        {
+            foreach($url as $u)
+            {
+                if(isSize($u))
+                    $modifiers['size'] = $u;
+                else if(isRotation($u))
+                    $modifiers['rotation'] = $u;
+            }
+            if(in_array('webp',$url) && $type!='webp')
+                $modifiers['webp'] = true;
+            if(in_array('forcesize',$url) && $modifiers['size'])
+                $modifiers['forcesize'] = true;
+        }
+        else //gif
+        {
+            if(in_array('mp4',$url))
+                $modifiers['mp4']=true;
+        }
+
+        if($modifiers)
+        {
+            //why in gods name would you use http build query here???
+            //well we want a unique filename for every modied image
+            //so if we take all parameters in key=>value form and hash it
+            //we get one nice little hash for every eventuality
+            $modhash = md5(http_build_query($modifiers,'',','));
+            $newpath = ROOT.DS.'data'.DS.$hash.DS.$modhash.'_'.$hash;
+            $im = $this->getObjOfImage($path);
+
+            if(!file_exists($newpath))
+            {
+                foreach($modifiers as $mod => $val)
+                {
+                    switch($mod)
+                    {
+                        case 'size':
+                            ($modifiers['forcesize']?forceResize($im,$val):resize($im,$val));
+                        break;
+
+                        case 'rotation':
+                            rotate($im,$val);
+                        break;
+
+                        case 'webp':
+                            $type = 'webp';
+                        break;
+
+                        case 'mp4':
+                            
+                        break;
+                    }
+                }
+
+                $this->saveObjOfImage($im,$newpath,$type);
+            }
+            $path = $newpath;
+            
+        }
+
+        
         switch($type)
         {
             case 'jpeg':
@@ -94,5 +161,31 @@ class ImageController implements ContentController
                 readfile($path);
             break;
         }
+    }
+
+    function getObjOfImage($path)
+    {
+        return imagecreatefromstring(file_get_contents($path));
+    }
+
+    function saveObjOfImage($im,$path,$type)
+    {
+        switch($type)
+        {
+            case 'jpeg':
+            case 'jpg': 
+                imagejpeg($im,$path,(defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
+            break;
+
+            case 'png': 
+                imagepng($im,$path,(defined('PNG_COMPRESSION')?PNG_COMPRESSION:6));
+            break;
+
+            case 'webp': 
+                imagewebp($im,$path,(defined('WEBP_COMPRESSION')?WEBP_COMPRESSION:80));
+            break;
+        }
+
+        return $im;
     }
 }
