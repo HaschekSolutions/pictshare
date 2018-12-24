@@ -30,6 +30,8 @@ Table of contents
 - [x] Duplicate detection
 - [x] Write permission detection
 - [ ] Upload via link
+- [ ] Delete codes for every uploaded file
+- [ ] Autodestruct for every uploaded file
 
 ### Config options
 
