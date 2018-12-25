@@ -26,14 +26,21 @@ If there is an error the server will answer with status:err and a reason
 }
 ```
 
-### Example
+### Examples
 
-Uploading a file called test.jpg via curl
+1. Uploading a file called test.jpg via curl
 
 ```curl -F "file=@test.jpg" https://pictshare.net/api/upload.php```
 
 Answer from the server:
 ```{"status":"ok","hash":"y1b6hr.jpg","url":"https://pictshare.net/y1b6hr.jpg"}```
+
+2. Uploading a file called test.jpg via curl and requesting a custom hash
+
+```curl -F "file=@test.jpg" -F "hash=helloworld.jpg" https://pictshare.net/api/upload.php```
+
+Answer from the server:
+```{"status":"ok","hash":"helloworld.jpg","url":"https://pictshare.net/helloworld.jpg"}```
 
 ---
 
