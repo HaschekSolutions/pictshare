@@ -43,8 +43,8 @@ Table of contents
 - [x] PNG_COMPRESSION
 - [x] JPEG_COMPRESSION
 - [x] WEBP_COMPRESSION
-- [ ] MASTER_DELETE_CODE
-- [ ] MASTER_DELETE_IP
+- [x] MASTER_DELETE_CODE
+- [x] MASTER_DELETE_IP
 - [ ] UPLOAD_CODE
 
 ### Image hosting
