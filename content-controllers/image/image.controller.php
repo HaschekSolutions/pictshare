@@ -28,8 +28,6 @@ class ImageController implements ContentController
                 $res = imagecreatefromjpeg($tmpfile);
                 imagejpeg($res, $tmpfile, (defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
                 $ext = 'jpg';
-
-                $newsha1 = sha1_file($tmpfile);
             break;
 
             default:
@@ -42,26 +40,13 @@ class ImageController implements ContentController
         }
         else
         {
-            $hash.='.'.$ext;
+            if(!endswith($hash,'.'.$ext))
+                $hash.='.'.$ext;
             if(isExistingHash($hash))
-                return array('status'=>'err','reason'=>'Custom hash already exists');
+                return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 
-        if($newsha1)
-            addSha1($hash,$newsha1);
-
-        mkdir(ROOT.DS.'data'.DS.$hash);
-		$file = ROOT.DS.'data'.DS.$hash.DS.$hash;
-		
-        copy($tmpfile, $file);
-        unlink($tmpfile);
-
-        if(defined('LOG_UPLOADER') && LOG_UPLOADER)
-		{
-			$fh = fopen(ROOT.DS.'data'.DS.'uploads.txt', 'a');
-			fwrite($fh, time().';'.$url.';'.$hash.';'.getUserIP()."\n");
-			fclose($fh);
-		}
+        storeFile($tmpfile,$hash,true);
         
         return array('status'=>'ok','hash'=>$hash,'url'=>URL.$hash);
     }

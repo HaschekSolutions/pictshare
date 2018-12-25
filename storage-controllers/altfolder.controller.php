@@ -18,11 +18,7 @@ class AltfolderStorage implements StorageController
         $altname=ALT_FOLDER.DS.$hash;
 		if(file_exists($altname))
 		{
-            mkdir(ROOT.DS.'data'.DS.$hash);
-            copy($altname,ROOT.DS.'data'.DS.$hash.DS.$hash);
-
-            //and don't forget to add it to the duplicate detection system
-            addSha1($hash,sha1_file($altname));
+            storeFile($altname,$hash,false);
 		}
     }
 

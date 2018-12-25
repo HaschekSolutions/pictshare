@@ -37,6 +37,7 @@ function architect($url)
             $hash = $el;
             break;
         }
+        // if we don't have a hash yet but the element looks like it could be a hash
         if($hash === false && mightBeAHash($el))
         {
             if(!$sc)
@@ -48,7 +49,7 @@ function architect($url)
                 {
                     $c->pullFile($el);
                     $hash = $el;
-                    break;
+                    break; // we brake here because we already have the file. no need to check other storage controllers
                 }
             }
         } 
@@ -62,7 +63,25 @@ function architect($url)
     }
     else
     {
-        //ok we have a valid hash. Now let's check the extension to find out which controller will be handling this request
+        //ok we have a valid hash.
+
+        //is the user requesting this file to be deleted?
+        foreach($u as $el)
+        {
+            if(startsWith($el,'delete_'))
+            {
+                $code = substr($el,7);
+                //@todo: allow MASTER_DELETE_IP to be CIDR range or coma separated
+                if(getDeleteCodeOfHash($hash)==$code || (defined('MASTER_DELETE_CODE') && MASTER_DELETE_CODE==$code ) || (defined('MASTER_DELETE_IP') && MASTER_DELETE_IP==getUserIP()) )
+                {
+                    deleteHash($hash);
+                    exit($hash.' deleted successfully');
+                }
+            }
+        }
+        
+        
+        //Now let's check the extension to find out which controller will be handling this request
         $extension = pathinfo($hash, PATHINFO_EXTENSION);
 
         
@@ -384,4 +403,67 @@ function getStorageControllers()
     }
 
     return $controllers;
+}
+
+function rrmdir($dir) { 
+    if (is_dir($dir)) { 
+      $objects = scandir($dir); 
+      foreach ($objects as $object) { 
+        if ($object != "." && $object != "..") { 
+          if (is_dir($dir."/".$object))
+            rrmdir($dir."/".$object);
+          else
+            unlink($dir."/".$object); 
+        } 
+      }
+      rmdir($dir); 
+    } 
+  }
+
+function storeFile($srcfile,$hash,$deleteoriginal=false)
+{
+    if(is_dir(ROOT.DS.'data'.DS.$hash) && file_exists(ROOT.DS.'data'.DS.$hash.DS.$hash)) return;
+    mkdir(ROOT.DS.'data'.DS.$hash);
+	$file = ROOT.DS.'data'.DS.$hash.DS.$hash;
+	
+    copy($srcfile, $file);
+    if($deleteoriginal===true)
+        unlink($srcfile);
+
+    addSha1($hash,sha1_file($file));
+
+    //creating a delete code
+    $deletecode = getRandomString(32);
+    $fh = fopen(ROOT.DS.'data'.DS.$hash.DS.'deletecode', 'w');
+	fwrite($fh, $deletecode);
+	fclose($fh);
+       
+    if(defined('LOG_UPLOADER') && LOG_UPLOADER)
+	{
+		$fh = fopen(ROOT.DS.'data'.DS.'uploads.txt', 'a');
+		fwrite($fh, time().';'.$url.';'.$hash.';'.getUserIP()."\n");
+		fclose($fh);
+	}
+}
+
+function getDeleteCodeOfHash($hash)
+{
+    return file_get_contents(ROOT.DS.'data'.DS.$hash.DS.'deletecode');
+}
+
+function deleteHash($hash)
+{
+    //delete all local images
+    rrmdir(ROOT.DS.'data'.DS.$hash);
+
+    //tell every storage controller to delete theirs as well
+    $sc = getStorageControllers();
+    foreach($sc as $contr)
+    {
+        $c = new $contr();
+        if($c->isEnabled()===true && $c->hashExists($el)) 
+        {
+            $c->deleteFile($el);
+        }
+    }
 }

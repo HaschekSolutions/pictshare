@@ -28,9 +28,10 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
 {
     //check for duplicates
     $sha1 = sha1_file($_FILES['file']["tmp_name"]);
-    $hash = sha1Exists($sha1);
-    if($hash)
-        exit(json_encode(array('status'=>'ok','hash'=>$hash,'url'=>URL.$hash)));
+    $ehash = sha1Exists($sha1);
+    if($ehash && file_exists(ROOT.DS.'data'.DS.$ehash.DS.$ehash))
+        exit(json_encode(array('status'=>'ok','hash'=>$ehash,'url'=>URL.$ehash)));
+
 
     //get the file type
     $type = getTypeOfFile($_FILES['file']["tmp_name"]);
@@ -56,10 +57,17 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
     if(!$answer)
         $answer = array('status'=>'err','reason'=>'Unsupported filetype');
 
-    if($answer['hash'])
+    if($answer['hash'] && $answer['status']=='ok')
     {
         //add this sha1 to the list
         addSha1($answer['hash'],$sha1);
+
+        if(getDeleteCodeOfHash($answer['hash']))
+        {
+            $answer['delete_code'] = getDeleteCodeOfHash($answer['hash']);
+            $answer['delete_url'] = URL.'delete_'.getDeleteCodeOfHash($answer['hash']).'/'.$answer['hash'];
+        }
+            
 
         // Lets' check all storage controllers and tell them that a new file was uploaded
         $sc = getStorageControllers();

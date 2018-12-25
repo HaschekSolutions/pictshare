@@ -43,21 +43,10 @@ class TextController implements ContentController
             if(!endswith($hash,'.txt'))
                 $hash.='.txt';
             if(isExistingHash($hash))
-                return array('status'=>'err','reason'=>'Custom hash already exists');
+                return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 
-        mkdir(ROOT.DS.'data'.DS.$hash);
-		$file = ROOT.DS.'data'.DS.$hash.DS.$hash;
-		
-        copy($tmpfile, $file);
-        unlink($tmpfile);
-
-        if(defined('LOG_UPLOADER') && LOG_UPLOADER)
-		{
-			$fh = fopen(ROOT.DS.'data'.DS.'uploads.txt', 'a');
-			fwrite($fh, time().';'.$url.';'.$hash.';'.getUserIP()."\n");
-			fclose($fh);
-		}
+        storeFile($tmpfile,$hash,true);
         
         return array('status'=>'ok','hash'=>$hash,'url'=>URL.$hash);
     }

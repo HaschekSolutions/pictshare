@@ -24,6 +24,7 @@ Table of contents
 ## Breaking changes
 
 - New API system. Only single file uploads now via /api/upload.php (POST var name is "file"). [read more..](/rtfm/API.md)
+- Data directory changed from ```upload``` to ```data```
 
 ## Status
 
