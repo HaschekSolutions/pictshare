@@ -31,7 +31,8 @@ Table of contents
 - [x] Duplicate detection
 - [x] Write permission detection
 - [x] Delete codes for every uploaded file
-- [ ] Upload via link
+- [x] Upload via link/url
+- [x] Upload via base64
 - [ ] Autodestruct for every uploaded file
 
 ### Config options

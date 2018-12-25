@@ -9,7 +9,7 @@ if(!file_exists(ROOT.DS.'inc'.DS.'config.inc.php'))
 include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
 //loading core and controllers
-include_once(ROOT . DS . 'inc' .         DS. 'core.php');
+include_once(ROOT . DS . 'inc' . DS. 'core.php');
 require_once(ROOT . DS . 'content-controllers' . DS. 'image'. DS . 'image.controller.php');
 require_once(ROOT . DS . 'content-controllers' . DS. 'text'. DS . 'text.controller.php');
 require_once(ROOT . DS . 'content-controllers' . DS. 'url'. DS . 'url.controller.php');
@@ -23,53 +23,58 @@ else if(!isFolderWritable(ROOT.DS.'tmp'))
 
 $hash = sanatizeString(trim($_REQUEST['hash']))?sanatizeString(trim($_REQUEST['hash'])):false;
 
-// check for POST upload
-if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
+// check for POSTed text
+if($_REQUEST['base64'])
 {
+    $data = $_REQUEST['base64'];
+    $format = $_REQUEST['format'];
+
+    $tmpfile = ROOT.DS.'tmp'.DS.md5(rand(0,10000).time()).time();
+
+    base64ToFile($data, $tmpfile);
+
     //check for duplicates
-    $sha1 = sha1_file($_FILES['file']["tmp_name"]);
+    $sha1 = sha1_file($tmpfile);
     $ehash = sha1Exists($sha1);
     if($ehash && file_exists(ROOT.DS.'data'.DS.$ehash.DS.$ehash))
         exit(json_encode(array('status'=>'ok','hash'=>$ehash,'url'=>URL.$ehash)));
-
-
+            
     //get the file type
-    $type = getTypeOfFile($_FILES['file']["tmp_name"]);
+    $type = getTypeOfFile($tmpfile);
 
     //cross check filetype for controllers
     //
     //image?
     if(in_array($type,(new ImageController)->getRegisteredExtensions()))
     {
-        $answer = (new ImageController())->handleUpload($_FILES['file']['tmp_name'],$hash);
+        $answer = (new ImageController())->handleUpload($tmpfile,$hash);
     }
     //or, a text
     else if($type=='text')
     {
-        $answer = (new TextController())->handleUpload($_FILES['file']['tmp_name'],$hash);
+        $answer = (new TextController())->handleUpload($tmpfile,$hash);
     }
     //or, a video
     else if(in_array($type,(new VideoController)->getRegisteredExtensions()))
     {
-        $answer = (new VideoController())->handleUpload($_FILES['file']['tmp_name'],$hash);
+        $answer = (new VideoController())->handleUpload($tmpfile,$hash);
     }
 
     if(!$answer)
-        $answer = array('status'=>'err','reason'=>'Unsupported filetype');
+        $answer = array('status'=>'err','reason'=>'Unsupported filetype','filetype'=>$type);
 
     if($answer['hash'] && $answer['status']=='ok')
     {
         $answer['filetype'] = $type;
         //add this sha1 to the list
         addSha1($answer['hash'],$sha1);
-
+        
         if(getDeleteCodeOfHash($answer['hash']))
         {
             $answer['delete_code'] = getDeleteCodeOfHash($answer['hash']);
             $answer['delete_url'] = URL.'delete_'.getDeleteCodeOfHash($answer['hash']).'/'.$answer['hash'];
         }
-            
-
+        
         // Lets' check all storage controllers and tell them that a new file was uploaded
         $sc = getStorageControllers();
         foreach($sc as $contr)
@@ -78,8 +83,41 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
                 (new $contr())->pushFile($answer['hash']);
         }
     }
-
-    echo json_encode($answer);
+    
+        echo json_encode($answer);   
 }
-else
-    exit(json_encode(array('status'=>'err','reason'=>'Upload error')));
+
+
+
+
+function base64_to_type($base64_string)
+{
+	$data = explode(',', $base64_string);
+	$data = $data[1];
+
+	$data = str_replace(' ','+',$data);
+	$data = base64_decode($data);
+
+	$info = getimagesizefromstring($data);
+	
+	
+
+	trigger_error("########## FILETYPE: ".$info['mime']);
+
+
+	$f = finfo_open();
+	$type = finfo_buffer($f, $data, FILEINFO_MIME_TYPE);
+
+	return $type;
+}
+
+function base64ToFile($base64_string, $output_file)
+{
+	$data = explode(',', $base64_string);
+	$data = $data[1];
+	$data = str_replace(' ','+',$data);
+    $data = base64_decode($data);
+    $ifp = fopen( $output_file, 'wb' ); 
+    fwrite( $ifp, $data );
+    fclose( $ifp ); 
+}

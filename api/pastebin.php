@@ -32,7 +32,7 @@ if($_REQUEST['api_paste_code'])
         exit(URL.$sha_hash);
 
     $answer = (new TextController())->handleUpload($tmpfile,$hash);
-    if($answer['hash'])
+    if($answer['hash'] && $answer['status']=='ok')
         addSha1($answer['hash'],$sha1);
 
     echo URL.$hash;
