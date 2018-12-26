@@ -26,15 +26,14 @@ $hash = sanatizeString(trim($_REQUEST['hash']))?sanatizeString(trim($_REQUEST['h
 // check for POST upload
 if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
 {
+    //get the file type
+    $type = getTypeOfFile($_FILES['file']["tmp_name"]);
+
     //check for duplicates
     $sha1 = sha1_file($_FILES['file']["tmp_name"]);
     $ehash = sha1Exists($sha1);
     if($ehash && file_exists(ROOT.DS.'data'.DS.$ehash.DS.$ehash))
-        exit(json_encode(array('status'=>'ok','hash'=>$ehash,'url'=>URL.$ehash)));
-
-
-    //get the file type
-    $type = getTypeOfFile($_FILES['file']["tmp_name"]);
+        exit(json_encode(array('status'=>'ok','hash'=>$ehash,'filetype'=>$type,'url'=>URL.$ehash)));
 
     //cross check filetype for controllers
     //

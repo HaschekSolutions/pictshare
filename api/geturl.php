@@ -35,13 +35,15 @@ $name = basename($url);
 $tmpfile = ROOT.DS.'tmp'.DS.$name;
 file_put_contents($tmpfile,file_get_contents($url));
 
+$type = getTypeOfFile($tmpfile);
+
 //check for duplicates
 $sha1 = sha1_file($tmpfile);
 $ehash = sha1Exists($sha1);
 if($ehash && file_exists(ROOT.DS.'data'.DS.$ehash.DS.$ehash))
-    exit(json_encode(array('status'=>'ok','hash'=>$ehash,'url'=>URL.$ehash)));
+    exit(json_encode(array('status'=>'ok','hash'=>$ehash,'filetype'=>$type,'url'=>URL.$ehash)));
 
-$type = getTypeOfFile($tmpfile);
+
 
 //cross check filetype for controllers
 //
