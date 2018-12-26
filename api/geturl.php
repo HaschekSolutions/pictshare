@@ -27,6 +27,7 @@ $url = trim($_REQUEST['url']);
 
 if(!$url || !startsWith($url, 'http'))
     exit(json_encode(array('status'=>'err','reason'=>'Invalid URL')));
+    
 //@todo: let user decide max upload size via config and set php_ini var
 else if(remote_filesize($url)*0.000001 > 20)
     exit(json_encode(array('status'=>'err','reason'=>'File too big. 20MB max')));
@@ -42,8 +43,6 @@ $sha1 = sha1_file($tmpfile);
 $ehash = sha1Exists($sha1);
 if($ehash && file_exists(ROOT.DS.'data'.DS.$ehash.DS.$ehash))
     exit(json_encode(array('status'=>'ok','hash'=>$ehash,'filetype'=>$type,'url'=>URL.$ehash)));
-
-
 
 //cross check filetype for controllers
 //
