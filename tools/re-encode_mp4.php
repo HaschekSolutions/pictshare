@@ -14,20 +14,30 @@
 
 if(php_sapi_name() !== 'cli') exit('This script can only be called via CLI');
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
+
+// basic path definitions
 define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', dirname(__FILE__).DS.'..');
-include_once(ROOT.DS.'inc/config.inc.php');
-include_once(ROOT.DS.'inc/core.php');
+define('ROOT', dirname(__FILE__).'/..');
 
-$pm = new PictshareModel();
+//loading default settings if exist
+if(!file_exists(ROOT.DS.'inc'.DS.'config.inc.php'))
+	exit('Rename /inc/example.config.inc.php to /inc/config.inc.php first!');
+include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
-$dir = ROOT.DS.'upload'.DS;
+//loading core and controllers
+include_once(ROOT.DS.'inc'.DS.'core.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'video'. DS . 'video.controller.php');
+
+if(!defined('FFMPEG_BINARY')||FFMPEG_BINARY=='' || !FFMPEG_BINARY) exit('Error: FFMPEG_BINARY not defined, no clue where to look');
+
+$vc = new VideoController();
+$dir = ROOT.DS.'data'.DS;
 $dh  = opendir($dir);
 $localfiles = array();
 
 foreach($argv as $arg)
 {
-    if($pm->isImage($arg) && $pm->isTypeAllowed(pathinfo($dir.$arg, PATHINFO_EXTENSION)) == 'mp4')
+    if(isExistingHash($arg) && in_array(pathinfo($dir.$arg, PATHINFO_EXTENSION),$vc->getRegisteredExtensions()))
         $localfiles[] = $arg;
 }
 
@@ -37,18 +47,17 @@ if(in_array('altfolder',$argv) && defined('ALT_FOLDER') && ALT_FOLDER && is_dir(
     $dir = ALT_FOLDER.DS;
     $dh  = opendir($dir);
     while (false !== ($filename = readdir($dh))) {
-        $img = $dir.$filename;
+        $vid = $dir.$filename;
         $hash = $filename;
         echo "\r[$filename]               ";
-        if(!file_exists($img)) continue;
-        $type = strtolower(pathinfo($img, PATHINFO_EXTENSION));
-        $type = $pm->isTypeAllowed($type);
-        if($type=='mp4')
+        if(!file_exists($vid)) continue;
+        $type = strtolower(pathinfo($vid, PATHINFO_EXTENSION));
+        if(in_array($type,$vc->getRegisteredExtensions()))
         {
             echo "\n [i] $filename is ..\t";
-            $valid = checkFileForValidMP4($img);
+            $valid = $vc->rightEncodedMP4($vid);
             $tmp = ROOT.DS.'tmp'.DS.$hash;
-            $cmd = FFMPEG_BINARY." -loglevel panic -y -i $img -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
+            $cmd = FFMPEG_BINARY." -loglevel panic -y -i $vid -vcodec libx264 -an -profile:v baseline -level 3.0 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" $tmp && cp $tmp $img";
             echo ($valid?'Valid'."\n":'Not valid => Converting..');
             if(!$valid)
             {
@@ -70,8 +79,7 @@ if(count($localfiles)==0)
         $img = $dir.$filename.DS.$filename;
         if(!file_exists($img)) continue;
         $type = strtolower(pathinfo($img, PATHINFO_EXTENSION));
-        $type = $pm->isTypeAllowed($type);
-        if($type=='mp4')
+        if(in_array($type,$vc->getRegisteredExtensions()))
             $localfiles[] = $filename;
     }
 }
@@ -86,7 +94,7 @@ echo "[i] Checking hashes for wrongly encoded ones\n";
 foreach($localfiles as $akey => $hash)
 {
     $mp4 = $dir.$hash.DS.$hash;
-    if(checkFileForValidMP4($mp4))
+    if($vc->rightEncodedMP4($mp4))
     {
         echo " [i] Skipping $hash because it's already correctly encoded\n";
         unset($localfiles[$akey]);
@@ -103,29 +111,10 @@ foreach($localfiles as $hash)
     system($cmd);
     if(defined('ALT_FOLDER') && ALT_FOLDER && is_dir(ALT_FOLDER))
         copy($mp4,ALT_FOLDER.DS.$hash);
+
+    //file got a new hash so add that as well
+    addSha1($hash,sha1_file($mp4));
+    
     echo "\tdone\n";
 
-}
-
-function checkFileForValidMP4($file)
-{
-    $hash = md5($file);
-    $cmd = FFMPEG_BINARY." -i $file -hide_banner 2> ".ROOT.DS.'tmp'.DS.$hash.'.txt';
-    system($cmd);
-    $results = file(ROOT.DS.'tmp'.DS.$hash.'.txt');
-    foreach($results as $l)
-    {
-        $elements = explode(':',trim($l));
-        $key=trim(array_shift($elements));
-        $value = trim(implode(':',$elements));
-        if($key=='encoder')
-        {
-            if(startsWith(strtolower($value),'lav'))
-            {
-                return true;
-            } else return false;
-        }
-    }
-    unlink(ROOT.DS.'tmp'.DS.$hash.'.txt');
-    return false;
 }

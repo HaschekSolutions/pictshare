@@ -31,7 +31,7 @@ else $sim = false;
 //gather local data
 echo "[i] Looping through local files\n";
 
-$dir = ROOT.DS.'upload'.DS;
+$dir = ROOT.DS.'data'.DS;
 $dh  = opendir($dir);
 $localfiles = array();
 
