@@ -22,7 +22,7 @@ function architect($url)
 
     //if there is no info in the URL, don't even bother checking with the controllers
     //just show the site
-    if( (!defined('UPLOAD_FORM_LOCATION') && count($u)==0) || (defined('UPLOAD_FORM_LOCATION') && UPLOAD_FORM_LOCATION && '/'.implode('/',$u)==UPLOAD_FORM_LOCATION) )
+    if( ( (!defined('UPLOAD_FORM_LOCATION') || (defined('UPLOAD_FORM_LOCATION') && !UPLOAD_FORM_LOCATION)) && count($u)==0) || (defined('UPLOAD_FORM_LOCATION') && UPLOAD_FORM_LOCATION && '/'.implode('/',$u)==UPLOAD_FORM_LOCATION) )
     {
         renderTemplate('main');
         return;
