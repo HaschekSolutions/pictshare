@@ -54,7 +54,7 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
     }
 
     if(!$answer)
-        $answer = array('status'=>'err','reason'=>'Unsupported filetype');
+        $answer = array('status'=>'err','reason'=>'Unsupported filetype: '.$type,'filetype'=>$type);
 
     if($answer['hash'] && $answer['status']=='ok')
     {
