@@ -22,9 +22,9 @@ function architect($url)
 
     //if there is no info in the URL, don't even bother checking with the controllers
     //just show the site
-    if(count($u)==0)
+    if( (!defined('UPLOAD_FORM_LOCATION') && count($u)==0) || (defined('UPLOAD_FORM_LOCATION') && UPLOAD_FORM_LOCATION && '/'.implode('/',$u)==UPLOAD_FORM_LOCATION) )
     {
-        renderTemplate('main',false);
+        renderTemplate('main');
         return;
     }
 
@@ -55,11 +55,11 @@ function architect($url)
         } 
     }
 
-    //we didn't find a hash. Well let's just display the webpage instead
+    //we didn't find a hash. send error 404
     if($hash===false)
     {
-        //var_dump("main site");
-        renderTemplate('main',false);
+        http_response_code(404);
+        die("404");
     }
     else
     {
@@ -154,7 +154,8 @@ function autoload($className)
 
 function renderTemplate($template,$vars=false)
 {
-    extract($vars);
+    if(is_array($vars))
+        extract($vars);
     include_once(ROOT.DS.'templates'.DS.$template.'.html');
 }
 
