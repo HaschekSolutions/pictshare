@@ -1,4 +1,4 @@
-# PictShare version 2
+# PictShare v2
 ---
 [![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
 
@@ -11,23 +11,40 @@ Table of contents
 * [Docker](/rtfm/DOCKER.md)
 * [API](/rtfm/API.md)
 * [Addons/Integration](/rtfm/INTEGRATIONS.md)
+* [Development status](#development-status)
 
 ---
 
-## New Features in v2:
+## New Features in v2
 
 - Added text hosting (like pastebin)
 - Added URL shortening
 - Added WebP to images (and conversion from jpg,png to webp)
 - Massive code rework. Actually we designed it from the ground up to be more modular and easier to debug
 
-## Breaking changes
+## Breaking changes in v2
 
 - [New API system](/rtfm/API.md). Only single file uploads now via /api/upload.php (POST var name is "file"). [read more..](/rtfm/API.md)
 - Data directory renamed from ```upload``` to ```data```
 - Backblaze support dropped for now because we didn't need it anymore as ALT_FOLDER is more flexible. If soneone needs it, it can easily be implemented via adding a new storage controller. We're happy to accept pull requests
 
-## Status
+# Features
+
+- Selfhostable
+- [Simple upload API](/rtfm/API.md)
+- 100% file based - no database needed
+- GIF to MP4 conversion
+- MP4 resizing
+- PictShare removes all exif data so you can upload photos from your phone and all GPS tags and camera model info get wiped
+- Change and resize your uploads just by editing the URL
+- Duplicates don't take up space. If the exact same file is uploaded twice, the second upload will link to the first
+- Many [configuration options](/rtfm/CONFIG.md)
+- Full control over your data. Delete images with individual and global delete codes
+
+
+---
+
+## Development roadmap
 
 - [x] Duplicate detection
 - [x] Write permission detection
