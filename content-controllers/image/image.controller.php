@@ -11,7 +11,7 @@
 class ImageController implements ContentController
 {
     //returns all extensions registered by this type of content
-    public function getRegisteredExtensions(){return array('png','bmp','gif','jpg','jpeg','x-png','ico','webp');}
+    public function getRegisteredExtensions(){return array('png','bmp','gif','jpg','jpeg','x-png','webp');}
 
     public function handleUpload($tmpfile,$hash=false)
     {

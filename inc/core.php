@@ -405,6 +405,37 @@ function getStorageControllers()
     return $controllers;
 }
 
+function getAllContentControllers()
+{
+    $controllers = array();
+    if ($handle = opendir(ROOT.DS.'content-controllers')) {
+        while (false !== ($entry = readdir($handle))) {
+            if ($entry != "." && $entry != "..") {
+                if(is_dir(ROOT.DS.'content-controllers'.DS.$entry) && file_exists(ROOT.DS.'content-controllers'.DS.$entry.DS."$entry.controller.php"))
+                {
+                    $controllers[] = ucfirst($entry).'Controller';
+                    include_once(ROOT.DS.'content-controllers'.DS.$entry.DS."$entry.controller.php");
+                }
+            }
+        }
+        closedir($handle);
+    }
+
+    return $controllers;
+}
+
+function getAllContentFiletypes()
+{
+    $types = array();
+    $controllers = getAllContentControllers(true);
+    foreach($controllers as $c)
+    {
+        $types = array_merge($types,(new $c)->getRegisteredExtensions());
+    }
+
+    return $types;
+}
+
 function rrmdir($dir) { 
     if (is_dir($dir)) { 
       $objects = scandir($dir); 

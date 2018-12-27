@@ -38,7 +38,7 @@ Table of contents
 ### Config options
 
 - [x] ALT_FOLDER
-- [x] URL
+- [x] URL (instead of FORCE_DOMAIN but mandatory)
 - [x] LOG_UPLOADER
 - [x] FFMPEG_BINARY
 - [x] PNG_COMPRESSION
@@ -47,6 +47,12 @@ Table of contents
 - [x] MASTER_DELETE_CODE
 - [x] MASTER_DELETE_IP
 - [ ] UPLOAD_CODE
+- [ ] UPLOAD_FORM_LOCATION
+- [ ] LOW_PROFILE
+- [ ] IMAGE_CHANGE_CODE
+- [ ] MAX_RESIZED_IMAGES
+- [ ] ALLOW_BLOATING
+- [ ] BACKBLAZE
 
 ### Image hosting
 - [X] Resizing

@@ -3,7 +3,7 @@
 class VideoController implements ContentController
 {
     //returns all extensions registered by this type of content
-    public function getRegisteredExtensions(){return array('mp4','ogg','webm');}
+    public function getRegisteredExtensions(){return array('mp4');}
 
     public function handleHash($hash,$url)
     {
