@@ -24,6 +24,9 @@ cp -r temp/* pictshare/.
 rm -rf temp
 ```
 
+## Configuring PictShare
+[Documentation of config settings here](/rtfm/CONFIG.md)
+
 ## Nginx configuration
 This is a simple config file that should make PictShare work on nginx
 

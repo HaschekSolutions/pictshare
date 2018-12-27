@@ -25,6 +25,7 @@ Table of contents
 
 - New API system. Only single file uploads now via /api/upload.php (POST var name is "file"). [read more..](/rtfm/API.md)
 - Data directory changed from ```upload``` to ```data```
+- Backblaze support dropped for now because we didn't need it anymore as ALT_FOLDER is more flexible. If soneone needs it, it can easily be implemented via adding a new storage controller. We're happy to accept pull requests
 
 ## Status
 
@@ -36,6 +37,8 @@ Table of contents
 - [ ] Autodestruct for every uploaded file
 
 ### Config options
+
+Read [here](/rftm/CONFIG.md) what those options do
 
 - [x] ALT_FOLDER
 - [x] URL (instead of FORCE_DOMAIN but mandatory)
