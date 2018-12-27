@@ -1,9 +1,8 @@
-# PictShare v2
+# PictShare
 ---
 [![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
 
-# This is the development branch for Version 2 do not use in production
-Test site: https://dev.pictshare.net/ (only sometimes on)
+https://pictshare.net
 
 Table of contents
 =================
