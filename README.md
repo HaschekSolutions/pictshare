@@ -38,7 +38,7 @@ Table of contents
 
 ### Config options
 
-Read [here](/rftm/CONFIG.md) what those options do
+Read [here](/rtfm/CONFIG.md) what those options do
 
 - [x] ALT_FOLDER
 - [x] URL (instead of FORCE_DOMAIN but mandatory)
