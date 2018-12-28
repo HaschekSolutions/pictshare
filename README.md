@@ -33,7 +33,9 @@ Table of contents
 - Selfhostable
 - [Simple upload API](/rtfm/API.md)
 - 100% file based - no database needed
+- [Scalable](/rtfm/SCALING.md)
 - GIF to MP4 conversion
+- JPG, PNG to WEBP conversion
 - MP4 resizing
 - PictShare removes all exif data so you can upload photos from your phone and all GPS tags and camera model info get wiped
 - Change and resize your uploads just by editing the URL
