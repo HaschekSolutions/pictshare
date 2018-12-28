@@ -26,6 +26,7 @@ Table of contents
 - [New API system](/rtfm/API.md). Only single file uploads now via /api/upload.php (POST var name is "file"). [read more..](/rtfm/API.md)
 - Data directory renamed from ```upload``` to ```data```
 - Backblaze support dropped for now because we didn't need it anymore as ALT_FOLDER is more flexible. If soneone needs it, it can easily be implemented via adding a new storage controller. We're happy to accept pull requests
+- Dropped support for legacy URLs (/thumbs/1024x768_d8c01b45a6.png cant be used anymore, should be /1024x768/d8c01b45a6.png)
 
 # Features
 
