@@ -493,9 +493,9 @@ function deleteHash($hash)
     foreach($sc as $contr)
     {
         $c = new $contr();
-        if($c->isEnabled()===true && $c->hashExists($el)) 
+        if($c->isEnabled()===true && $c->hashExists($hash)) 
         {
-            $c->deleteFile($el);
+            $c->deleteFile($hash);
         }
     }
 }
