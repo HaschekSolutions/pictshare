@@ -1,3 +1,24 @@
+<p align="center">
+  <a href="" rel="noopener">
+ <img height=200px src="https://pictshare.net/asbbdo.png" alt="PictShare logo"></a>
+</p>
+
+<h1 align="center">PictShare</h1>
+
+<div align="center">
+
+![](https://img.shields.io/php-eye/symfony/symfony.svg)
+[![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
+[![HitCount](http://hits.dwyl.io/HaschekSolutions/pictshare.svg)](http://hits.dwyl.io/HaschekSolutions/pictshare)
+
+
+<h4>Get the ability to access <strong>Google Drive</strong> without leaving your terminal.</h4>
+
+</div>
+
+-----------------------------------------
+
+
 # PictShare
 ---
 [![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
