@@ -1,6 +1,8 @@
 # Filters for images
 
-If the value field is defined you can use it like this: filtername_value. Eg: https://pictshare.net/pixelate_10/oyo86f.jpg
+If the value field is defined you can use it like this: ```filtername_value```. eg: https://pictshare.net/pixelate_10/oyo86f.jpg
+
+Click on the images to see them in full size
 
 | Filter     | Value  | Example image                                                                                         |
 | ---        | ---    | ---                                                                                                   |
