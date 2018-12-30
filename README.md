@@ -12,7 +12,7 @@
 [![HitCount](http://hits.dwyl.io/HaschekSolutions/pictshare.svg)](http://hits.dwyl.io/HaschekSolutions/pictshare)
 
 
-<h4>Get the ability to access <strong>Google Drive</strong> without leaving your terminal.</h4>
+<h4Host your own `images` `gifs` `mp4s` `text bins` and stay in control</h4>
 
 </div>
 
