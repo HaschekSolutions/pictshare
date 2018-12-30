@@ -34,6 +34,7 @@ Table of contents
 - [Simple upload API](/rtfm/API.md)
 - 100% file based - no database needed
 - [Scalable](/rtfm/SCALING.md)
+- Many [Filters](/rtfm/IMAGEFILTERS.md) for images
 - GIF to MP4 conversion
 - JPG, PNG to WEBP conversion
 - MP4 resizing
