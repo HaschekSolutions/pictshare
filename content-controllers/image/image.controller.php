@@ -64,13 +64,30 @@ class ImageController implements ContentController
         //don't do this if it's a gif because PHP can't handle animated gifs
         if($type!='gif')
         {
+            $filters = getFilters();
             foreach($url as $u)
             {
                 if(isSize($u))
                     $modifiers['size'] = $u;
                 else if(isRotation($u))
                     $modifiers['rotation'] = $u;
+                else // check for filters
+                {
+                    foreach($filters as $filter)
+                    {
+                        if(startsWith($u,$filter) && ($u==$filter || startsWith($u,$filter.'_')))
+                        {
+                            $a = explode('_',$u);
+                            $value = $a[1];
+                            if(is_numeric($value))
+                                $modifiers['filters'][] = array('filter'=>$filter,'value'=>$value);
+                            else
+                                $modifiers['filters'][] = array('filter'=>$filter);
+                        }
+                    }
+                }
             }
+
             if(in_array('webp',$url) && $type!='webp')
                 $modifiers['webp'] = true;
             if(in_array('forcesize',$url) && $modifiers['size'])
@@ -91,6 +108,7 @@ class ImageController implements ContentController
             $modhash = md5(http_build_query($modifiers,'',','));
             $newpath = ROOT.DS.'data'.DS.$hash.DS.$modhash.'_'.$hash;
             $im = $this->getObjOfImage($path);
+            $f = new Filter();
 
             if(!file_exists($newpath))
             {
@@ -98,6 +116,15 @@ class ImageController implements ContentController
                 {
                     switch($mod)
                     {
+                        case 'filters':
+                            foreach($val as $fd)
+                            {
+                                $filter = $fd['filter'];
+                                $value = $fd['value'];
+                                $im = $f->$filter($im,$value);
+                            }
+                        break;
+
                         case 'size':
                             ($modifiers['forcesize']?forceResize($im,$val):resize($im,$val));
                         break;
