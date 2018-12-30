@@ -10,7 +10,7 @@
 ![](https://img.shields.io/php-eye/symfony/symfony.svg)
 [![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
 [![HitCount](http://hits.dwyl.io/HaschekSolutions/pictshare.svg)](http://hits.dwyl.io/HaschekSolutions/pictshare)
-
+[![](https://img.shields.io/github/stars/HaschekSolutions/pictshare.svg?label=Stars&style=social)](https://github.com/HaschekSolutions/pictshare)
 
 #### Host your own `images` `gifs` `mp4s` `text bins` and stay in control
 
