@@ -298,9 +298,11 @@ function getTypeOfFile($url)
 		$type = $a2[1];
     }
     
-    if($type=='octet-stream' && (new VideoController())->isProperMP4($url)) return 'mp4';
-	if($type=='mp4' && !(new VideoController())->isProperMP4($url))
-		return false;
+    if($type=='octet-stream')
+        if((new VideoController())->isProperMP4($url)) return 'mp4';
+    if($type=='mp4')
+        if(!(new VideoController())->isProperMP4($url))
+		    return false;
 	
 	return $type;
 }
