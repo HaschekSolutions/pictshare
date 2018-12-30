@@ -5,8 +5,11 @@
 
 <h1 align="center">PictShare</h1>
 
-<div align="center">
+<h4 align="center">https://pictshare.net</h4>
 
+<div align="center">
+ 
+  
 ![](https://img.shields.io/php-eye/symfony/symfony.svg)
 [![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
 [![HitCount](http://hits.dwyl.io/HaschekSolutions/pictshare.svg)](http://hits.dwyl.io/HaschekSolutions/pictshare)
@@ -18,13 +21,6 @@
 
 -----------------------------------------
 
-
-# PictShare
----
-[![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
-
-https://pictshare.net
-
 Table of contents
 =================
 * [Installation](/rtfm/INSTALL.md)
@@ -32,6 +28,7 @@ Table of contents
 * [API](/rtfm/API.md)
 * [Addons/Integration](/rtfm/INTEGRATIONS.md)
 * [Development status](#development-status)
+* [Features](#features)
 
 ---
 
