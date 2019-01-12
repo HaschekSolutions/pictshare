@@ -14,11 +14,10 @@ define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', dirname(__FILE__).DS.'..');
 include_once(ROOT.DS.'inc/config.inc.php');
 include_once(ROOT.DS.'inc/core.php');
+require_once(ROOT . DS . 'content-controllers' . DS. 'video'. DS . 'video.controller.php');
 
 if(!defined('ALT_FOLDER') || !ALT_FOLDER)
 die("[X] Error: You should define the ALT_FOLDER config in your inc/config.inc.php first");
-
-$pm = new PictshareModel();
 
 if(in_array('sim',$argv))
 {
@@ -46,7 +45,7 @@ while (false !== ($hash = readdir($dh))) {
     if(!file_exists($img)) continue;
     $info = strtolower(pathinfo($img, PATHINFO_EXTENSION));
     $thissize = filesize($img);
-    $type = $pm->isTypeAllowed($info);
+    $type = getTypeOfFile($img);
     ++$allhashes;
     $allsize+=$thissize;
     if($type)
