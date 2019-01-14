@@ -33,6 +33,7 @@ if($_REQUEST['base64'])
 
     base64ToFile($data, $tmpfile);
 
+    
     //get the file type
     $type = getTypeOfFile($tmpfile);
 

@@ -143,3 +143,26 @@ Answer from the server:
   "type_interpreted": "mp4"
 }
 ```
+
+# base64.php
+- URL https://pictshare.net/api/base64.php
+- Method: POST/GET
+- Query var name: base64
+- Answer: JSON
+
+## Example
+
+Upload local image "test.jpg" to pictshare 
+
+```(echo -n "base64="; echo -n "data:image/jpeg;base64,$(base64 -w 0 test.jpg)") | curl --data @- https://pictshare.net/api/base64.php```
+
+```json
+{
+  "status": "ok",
+  "hash": "lpl119.jpg",
+  "url": "https://dev.pictshare.net/lpl119.jpg",
+  "filetype": "jpeg",
+  "delete_code": "z0e1mdo8szxnauspxp2f080e4wd4ycf2",
+  "delete_url": "https://dev.pictshare.net/delete_z0e1mdo8szxnauspxp2f080e4wd4ycf2/lpl119.jpg"
+}
+```
