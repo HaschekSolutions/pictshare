@@ -37,6 +37,25 @@ Answer from the server:
 {"status":"ok","hash":"y1b6hr.jpg","url":"https://pictshare.net/y1b6hr.jpg"}
 ```
 
+2. Uploading from the commandline using alias, requires `jq` package for json response decoding
+
+Put this in your `.bashrc` or `.zshrc`:
+```
+pict () {
+    curl -s -F "file=@${1:--}" https://pictshare.net/api/upload.php | jq -r '.url';
+}
+```
+
+Usage:
+```
+$ cat path/to/image.jpg | pict
+```
+
+Repsonse:
+```
+https://pictshare.net/y1b6hr.jpg
+```
+
 # geturl.php
 
 - URL https://pictshare.net/api/geturl.php
@@ -98,6 +117,25 @@ Answer from the server:
   "delete_code": "aqxqlv3kqokxd15xpkqp8zjljpqerveu",
   "delete_url": "https://pictshare.net/delete_aqxqlv3kqokxd15xpkqp8zjljpqerveu/u0ni1m.mp4"
 }
+```
+
+3. Uploading from the commandline using alias, requires `jq` package for json response decoding
+
+Put this in your `.bashrc` or `.zshrc`:
+```
+pictget () {
+    curl -s "hhttps://pictshare.net/api/geturl.php?url=$1" | jq -r '.url';
+}
+```
+
+Usage:
+```
+$ pictget https://i.imgur.com/qQstLQt.mp4
+```
+
+Repsonse:
+```
+https://pictshare.net/u0ni1m.mp4
 ```
 
 ---

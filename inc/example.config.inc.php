@@ -12,3 +12,4 @@ define('URL','https://dev.pictshare.net/');
 //define('JPEG_COMPRESSION', 90);
 //define('FFMPEG_BINARY','');
 //define('ALT_FOLDER','/ftp/pictshare');
+//define('ALLOWED_SUBNET','192.168.0.0/24');

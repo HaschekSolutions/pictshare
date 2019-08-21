@@ -24,6 +24,12 @@ function architect($url)
     //just show the site
     if( ( (!defined('UPLOAD_FORM_LOCATION') || (defined('UPLOAD_FORM_LOCATION') && !UPLOAD_FORM_LOCATION)) && count($u)==0) || (defined('UPLOAD_FORM_LOCATION') && UPLOAD_FORM_LOCATION && '/'.implode('/',$u)==UPLOAD_FORM_LOCATION) )
     {
+        // check if client address is allowed
+        if(defined('ALLOWED_SUBNET') && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
+        {
+            header("HTTP/1.1 401 Unauthorized");
+            exit;
+        }
         renderTemplate('main');
         return;
     }
@@ -500,4 +506,25 @@ function deleteHash($hash)
             $c->deleteFile($hash);
         }
     }
+}
+
+/**
+ * Check if a given ip is in a network
+ * @param  string $ip    IP to check in IPV4 format eg. 127.0.0.1
+ * @param  string $range IP/CIDR netmask eg. 127.0.0.0/24, also 127.0.0.1 is accepted and /32 assumed
+ * @return boolean true if the ip is in this range / false if not.
+ * via https://gist.github.com/tott/7684443
+ */
+function isIPInRange( $ip, $range ) {
+    if ( strpos( $range, '/' ) == false )
+    {
+        $range .= '/32';
+    }
+    // $range is in IP/CIDR format eg 127.0.0.1/24
+    list( $range, $netmask ) = explode( '/', $range, 2 );
+    $range_decimal = ip2long( $range );
+    $ip_decimal = ip2long( $ip );
+    $wildcard_decimal = pow( 2, ( 32 - $netmask ) ) - 1;
+    $netmask_decimal = ~ $wildcard_decimal;
+    return ( ( $ip_decimal & $netmask_decimal ) == ( $range_decimal & $netmask_decimal ) );
 }
