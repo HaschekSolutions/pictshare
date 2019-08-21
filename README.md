@@ -11,7 +11,9 @@
  
   
 ![](https://img.shields.io/badge/php-7.1%2B-brightgreen.svg)
-[![Apache License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
+[![](https://img.shields.io/docker/pulls/hascheksolutions/pictshare?color=brightgreen)](https://hub.docker.com/r/hascheksolutions/pictshare)
+[![](https://img.shields.io/docker/cloud/build/hascheksolutions/pictshare?color=brightgreen)](https://hub.docker.com/r/hascheksolutions/pictshare/builds)
+[![Apache License](https://img.shields.io/badge/license-Apache-brightgreen.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
 [![HitCount](http://hits.dwyl.io/HaschekSolutions/pictshare.svg)](http://hits.dwyl.io/HaschekSolutions/pictshare)
 [![](https://img.shields.io/github/stars/HaschekSolutions/pictshare.svg?label=Stars&style=social)](https://github.com/HaschekSolutions/pictshare)
 
