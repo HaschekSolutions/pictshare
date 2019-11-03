@@ -37,20 +37,14 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
     $sha1 = sha1_file($_FILES['file']["tmp_name"]);
     $ehash = sha1Exists($sha1);
     if($ehash && file_exists(ROOT.DS.'data'.DS.$ehash.DS.$ehash)) {
-        $earray = array(
-			'status'=>'ok',
-	    	'hash'=>$ehash,
-			'filetype'=>$type,
-			'url'=>URL.$ehash
-		);
-		if(getDeleteCodeOfHash($ehash))
+        $earray = array('status'=>'ok','hash'=>$ehash,'filetype'=>$type,'url'=>URL.$ehash);
+	if(getDeleteCodeOfHash($ehash))
         {
             $earray['delete_code'] = getDeleteCodeOfHash($ehash);
             $earray['delete_url'] = URL.'delete_'.getDeleteCodeOfHash($ehash).'/'.$ehash;
         }
-		exit(json_encode($earray));
+	exit(json_encode($earray));
     }
-       
 
     //cross check filetype for controllers
     //
