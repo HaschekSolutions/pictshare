@@ -36,7 +36,23 @@ class S3Storage implements StorageController
 		if(!$this->s3)$this->connect();
 
 		return $this->s3->doesObjectExist(S3_BUCKET,$hash);
-    }
+	}
+	
+	function getItems()
+	{
+		if(!$this->s3)$this->connect();
+
+		$iterator = $this->s3->getIterator('ListObjects', [
+			'Bucket' => S3_BUCKET
+		]);
+
+		$items = array();
+		foreach ($iterator as $object) {
+			$items[] = $object['Key'];
+		}
+
+		return $items;
+	}
 
     function pullFile($hash,$location)
     {

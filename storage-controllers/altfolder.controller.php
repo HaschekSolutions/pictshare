@@ -13,6 +13,20 @@ class AltfolderStorage implements StorageController
 		return file_exists($altname);
     }
 
+    function getItems()
+    {
+        $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(ALT_FOLDER.DS));
+        $files = array(); 
+
+        foreach ($rii as $file) {
+            if ($file->isDir())
+                continue;
+            $files[] = $file->getPathname(); 
+        }
+
+        return $files;
+    }
+
     function pullFile($hash,$location)
     {
         $altname=ALT_FOLDER.DS.$hash;
@@ -25,8 +39,7 @@ class AltfolderStorage implements StorageController
     function pushFile($source,$hash)
     {
         $altname=ALT_FOLDER.DS.$hash;
-        $orig = ROOT.DS.'data'.DS.$hash.DS.$hash;
-		if(file_exists($orig) && !$this->hashExists($hash))
+		if(!$this->hashExists($hash))
 		{
             copy($source,$altname);
             return true;

@@ -26,6 +26,14 @@ interface StorageController
      */
     function hashExists($hash);
 
+
+    /**
+     * Returns an array of all items in this storage controller
+     * 
+     * @return array
+     */
+    function getItems();
+
     /**
      * If a file does exist in this storage system, then this method should
      * get the file and put it in the default data directory
