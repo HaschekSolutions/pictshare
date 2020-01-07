@@ -73,13 +73,7 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
         }
             
 
-        // Lets' check all storage controllers and tell them that a new file was uploaded
-        $sc = getStorageControllers();
-        foreach($sc as $contr)
-        {
-            if((new $contr())->isEnabled()===true)
-                (new $contr())->pushFile($answer['hash']);
-        }
+        storageControllerUpload($answer['hash']);
     }
 
     echo json_encode($answer);

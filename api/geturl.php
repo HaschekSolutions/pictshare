@@ -78,13 +78,7 @@ if($answer['hash'] && $answer['status']=='ok')
         }
             
 
-        // Lets' check all storage controllers and tell them that a new file was uploaded
-        $sc = getStorageControllers();
-        foreach($sc as $contr)
-        {
-            if((new $contr())->isEnabled()===true)
-                (new $contr())->pushFile($answer['hash']);
-        }
+        storageControllerUpload($answer['hash']);
     }
 
     if($answer['hash'] && $answer['status']=='ok')
@@ -98,13 +92,7 @@ if($answer['hash'] && $answer['status']=='ok')
             $answer['delete_url'] = URL.'delete_'.getDeleteCodeOfHash($answer['hash']).'/'.$answer['hash'];
         }
 
-        // Lets' check all storage controllers and tell them that a new file was uploaded
-        $sc = getStorageControllers();
-        foreach($sc as $contr)
-        {
-            if((new $contr())->isEnabled()===true)
-                (new $contr())->pushFile($answer['hash']);
-        }
+        storageControllerUpload($answer['hash']);
     }
 
     echo json_encode($answer);  

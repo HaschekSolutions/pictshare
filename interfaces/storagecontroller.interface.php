@@ -34,10 +34,11 @@ interface StorageController
      * a folder that you might have to create first before putting the file in
      * 
      * @param string $hash is the hash of the file that should be pulled from this storage system
+     * @param string $location is the location where the downloaded file should be placed
      * 
      * @return bool true if successful
      */
-    function pullFile($hash);
+    function pullFile($hash,$location);
 
     /**
      * Whenever a new file is uploaded this method will be called
@@ -47,7 +48,7 @@ interface StorageController
      * 
      * @return bool true if successful
      */
-    function pushFile($hash);
+    function pushFile($source,$hash);
 
     /**
      * If deletion of a file is requested, this method is called

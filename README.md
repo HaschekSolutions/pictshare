@@ -36,6 +36,8 @@ Table of contents
 
 ## New Features in v2
 
+- Added support for external storage
+- [Encryption of files in external storage](/rtfm/ENCRYPTION.md)
 - Added text hosting (like pastebin)
 - Added URL shortening
 - Added WebP to images (and conversion from jpg,png to webp)

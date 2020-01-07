@@ -51,11 +51,27 @@ function architect($url)
             foreach($sc as $contr)
             {
                 $c = new $contr();
-                if($c->isEnabled()===true && $c->hashExists($el)) 
+                if($c->isEnabled()===true && $c->hashExists($el))
                 {
-                    $c->pullFile($el);
                     $hash = $el;
-                    break; // we brake here because we already have the file. no need to check other storage controllers
+                    $c->pullFile($hash,ROOT.DS.'tmp'.DS.$hash);
+                    storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
+                    
+                    break; // we break here because we already have the file. no need to check other storage controllers
+                }
+                else if($c->isEnabled()===true && defined('ENCRYPTION_KEY') && ENCRYPTION_KEY !='' && $c->hashExists($el.'.enc')) //this is an encrypted file. Let's decrypt it
+                {
+                    $hash = $el.'.enc';
+                    $c->pullFile($hash,ROOT.DS.'tmp'.DS.$hash);
+
+                    $enc = new Encryption;
+                    $hash = substr($hash,0,-4);
+                    $enc->decryptFile(ROOT.DS.'tmp'.DS.$el.'.enc', ROOT.DS.'tmp'.DS.$hash,base64_decode(ENCRYPTION_KEY));
+
+                    storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
+                    unlink(ROOT.DS.'tmp'.DS.$el.'.enc');
+
+                    break; // we break here because we already have the file. no need to check other storage controllers
                 }
             }
         } 
@@ -123,6 +139,30 @@ function architect($url)
     //var_dump($u);
 }
 
+function storageControllerUpload($hash)
+{
+    // Lets' check all storage controllers and tell them that a new file was uploaded
+    $sc = getStorageControllers();
+    foreach($sc as $contr)
+    {
+        if((new $contr())->isEnabled()===true)
+        {
+            $source = ROOT.DS.'data'.DS.$hash.DS.$hash;
+            if(defined('ENCRYPTION_KEY') && ENCRYPTION_KEY) //ok so we got an encryption key which means we'll store only  the encrypted file
+            {
+                $enc = new Encryption;
+                $encoded_file = ROOT.DS.'tmp'.DS.$hash.'.enc';
+                $enc->encryptFile($source,$encoded_file,base64_decode(ENCRYPTION_KEY));
+                (new $contr())->pushFile($encoded_file,$hash.'.enc');
+            }
+            else // not encrypted
+                (new $contr())->pushFile($source,$hash);
+            
+        }
+            
+    }
+}
+
 function getNewHash($type,$length=10)
 {
 	while(1)
@@ -155,7 +195,9 @@ function autoload($className)
 	if (file_exists(ROOT . DS . 'content-controllers' . DS . strtolower($className) . '.php'))
         require_once(ROOT . DS . 'content-controllers' . DS . strtolower($className) . '.php');
     if (file_exists(ROOT . DS . 'interfaces' . DS . strtolower($className) . '.interface.php'))
-		require_once(ROOT . DS . 'interfaces' . DS . strtolower($className) . '.interface.php');
+        require_once(ROOT . DS . 'interfaces' . DS . strtolower($className) . '.interface.php');
+    if ($className=='Encryption')
+        require_once(ROOT . DS . 'inc' . DS . 'encryption.php');
 }
 
 function renderTemplate($template,$vars=false)

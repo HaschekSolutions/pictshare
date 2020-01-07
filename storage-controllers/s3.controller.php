@@ -9,7 +9,7 @@
  * (optional) S3_ENDPOINT
  */
 
-class S3Storage //implements StorageController
+class S3Storage implements StorageController
 {
 	private $s3;
 	function connect(){
@@ -38,27 +38,28 @@ class S3Storage //implements StorageController
 		return $this->s3->doesObjectExist(S3_BUCKET,$hash);
     }
 
-    function pullFile($hash)
+    function pullFile($hash,$location)
     {
 		if(!$this->s3)$this->connect();
 
 		if(!$this->hashExists($hash)) return false;
+
 		$this->s3->getObject([
 			'Bucket' => S3_BUCKET,
 			'Key'    => $hash,
-			'SaveAs' => ROOT.DS.'data'.DS.$hash.DS.$hash
+			'SaveAs' => $location
 	   ]);
 	   return true;
     }
 
-    function pushFile($hash)
+    function pushFile($source,$hash)
     {
 		if(!$this->s3)$this->connect();
 		
 		$this->s3->putObject([
 			'Bucket' => S3_BUCKET,
 			'Key'    => $hash,
-			'SourceFile' => ROOT.DS.'data'.DS.$hash.DS.$hash
+			'SourceFile' => $source
 		]);
 
 		return true;

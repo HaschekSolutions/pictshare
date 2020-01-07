@@ -13,23 +13,26 @@ class AltfolderStorage implements StorageController
 		return file_exists($altname);
     }
 
-    function pullFile($hash)
+    function pullFile($hash,$location)
     {
         $altname=ALT_FOLDER.DS.$hash;
 		if(file_exists($altname))
 		{
-            storeFile($altname,$hash,false);
+            copy($altname,$location);
 		}
     }
 
-    function pushFile($hash)
+    function pushFile($source,$hash)
     {
         $altname=ALT_FOLDER.DS.$hash;
         $orig = ROOT.DS.'data'.DS.$hash.DS.$hash;
 		if(file_exists($orig) && !$this->hashExists($hash))
 		{
-            copy($orig,$altname);
-		}
+            copy($source,$altname);
+            return true;
+        }
+        
+        return false;
     }
 
     function deleteFile($hash)
