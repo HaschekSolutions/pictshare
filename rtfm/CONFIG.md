@@ -22,7 +22,7 @@ PictShare has an extention system that allows handling of multiple storage solut
 
 |Option | value type | What it does|
 |---                      | ---     | ---|
-|ENCRYPTION_KEY                      | base64 string     | The key used to encrypt/decrypt files stored in storage controllers. See [/rtfm/ENCRYPTION.md] for setup guide |
+|ENCRYPTION_KEY                      | base64 string     | The key used to encrypt/decrypt files stored in storage controllers. See (/rtfm/ENCRYPTION.md)[/rtfm/ENCRYPTION.md] for setup guide |
 | ALT_FOLDER              | string  | All uploaded files will be copied to this location. This location can be a mounted network share (eg NFS or FTP, etc). If a file is not found in the normal upload direcotry, ALT_FOLDER will be checked. [more info about scaling PictShare](/rtfm/SCALING.md) |
 |S3_BUCKET                      | string     | Name of your [S3 bucket](https://aws.amazon.com/s3/) |
 |S3_ACCESS_KEY                      | string     | Access key for your bucket|
