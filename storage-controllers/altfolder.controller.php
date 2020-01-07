@@ -21,7 +21,7 @@ class AltfolderStorage implements StorageController
         foreach ($rii as $file) {
             if ($file->isDir())
                 continue;
-            $files[] = $file->getPathname(); 
+            $files[] = $file->getFilename(); 
         }
 
         return $files;
