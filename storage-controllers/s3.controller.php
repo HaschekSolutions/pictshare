@@ -43,7 +43,7 @@ class S3Storage implements StorageController
 		if(!$this->s3)$this->connect();
 
 		$KeyCount = 9999;
-		$keys = 10;
+		$keys = 100;	//the amount of keys we'll receive per request. 1000 max but that times out sometimes
 		$lastkey = false;
 		$count = 0;
 		$items = array();
