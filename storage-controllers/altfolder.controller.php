@@ -13,7 +13,7 @@ class AltfolderStorage implements StorageController
 		return file_exists($altname);
     }
 
-    function getItems()
+    function getItems($dev=false)
     {
         $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(ALT_FOLDER.DS));
         $files = array(); 

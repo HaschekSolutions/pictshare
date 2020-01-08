@@ -51,7 +51,7 @@ sleep(2);
 foreach($controllers as $contr)
 {
     echo "  [P1] Collecting list of items from ".get_class($contr)."..";
-    $controllerfiles = $contr->getItems();
+    $controllerfiles = $contr->getItems(true);
     echo " done. Got ".count($controllerfiles)." files\n";
     if($controllerfiles)
         foreach($controllerfiles as $cfile)
