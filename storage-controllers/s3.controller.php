@@ -38,7 +38,7 @@ class S3Storage implements StorageController
 		return $this->s3->doesObjectExist(S3_BUCKET,$hash);
 	}
 	
-	function getItems()
+	function getItems($dev=false)
 	{
 		if(!$this->s3)$this->connect();
 
