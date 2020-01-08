@@ -42,13 +42,30 @@ class S3Storage implements StorageController
 	{
 		if(!$this->s3)$this->connect();
 
-		$iterator = $this->s3->getIterator('ListObjects', [
-			'Bucket' => S3_BUCKET
-		]);
-
+		$KeyCount = 9999;
+		$keys = 10;
+		$lastkey = false;
+		$count = 0;
 		$items = array();
-		foreach ($iterator as $object) {
-			$items[] = $object['Key'];
+		while($KeyCount>=$keys)
+		{
+			$objects = $this->s3->listObjectsV2([
+				'Bucket' => S3_BUCKET,
+				'MaxKeys'=> $keys,
+				'StartAfter'=>($lastkey?$lastkey:'')
+			]);
+
+			++$count;
+			foreach ($objects['Contents'] as $object){
+				//echo $count." {$object['Key']}\n";
+				$lastkey = $object['Key'];
+				$items[] = $lastkey;
+			}
+
+			if($dev===true)
+				echo "Got ".($count*$keys)." files                  \r";
+
+			$KeyCount = $objects['KeyCount'];
 		}
 
 		return $items;
