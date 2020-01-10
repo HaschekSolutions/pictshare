@@ -35,7 +35,7 @@ If you want data on your external storage to be **encrypted**, you can set the f
 
 ### Alternative Folder
 
-The ALT_FOLDER option will copy every uploaded file from PictShare to a local path of your choice. This can be used to keep two allow two instances of PictShare to serve the same data. Eg. you can mount a NFS on your server and configure the ALT_FOLDER variable to point to that folder. All images are then stored on the NFS as well as your PictShare server.
+The ALT_FOLDER option will copy every uploaded file from PictShare to a local path of your choice. This can be used to allow two instances of PictShare to serve the same data. Eg. you can mount a NFS share on your server and configure the ALT_FOLDER variable to point to that folder. All images are then stored on the NFS as well as your PictShare server.
 
 |Option | value type | What it does|
 |---                      | ---     | ---|
@@ -44,7 +44,7 @@ The ALT_FOLDER option will copy every uploaded file from PictShare to a local pa
 
 ### S3 (compatible) storage
 
-You can also store all uploaded files on S3 or S3 compatible storage like [Minio](https://min.io/). This can also be used to scale your PictShare instance and have multiple distributed servers server the same files.
+You can also store all uploaded files on S3 or S3 compatible storage like [Minio](https://min.io/). This can also be used to scale your PictShare instance and have multiple distributed servers to serve the same files.
 
 |Option | value type | What it does|
 |---                                | ---           | ---|
@@ -55,7 +55,7 @@ You can also store all uploaded files on S3 or S3 compatible storage like [Minio
 
 ### FTP
 
-Oldschool, insecure and not that fast. But if you use it in combination with [/rtfm/ENCRYPTION.md](Encryption) this could be OK I guess. I don't judge.
+Oldschool, insecure and not that fast. But if you use it in combination with [Encryption](/rtfm/ENCRYPTION.md) this could be OK I guess. I don't judge.
 This probably requires the php-ftp package but on some platforms it's included in the php-common package.
 
 |Option | value type | What it does|
