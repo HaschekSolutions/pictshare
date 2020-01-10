@@ -26,6 +26,7 @@
 Table of contents
 =================
 * [Installation](/rtfm/INSTALL.md)
+* [Configuration](/rtfm/CONFIG.md)
 * [Docker](/rtfm/DOCKER.md)
 * [API](/rtfm/API.md)
 * [Addons/Integration](/rtfm/INTEGRATIONS.md)

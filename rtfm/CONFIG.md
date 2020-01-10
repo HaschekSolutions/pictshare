@@ -1,3 +1,9 @@
+# Configuration
+
+PictShare can be configured using a single file: `inc/config.inc.php`
+
+In this file you can set the following options. For a simple working example config file check out [/inc/example.config.inc.php](/inc/example.config.inc.php)
+
 # Config options
 
 |Option | value type | What it does|
