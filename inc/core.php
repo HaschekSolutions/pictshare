@@ -49,12 +49,14 @@ function architect($url)
             if(!$sc)
                 $sc = getStorageControllers();
             foreach($sc as $contr)
-            {
+            {                    
                 $c = new $contr();
+
                 if($c->isEnabled()===true && $c->hashExists($el))
                 {
                     $hash = $el;
                     $c->pullFile($hash,ROOT.DS.'tmp'.DS.$hash);
+                    if(!file_exists(ROOT.DS.'tmp'.DS.$hash)) continue;
                     storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
                     
                     break; // we break here because we already have the file. no need to check other storage controllers
@@ -63,7 +65,7 @@ function architect($url)
                 {
                     $hash = $el.'.enc';
                     $c->pullFile($hash,ROOT.DS.'tmp'.DS.$hash);
-
+                    if(!file_exists(ROOT.DS.'tmp'.DS.$hash)) continue;
                     $enc = new Encryption;
                     $hash = substr($hash,0,-4);
                     $enc->decryptFile(ROOT.DS.'tmp'.DS.$el.'.enc', ROOT.DS.'tmp'.DS.$hash,base64_decode(ENCRYPTION_KEY));
@@ -488,6 +490,7 @@ function getAllContentFiletypes()
 }
 
 function rrmdir($dir) { 
+    chmod($dir, 0777);
     if (is_dir($dir)) { 
       $objects = scandir($dir); 
       foreach ($objects as $object) { 
@@ -495,7 +498,9 @@ function rrmdir($dir) {
           if (is_dir($dir."/".$object))
             rrmdir($dir."/".$object);
           else
+          {
             unlink($dir."/".$object); 
+          }
         } 
       }
       rmdir($dir); 
@@ -530,12 +535,16 @@ function storeFile($srcfile,$hash,$deleteoriginal=false)
 
 function getDeleteCodeOfHash($hash)
 {
-    return file_get_contents(ROOT.DS.'data'.DS.$hash.DS.'deletecode');
+    if(file_exists(ROOT.DS.'data'.DS.$hash.DS.'deletecode'))
+        return file_get_contents(ROOT.DS.'data'.DS.$hash.DS.'deletecode');
+    return false;
 }
 
 function deleteHash($hash)
 {
-    //delete all local images
+    //@todo: add hash to deleted list. also on all controllers
+
+    //delete all files in directory
     rrmdir(ROOT.DS.'data'.DS.$hash);
 
     //tell every storage controller to delete theirs as well
@@ -546,6 +555,11 @@ function deleteHash($hash)
         if($c->isEnabled()===true && $c->hashExists($hash)) 
         {
             $c->deleteFile($hash);
+        }
+        //delete encrypted file if it exists
+        if($c->isEnabled()===true && defined('ENCRYPTION_KEY') && ENCRYPTION_KEY !='' && $c->hashExists($hash.'.enc'))
+        {
+            $c->deleteFile($hash.'.enc');
         }
     }
 }

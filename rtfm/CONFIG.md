@@ -24,13 +24,43 @@ In this file you can set the following options. For a simple working example con
 
 # Storage controllers
 
-PictShare has an extention system that allows handling of multiple storage solutions or backends. You can configure them with the following settings
+PictShare has an extention system that allows handling of multiple storage solutions or backends. If a requested file is not found locally, PictShare will ask all configured storage controllers if they have it, then download and serve it to the user. 
+
+If you want data on your external storage to be **encrypted**, you can set the following config setting. En/decryption is done automatically on up/download.
 
 |Option | value type | What it does|
 |---                      | ---     | ---|
 |ENCRYPTION_KEY                      | base64 string     | The key used to encrypt/decrypt files stored in storage controllers. See [/rtfm/ENCRYPTION.md](/rtfm/ENCRYPTION.md) for setup guide |
+
+
+## Alternative Folder
+
+The ALT_FOLDER option will copy every uploaded file from PictShare to a local path of your choice. This can be used to keep two allow two instances of PictShare to serve the same data. Eg. you can mount a NFS on your server and configure the ALT_FOLDER variable to point to that folder. All images are then stored on the NFS as well as your PictShare server.
+
+|Option | value type | What it does|
+|---                      | ---     | ---|
 | ALT_FOLDER              | string  | All uploaded files will be copied to this location. This location can be a mounted network share (eg NFS or FTP, etc). If a file is not found in the normal upload direcotry, ALT_FOLDER will be checked. [more info about scaling PictShare](/rtfm/SCALING.md) |
-|S3_BUCKET                      | string     | Name of your [S3 bucket](https://aws.amazon.com/s3/) |
-|S3_ACCESS_KEY                      | string     | Access key for your bucket|
-|S3_SECRET_KEY                      | string     | Secret key for your bucket
-|S3_ENDPOINT                      | URL     | Server URL. If you're using S3 compatible software like [Minio](https://min.io/) you can enter the URL here |
+
+
+## S3 (compatible) storage
+
+You can also store all uploaded files on S3 or S3 compatible storage like [Minio](https://min.io/). This can also be used to scale your PictShare instance and have multiple distributed servers server the same files.
+
+|Option | value type | What it does|
+|---                                | ---           | ---|
+|S3_BUCKET                          | string        | Name of your [S3 bucket](https://aws.amazon.com/s3/) |
+|S3_ACCESS_KEY                      | string        | Access key for your bucket|
+|S3_SECRET_KEY                      | string        | Secret key for your bucket |
+|S3_ENDPOINT                        | URL           | Server URL. If you're using S3 compatible software like [Minio](https://min.io/) you can enter the URL here |
+
+## FTP
+
+Oldschool, insecure and not that fast. But if you use it in combination with [/rtfm/ENCRYPTION.md](Encryption) this could be OK I guess. I don't judge.
+This probably requires the php-ftp package but on some platforms it's included in the php-common package.
+
+|Option | value type | What it does|
+|---                      | ---         | ---|
+|FTP_SERVER               | string      | IP or hostname of your FTP Server |
+|FTP_USER                 | string      | FTP Username |
+|FTP_PASS                 | string      | FTP Password |
+|FTP_BASEDIR              | string      | Base path where files will be stored. Must end with / eg `/web/pictshare/` |
