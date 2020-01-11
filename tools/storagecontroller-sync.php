@@ -43,49 +43,51 @@ if(defined('ENCRYPTION_KEY') && ENCRYPTION_KEY)
     echo "[i] Encryption key found. Will encrypt on Storage controllers\n";
 }
 
-
-echo "[i] PHASE 1\n";
-echo "  [P1] Files from Storage controllers will be downloaded if they don't exist localy\n";
-sleep(1);
-
-foreach($controllers as $contr)
+if(!in_array('p2',$argv))
 {
-    echo "  [P1] Collecting list of items from ".get_class($contr)."..";
-    $controllerfiles = $contr->getItems(true);
-    echo " done. Got ".count($controllerfiles)." files\n";
-    if($controllerfiles)
-        foreach($controllerfiles as $cfile)
-        {
-            if(endswith($cfile,'.enc'))
-                $hash = substr($cfile,0,-4);
-            else $hash = $cfile;
-            if(!is_dir($dir.$hash) || !file_exists($dir.$hash.DS.$hash)) //file only on storage controller. Will download
+    echo "[i] PHASE 1\n";
+    echo "  [P1] Files from Storage controllers will be downloaded if they don't exist localy\n";
+    sleep(1);
+
+    foreach($controllers as $contr)
+    {
+        echo "  [P1] Collecting list of items from ".get_class($contr)."..";
+        $controllerfiles = $contr->getItems(true);
+        echo " done. Got ".count($controllerfiles)." files\n";
+        if($controllerfiles)
+            foreach($controllerfiles as $cfile)
             {
-                echo "    [P1] $hash is not on the Server but on ".get_class($contr)."\n";
-                if($enc && endswith($cfile,'.enc')) // if its encrypted and we can decrypt, then do it
+                if(endswith($cfile,'.enc'))
+                    $hash = substr($cfile,0,-4);
+                else $hash = $cfile;
+                if(!is_dir($dir.$hash) || !file_exists($dir.$hash.DS.$hash)) //file only on storage controller. Will download
                 {
-                    if($sim!==true)
+                    echo "    [P1] $hash is not on the Server but on ".get_class($contr)."\n";
+                    if($enc && endswith($cfile,'.enc')) // if its encrypted and we can decrypt, then do it
                     {
-                        $contr->pullFile($cfile,ROOT.DS.'tmp'.DS.$cfile);
-                        $enc->decryptFile(ROOT.DS.'tmp'.DS.$cfile, ROOT.DS.'tmp'.DS.$hash,base64_decode(ENCRYPTION_KEY));
-                        storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
-                        unlink(ROOT.DS.'tmp'.DS.$cfile);
+                        if($sim!==true)
+                        {
+                            $contr->pullFile($cfile,ROOT.DS.'tmp'.DS.$cfile);
+                            $enc->decryptFile(ROOT.DS.'tmp'.DS.$cfile, ROOT.DS.'tmp'.DS.$hash,base64_decode(ENCRYPTION_KEY));
+                            storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
+                            unlink(ROOT.DS.'tmp'.DS.$cfile);
+                        }
                     }
-                }
-                else{ //otherwise just get the file
-                    if($sim!==true){
-                        $contr->pullFile($hash,ROOT.DS.'tmp'.DS.$hash);
-                        storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
+                    else{ //otherwise just get the file
+                        if($sim!==true){
+                            $contr->pullFile($hash,ROOT.DS.'tmp'.DS.$hash);
+                            storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
+                        }
                     }
+                    
                 }
-                
             }
-        }
+    }
+
+
+    echo "\n ----------- END OF PHASE 1 -----------\n\n";
 }
-
-
-echo "\n ----------- END OF PHASE 1 -----------\n\n";
-
+else echo "[i] Skipping Phase 1\n";
 
 echo "[i] PHASE 2\n";
 echo "  [P2] Local files are synced to all storage controllers\n";
