@@ -87,12 +87,15 @@ class FTPStorage implements StorageController
     {
         if(!$this->connect()) return false;
         @ftp_chdir($this->connection, FTP_BASEDIR); 
-        $parts = array_filter(explode('/',$ftpath));
+        $parts = array_filter(explode('/',$ftpath), function($value) {
+            return ($value !== null && $value !== false && $value !== ''); 
+        });
         foreach($parts as $part){
-           if(!@ftp_chdir($this->connection, $part)){
-              ftp_mkdir($this->connection, $part);
-              ftp_chdir($this->connection, $part);
-           }
+            $part = strval($part);
+        if(!@ftp_chdir($this->connection, $part)){
+            ftp_mkdir($this->connection, $part);
+            ftp_chdir($this->connection, $part);
+        }
         }
     }
 
