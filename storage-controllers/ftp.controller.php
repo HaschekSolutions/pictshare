@@ -36,43 +36,89 @@ class FTPStorage implements StorageController
     function hashExists($hash)
     {
         if(!$this->connect()) return null;
-        $ftpfilepath = FTP_BASEDIR.$hash;
-        return (ftp_size($this->connection,$ftpfilepath)>0?true:false);
+        $subdir = $this->hashToDir($hash);
+        $ftpfilepath = FTP_BASEDIR.$subdir.'/'.$hash;
+        if(@ftp_chdir($this->connection, FTP_BASEDIR.$subdir))
+            return (ftp_size($this->connection,$ftpfilepath)>0?true:false);
+        return false;
     }
 
     function getItems($dev=false)
     {
         if(!$this->connect()) return false;
-        $list = array();
-        $files = ftp_mlsd($this->connection,FTP_BASEDIR);
-        foreach ($files as $filearray)
-        {
-            $filename = $filearray['name'];
-            if($filearray['type']=='dir' || startsWith($filename,'.') || !mightBeAHash($filename)) continue;
-            $list[] = $filename;
-        }
-
-        return $list;
+        ftp_pasv($this->connection, TRUE);
+        return $this->ftp_list_files_recursive(FTP_BASEDIR);
     }
 
     function pullFile($hash,$location)
     {
         if(!$this->connect()) return false;
-        $ftpfilepath = FTP_BASEDIR.$hash;
+        $subdir = $this->hashToDir($hash);
+        $ftpfilepath = FTP_BASEDIR.$subdir.'/'.$hash;
         return ftp_get($this->connection, $location, $ftpfilepath, FTP_BINARY);
     }
 
     function pushFile($source,$hash)
     {
         if(!$this->connect()) return false;
-        $ftpfilepath = FTP_BASEDIR.$hash;
+        $subdir = $this->hashToDir($hash);
+        $ftpfilepath = FTP_BASEDIR.$subdir.'/'.$hash;
+        $this->ftp_mksubdirs($subdir);
+
         return ftp_put($this->connection, $ftpfilepath, $source, FTP_BINARY);
     }
 
-    function deleteFile($hash)
+    function deleteFile($hash) 
     {
         if(!$this->connect()) return false;
         $ftpfilepath = FTP_BASEDIR.$hash;
         return (ftp_delete($this->connection,$ftpfilepath)?true:false);
+    }
+
+    function hashToDir($hash)
+    {
+        $md5 = md5($hash);
+        $dir = $md5[0].'/'.$md5[1].'/'.$md5[2];
+
+        return $dir;
+    }
+
+    function ftp_mksubdirs($ftpath)
+    {
+        if(!$this->connect()) return false;
+        @ftp_chdir($this->connection, FTP_BASEDIR); 
+        $parts = array_filter(explode('/',$ftpath));
+        foreach($parts as $part){
+           if(!@ftp_chdir($this->connection, $part)){
+              ftp_mkdir($this->connection, $part);
+              ftp_chdir($this->connection, $part);
+           }
+        }
+    }
+
+    function ftp_list_files_recursive($path)
+    {
+        if(!$this->connect()) return false;
+        $items = ftp_mlsd($this->connection, $path);
+        $result = array();
+
+        if(is_array($items))
+        foreach ($items as $item)
+        {
+            $name = $item['name'];
+            $type = $item['type'];
+            $filepath = $path.'/'. $name;
+
+            if ($type == 'dir')
+            {
+                $result =
+                    array_merge($result, $this->ftp_list_files_recursive($filepath));
+            }
+            else if(mightBeAHash($name) || endswith($name,'.enc'))
+            {
+                $result[] = $name;
+            }
+        }
+        return $result;
     }
 }

@@ -46,7 +46,7 @@ if(defined('ENCRYPTION_KEY') && ENCRYPTION_KEY)
 
 echo "[i] PHASE 1\n";
 echo "  [P1] Files from Storage controllers will be downloaded if they don't exist localy\n";
-sleep(2);
+sleep(1);
 
 foreach($controllers as $contr)
 {
