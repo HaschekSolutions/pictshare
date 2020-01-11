@@ -16,7 +16,10 @@ class FTPStorage implements StorageController
         if(!$this->connection)
             $this->connection = ftp_connect(FTP_SERVER);
         if(!$this->login)
+        {
             $this->login = ftp_login($this->connection, FTP_USER, FTP_PASS);
+            ftp_pasv($this->connection, TRUE);
+        }
 
         // Was the connection successful?
         if ((!$this->connection) || (!$this->login)) {
@@ -46,7 +49,6 @@ class FTPStorage implements StorageController
     function getItems($dev=false)
     {
         if(!$this->connect()) return false;
-        ftp_pasv($this->connection, TRUE);
         return $this->ftp_list_files_recursive(FTP_BASEDIR);
     }
 
