@@ -23,6 +23,7 @@ foreach($sc as $contr)
     if((new $contr())->isEnabled()===true)
     {
         $controllers[] = new $contr();
+        echo "[i] Found storage controller ".get_class($controllers[(count($controllers)-1)])."\n";
     }
 }
 

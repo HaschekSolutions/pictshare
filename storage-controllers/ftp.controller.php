@@ -14,8 +14,13 @@ class FTPStorage implements StorageController
     function connect()
     {
         if(!$this->connection)
-            $this->connection = ftp_connect(FTP_SERVER);
-        if(!$this->login)
+        {
+            if(defined('FTP_SSL') && FTP_SSL === true)
+                $this->connection = ftp_ssl_connect(FTP_SERVER, ((defined('FTP_SSL') && is_numeric(FTP_PORT))?FTP_PORT:21) );
+            else
+                $this->connection = ftp_connect(FTP_SERVER, ((defined('FTP_SSL') && is_numeric(FTP_PORT))?FTP_PORT:21) );
+        }
+        if($this->connection && !$this->login)
         {
             $this->login = ftp_login($this->connection, FTP_USER, FTP_PASS);
             ftp_pasv($this->connection, TRUE);

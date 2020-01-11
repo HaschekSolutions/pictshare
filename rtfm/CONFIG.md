@@ -61,6 +61,8 @@ This probably requires the php-ftp package but on some platforms it's included i
 |Option | value type | What it does|
 |---                      | ---         | ---|
 |FTP_SERVER               | string      | IP or hostname of your FTP Server |
+|FTP_PORT                 | int         | Port number of your FTP Server. Defaults to 21 |
+|FTP_SSL                  | bool        | If your FTP server supports SSL-FTP (note: not sFTP! not the same), set it to true |
 |FTP_USER                 | string      | FTP Username |
 |FTP_PASS                 | string      | FTP Password |
 |FTP_BASEDIR              | string      | Base path where files will be stored. Must end with / eg `/web/pictshare/` |
