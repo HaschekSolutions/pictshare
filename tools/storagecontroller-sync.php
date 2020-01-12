@@ -52,9 +52,9 @@ if(!in_array('p2',$argv))
 
     foreach($controllers as $contr)
     {
-        echo "  [P1] Collecting list of items from ".get_class($contr)."..";
+        echo "  [P1] Collecting list of items from ".get_class($contr)."..\n";
         $controllerfiles = $contr->getItems(true);
-        echo " done. Got ".count($controllerfiles)." files\n";
+        echo "\n  done. Got ".count($controllerfiles)." files\n";
         if($controllerfiles)
             foreach($controllerfiles as $cfile)
             {

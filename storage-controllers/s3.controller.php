@@ -57,13 +57,11 @@ class S3Storage implements StorageController
 
 			++$count;
 			foreach ($objects['Contents'] as $object){
-				//echo $count." {$object['Key']}\n";
 				$lastkey = $object['Key'];
 				$items[] = $lastkey;
 			}
 
-			if($dev===true)
-				echo "Got ".($count*$keys)." files                  \r";
+			if($dev===true) echo "      Got ".($count*$keys)." files                  \r";
 
 			$KeyCount = $objects['KeyCount'];
 		}

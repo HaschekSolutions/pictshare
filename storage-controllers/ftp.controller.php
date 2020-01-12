@@ -54,7 +54,7 @@ class FTPStorage implements StorageController
     function getItems($dev=false)
     {
         if(!$this->connect()) return false;
-        return $this->ftp_list_files_recursive(FTP_BASEDIR);
+        return $this->ftp_list_files_recursive(FTP_BASEDIR,$dev);
     }
 
     function pullFile($hash,$location)
@@ -106,7 +106,7 @@ class FTPStorage implements StorageController
         }
     }
 
-    function ftp_list_files_recursive($path)
+    function ftp_list_files_recursive($path,$dev=false)
     {
         if(!$this->connect()) return false;
         $items = ftp_mlsd($this->connection, $path);
@@ -122,13 +122,15 @@ class FTPStorage implements StorageController
             if ($type == 'dir')
             {
                 $result =
-                    array_merge($result, $this->ftp_list_files_recursive($filepath));
+                    array_merge($result, $this->ftp_list_files_recursive($filepath,$dev));
             }
             else if(mightBeAHash($name) || endswith($name,'.enc'))
             {
                 $result[] = $name;
+                if($dev===true) echo "      Got $name                  \r";
             }
         }
+        
         return $result;
     }
 }
