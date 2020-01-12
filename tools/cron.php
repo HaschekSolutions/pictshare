@@ -15,7 +15,7 @@ switch($argv[1])
         uploadqueue();
     break;
     default:
-        exit("[ERR] Command not found. Available commands are: 15min,hourly,daily,weekly");
+        exit("[ERR] Command not found. Available commands are: uploadqueue");
 }
 
 function uploadqueue()
