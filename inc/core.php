@@ -145,9 +145,12 @@ function storageControllerUpload($hash)
 {
     // Lets' check all storage controllers and tell them that a new file was uploaded
     $sc = getStorageControllers();
+    $allgood = true;
+    $uploadedhash =$hash;
     foreach($sc as $contr)
     {
-        if((new $contr())->isEnabled()===true)
+        $controller = new $contr();
+        if($controller->isEnabled()===true)
         {
             $source = ROOT.DS.'data'.DS.$hash.DS.$hash;
             if(defined('ENCRYPTION_KEY') && ENCRYPTION_KEY) //ok so we got an encryption key which means we'll store only  the encrypted file
@@ -155,14 +158,44 @@ function storageControllerUpload($hash)
                 $enc = new Encryption;
                 $encoded_file = ROOT.DS.'tmp'.DS.$hash.'.enc';
                 $enc->encryptFile($source,$encoded_file,base64_decode(ENCRYPTION_KEY));
-                (new $contr())->pushFile($encoded_file,$hash.'.enc');
+                $controller->pushFile($encoded_file,$hash.'.enc');
+                unlink($encoded_file);
+                $uploadedhash = $hash.'.enc';
             }
             else // not encrypted
-                (new $contr())->pushFile($source,$hash);
-            
+                $controller->pushFile($source,$hash);
+
+            //let's check if the file is really there. If not, queue it for later
+            if(!$controller->hashExists($uploadedhash))
+            {
+                $allgood = false;
+                $queuefile=ROOT.DS.'tmp'.DS.'controllerqueue.txt';
+                if(!file_exists($queuefile) || !stringInFile($hash,$queuefile))
+                {
+                    $fp=fopen($queuefile,'a');
+                    if($fp)
+                    {
+                        fwrite($fp,$hash."\n");
+                        fclose($fp);
+                    }
+                }
+            }
         }
             
     }
+
+    return $allgood;
+}
+
+function stringInFile($string,$file)
+{
+    $handle = fopen($file, 'r');
+    while (($line = fgets($handle)) !== false) {
+        $line=trim($line);
+        if($line==$string) return true;  
+    }
+    fclose($handle);
+    return false;
 }
 
 function getNewHash($type,$length=10)
