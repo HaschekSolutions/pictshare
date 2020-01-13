@@ -25,13 +25,13 @@
 
 Table of contents
 =================
+* [Features](#features)
 * [Installation](/rtfm/INSTALL.md)
 * [Configuration](/rtfm/CONFIG.md)
 * [Docker](/rtfm/DOCKER.md)
 * [API](/rtfm/API.md)
-* [Addons/Integration](/rtfm/INTEGRATIONS.md)
-* [Development status](#development-status)
-* [Features](#features)
+* [Addons and integration](/rtfm/INTEGRATIONS.md)
+* [Development roadmap](#development-roadmap)
 
 ---
 
@@ -43,13 +43,6 @@ Table of contents
 - Added URL shortening
 - Added WebP to images (and conversion from jpg,png to webp)
 - Massive code rework. Actually we designed it from the ground up to be more modular and easier to debug
-
-## Breaking changes in v2
-
-- [New API system](/rtfm/API.md). Only single file uploads now via /api/upload.php (POST var name is "file"). [read more..](/rtfm/API.md)
-- Data directory renamed from ```upload``` to ```data```
-- Backblaze support dropped for now because we didn't need it anymore as ALT_FOLDER is more flexible. If someone needs it, it can easily be implemented via adding a new storage controller. We're happy to accept pull requests
-- Dropped support for legacy URLs (/thumbs/1024x768_d8c01b45a6.png cant be used anymore, should be /1024x768/d8c01b45a6.png)
 
 # Features
 
