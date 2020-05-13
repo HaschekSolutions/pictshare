@@ -16,4 +16,15 @@ $(function() {
             console.log(o)
         }
     });
+
+    document.onpaste = function(event){
+        var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        for (index in items) {
+          var item = items[index];
+          if (item.kind === 'file') {
+            // adds the file to your dropzone instance
+            myDropzone.addFile(item.getAsFile())
+          }
+        }
+      }
   })
