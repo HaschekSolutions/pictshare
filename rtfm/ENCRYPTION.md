@@ -35,7 +35,3 @@ If you have everything running you can upload a new image and it will get encryp
 If you have uploaded a few files and see them on your storage container (eg S3) you'll notice the file has the '.enc' extension.
 
 When you now wipe your PictShare instances local data folder and request the file again via the URL, the storage controller will pull the encrypted file, decrypt it and save it locally (unencrypted)
-
-# Todo
-
-- Automatically encrypt all existing (unencrypted) files on the storage controllers
