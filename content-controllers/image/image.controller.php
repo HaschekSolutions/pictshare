@@ -192,21 +192,29 @@ class ImageController implements ContentController
             case 'jpeg':
             case 'jpg': 
                 header ("Content-type: image/jpeg");
+                header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
+                header ("ETag: $hash");
                 readfile($path);
             break;
 
             case 'png': 
                 header ("Content-type: image/png");
+                header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
+                header ("ETag: $hash");
                 readfile($path);
             break;
 
             case 'gif': 
                 header ("Content-type: image/gif");
+                header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
+                header ("ETag: $hash");
                 readfile($path);
             break;
 
             case 'webp': 
                 header ("Content-type: image/webp");
+                header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
+                header ("ETag: $hash");
                 readfile($path);
             break;
         }
