@@ -10,7 +10,9 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
 //loading core and controllers
 include_once(ROOT . DS . 'inc' .         DS. 'core.php');
-require_once(ROOT . DS . 'content-controllers' . DS. 'text'. DS . 'text.controller.php');
+$controllers = loadAllContentControllers();
+if(!in_array('TextController',$controllers))
+    exit(json_encode(array('status'=>'err','reason'=>'Text controller not enabled')));
 
 // check write permissions first
 if(!isFolderWritable(ROOT.DS.'data'))

@@ -22,6 +22,21 @@ In this file you can set the following options. For a simple working example con
 | UPLOAD_CODE (NOT IMPLEMENTED             | string  | If set, all uploads require this code via GET or POST variable "uploadcode" or upload will fail |
 | MAX_RESIZED_IMAGES (NOT IMPLEMENTED      | string  | If set, limits count of resized images/videos per file on server |
 
+# Content controllers
+PictShare is not limited to handling just images. Various content types including txt,mp4 and even url shortenings are supported.
+By default all of these are enabled but if you only need one or more, you can whitelist them and all others won't be accessible.
+
+|Option | value type | What it does|
+|---                      | ---     | ---|
+| CONTENTCONTROLLERS             | CSV string | If set, will whitelist content controllers for your instance. Must be uppercase and can be comma separated. Example: Only Pictures: `IMAGE`, Pictures and Videos: `IMAGE,VIDEO` |
+
+Available values for the `CONTENTCONTROLLERS` setting are:
+
+- IMAGE
+- TEXT
+- VIDEO
+- URL
+
 # Storage controllers
 
 PictShare has an extention system that allows handling of multiple storage solutions or backends. If a requested file is not found locally, PictShare will ask all configured storage controllers if they have it, then download and serve it to the user. 

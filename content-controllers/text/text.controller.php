@@ -3,7 +3,7 @@
 class TextController implements ContentController
 {
     //returns all extensions registered by this type of content
-    public function getRegisteredExtensions(){return array('txt');}
+    public function getRegisteredExtensions(){return array('txt','text','csv');}
 
     public function handleHash($hash,$url)
     {

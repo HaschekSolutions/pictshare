@@ -109,33 +109,17 @@ function architect($url)
         $extension = pathinfo($hash, PATHINFO_EXTENSION);
 
         
-        //First, check if URL is an image
-        if(in_array($extension,(new ImageController)->getRegisteredExtensions()))
+        foreach(loadAllContentControllers() as $cc)
         {
-            (new ImageController())->handleHash($hash,$u);
-        }
-        //or, a url
-        else if(in_array($extension,(new UrlController)->getRegisteredExtensions()))
-        {
-            var_dump("Url");
-        }
-        //or, a text
-        else if(in_array($extension,(new TextController)->getRegisteredExtensions()))
-        {
-            (new TextController())->handleHash($hash,$u);
-        }
-        //or, a video
-        else if(in_array($extension,(new VideoController)->getRegisteredExtensions()))
-        {
-            (new VideoController())->handleHash($hash,$u);
-        }
-        //very odd. We know it's a valid hash but no controller says it's one of their kids
-        //oh well
-        else
-        {
-            var_dump("odd err");
+            if(in_array($extension,(new $cc)->getRegisteredExtensions()))
+            {
+                (new $cc())->handleHash($hash,$u);
+                return;
+            }
         }
 
+        http_response_code(404);
+        die("404");
     }
 
     //var_dump($u);
@@ -227,8 +211,6 @@ function mightBeAHash($string)
 
 function autoload($className)
 {
-	if (file_exists(ROOT . DS . 'content-controllers' . DS . strtolower($className) . '.php'))
-        require_once(ROOT . DS . 'content-controllers' . DS . strtolower($className) . '.php');
     if (file_exists(ROOT . DS . 'interfaces' . DS . strtolower($className) . '.interface.php'))
         require_once(ROOT . DS . 'interfaces' . DS . strtolower($className) . '.interface.php');
     if ($className=='Encryption')
@@ -491,13 +473,18 @@ function getStorageControllers()
     return $controllers;
 }
 
-function getAllContentControllers()
+function loadAllContentControllers()
 {
+    $allowedcontrollers = false;
+    if(defined('CONTENTCONTROLLERS') && CONTENTCONTROLLERS != '')
+    {
+        $allowedcontrollers = array_map('strtolower', explode(',',CONTENTCONTROLLERS));
+    }
     $controllers = array();
     if ($handle = opendir(ROOT.DS.'content-controllers')) {
         while (false !== ($entry = readdir($handle))) {
             if ($entry != "." && $entry != "..") {
-                if(is_dir(ROOT.DS.'content-controllers'.DS.$entry) && file_exists(ROOT.DS.'content-controllers'.DS.$entry.DS."$entry.controller.php"))
+                if(is_dir(ROOT.DS.'content-controllers'.DS.$entry) && file_exists(ROOT.DS.'content-controllers'.DS.$entry.DS."$entry.controller.php") && ( ($allowedcontrollers!==false && in_array($entry,$allowedcontrollers) ) || $allowedcontrollers===false))
                 {
                     $controllers[] = ucfirst($entry).'Controller';
                     include_once(ROOT.DS.'content-controllers'.DS.$entry.DS."$entry.controller.php");
@@ -513,7 +500,7 @@ function getAllContentControllers()
 function getAllContentFiletypes()
 {
     $types = array();
-    $controllers = getAllContentControllers(true);
+    $controllers = loadAllContentControllers();
     foreach($controllers as $c)
     {
         $types = array_merge($types,(new $c)->getRegisteredExtensions());
@@ -616,4 +603,20 @@ function isIPInRange( $ip, $range ) {
     $wildcard_decimal = pow( 2, ( 32 - $netmask ) ) - 1;
     $netmask_decimal = ~ $wildcard_decimal;
     return ( ( $ip_decimal & $netmask_decimal ) == ( $range_decimal & $netmask_decimal ) );
+}
+
+function loadContentControllers()
+{
+    if(defined('CONTENTCONTROLLERS') && CONTENTCONTROLLERS != '')
+    {
+        $controllers = explode(',',CONTENTCONTROLLERS);
+        foreach($controllers as $controller)
+        {
+            $controller = strtolower($controller);
+            if(@file_exists(ROOT . DS . 'content-controllers' . DS. $controller. DS . $controller.'.controller.php'))
+                require_once(ROOT . DS . 'content-controllers' . DS. $controller. DS . $controller.'.controller.php');
+        }
+    }
+    else
+        loadAllContentControllers();
 }

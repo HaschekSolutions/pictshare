@@ -10,7 +10,7 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
 //loading core and controllers
 include_once(ROOT . DS . 'inc' .         DS. 'core.php');
-require_once(ROOT . DS . 'content-controllers' . DS. 'video'. DS . 'video.controller.php');
+loadAllContentControllers();
 
 $hash = $_REQUEST['hash'];
 

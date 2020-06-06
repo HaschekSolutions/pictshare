@@ -10,10 +10,7 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
 //loading core and controllers
 include_once(ROOT . DS . 'inc' .         DS. 'core.php');
-require_once(ROOT . DS . 'content-controllers' . DS. 'image'. DS . 'image.controller.php');
-require_once(ROOT . DS . 'content-controllers' . DS. 'text'. DS . 'text.controller.php');
-require_once(ROOT . DS . 'content-controllers' . DS. 'url'. DS . 'url.controller.php');
-require_once(ROOT . DS . 'content-controllers' . DS. 'video'. DS . 'video.controller.php');
+$allowedcontentcontrollers = loadAllContentControllers();
 
 // check write permissions first
 if(!isFolderWritable(ROOT.DS.'data'))
@@ -42,10 +39,22 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
     //cross check filetype for controllers
     //
     //image?
+
+    foreach($allowedcontentcontrollers as $cc)
+    {
+        if(in_array($type,(new $cc)->getRegisteredExtensions()))
+        {
+            $answer = (new $cc())->handleUpload($_FILES['file']['tmp_name'],$hash);
+            break;
+        }
+    }
+
+/*
     if(in_array($type,(new ImageController)->getRegisteredExtensions()))
     {
         $answer = (new ImageController())->handleUpload($_FILES['file']['tmp_name'],$hash);
     }
+    
     //or, a text
     else if($type=='text')
     {
@@ -56,7 +65,7 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
     {
         $answer = (new VideoController())->handleUpload($_FILES['file']['tmp_name'],$hash);
     }
-
+*/
     if(!$answer)
         $answer = array('status'=>'err','reason'=>'Unsupported filetype: '.$type,'filetype'=>$type);
 
