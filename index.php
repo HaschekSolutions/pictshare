@@ -18,4 +18,6 @@ require_once(ROOT . DS . 'content-controllers' . DS. 'video'. DS . 'video.contro
 
 //send the URL to the architect. It'll know what to do
 $url = $_GET['url'];
+if(!$url)
+	$url = ltrim($_SERVER['REQUEST_URI'],'/'); 
 architect($url);
