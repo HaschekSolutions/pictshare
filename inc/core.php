@@ -79,6 +79,7 @@ function architect($url)
         } 
     }
 
+
     //we didn't find a hash. send error 404
     if($hash===false)
     {
@@ -109,7 +110,7 @@ function architect($url)
         $extension = pathinfo($hash, PATHINFO_EXTENSION);
 
         
-        foreach(loadAllContentControllers() as $cc)
+        foreach(loadAllContentControllers(true) as $cc)
         {
             if(in_array($extension,(new $cc)->getRegisteredExtensions()))
             {
@@ -473,10 +474,10 @@ function getStorageControllers()
     return $controllers;
 }
 
-function loadAllContentControllers()
+function loadAllContentControllers($all=false)
 {
     $allowedcontrollers = false;
-    if(defined('CONTENTCONTROLLERS') && CONTENTCONTROLLERS != '')
+    if(defined('CONTENTCONTROLLERS') && CONTENTCONTROLLERS != '' && $all!==true)
     {
         $allowedcontrollers = array_map('strtolower', explode(',',CONTENTCONTROLLERS));
     }
