@@ -12,6 +12,10 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 include_once(ROOT . DS . 'inc' . DS. 'core.php');
 loadAllContentControllers();
 
+// check if client has permission to upload
+if(defined('ALLOWED_SUBNET') && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
+    exit(json_encode(array('status'=>'err','reason'=> 'Access denied')));
+
 // check write permissions first
 if(!isFolderWritable(ROOT.DS.'data'))
     exit(json_encode(array('status'=>'err','reason'=>'Data directory not writable')));
