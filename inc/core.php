@@ -595,6 +595,13 @@ function deleteHash($hash)
  * via https://gist.github.com/tott/7684443
  */
 function isIPInRange( $ip, $range ) {
+    if(strpos($range,',')!==false)
+    {
+        $ranges = explode(',',$range);
+        foreach($ranges as $range)
+            if(isIPInRange( $ip, $range )) return true;
+        return false;
+    }
     if ( strpos( $range, '/' ) == false )
     {
         $range .= '/32';
