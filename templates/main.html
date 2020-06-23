@@ -42,6 +42,13 @@
                             echo '<div class="alert alert-warning" role="alert">'.file_get_contents(ROOT.DS.'notice.txt').'</div>';
                     ?>
                     <div class="well">
+                        <?php if($forbidden===true) { ?>
+
+                            <h2>Upload forbidden</h2>
+
+                            <p>Due to configured restrictions, you are not allowed to upload files at this time</p>
+
+                        <?php } else { ?>
                         <div id="uploadinfo"></div>
                         <p>
                             <?php 
@@ -54,6 +61,7 @@
                                         <input name="file" type="file" multiple />
                                       </div>
                               </form>
+                        <?php } ?>
                     </div>
                 </div>
             </div>

@@ -25,12 +25,12 @@ function architect($url)
     if( ( (!defined('UPLOAD_FORM_LOCATION') || (defined('UPLOAD_FORM_LOCATION') && !UPLOAD_FORM_LOCATION)) && count($u)==0) || (defined('UPLOAD_FORM_LOCATION') && UPLOAD_FORM_LOCATION && '/'.implode('/',$u)==UPLOAD_FORM_LOCATION) )
     {
         // check if client address is allowed
+        $forbidden = false;
         if(defined('ALLOWED_SUBNET') && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
         {
-            header("HTTP/1.1 401 Unauthorized");
-            exit;
+            $forbidden = true;
         }
-        renderTemplate('main');
+        renderTemplate('main',array('forbidden'=>$forbidden));
         return;
     }
 
