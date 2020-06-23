@@ -19,8 +19,7 @@ else if(!isFolderWritable(ROOT.DS.'tmp'))
     exit(json_encode(array('status'=>'err','reason'=>'Temp directory not writable')));
 
 // check if client has permission to upload
-if(defined('ALLOWED_SUBNET') && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
-    exit(json_encode(array('status'=>'err','reason'=> 'Access denied')));
+executeUploadPermission();
 
 $hash = sanatizeString(trim($_REQUEST['hash']))?sanatizeString(trim($_REQUEST['hash'])):false;
 

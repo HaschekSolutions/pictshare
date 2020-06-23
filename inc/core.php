@@ -692,3 +692,12 @@ function isCloudflare() {
     $requestCheck   = _cloudflare_Requests_Check();
     return ($ipCheck && $requestCheck);
 }
+
+function executeUploadPermission()
+{
+    if(defined('ALLOWED_SUBNET') && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
+    {
+        http_response_code(403);
+        exit(json_encode(array('status'=>'err','reason'=> 'Access denied')));
+    }
+}

@@ -15,8 +15,7 @@ if(!in_array('TextController',$controllers))
     exit(json_encode(array('status'=>'err','reason'=>'Text controller not enabled')));
 
 // check if client has permission to upload
-if(defined('ALLOWED_SUBNET') && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
-    exit(json_encode(array('status'=>'err','reason'=> 'Access denied')));
+executeUploadPermission();
 
 // check write permissions first
 if(!isFolderWritable(ROOT.DS.'data'))
