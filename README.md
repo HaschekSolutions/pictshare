@@ -95,8 +95,8 @@ Read [here](/rtfm/CONFIG.md) what those options do
 - [ ] BACKBLAZE
 
 ### Image hosting
-- [X] Resizing
-- [ ] Filters
+- [x] Resizing
+- [x] Filters
 - [x] Gif to mp4 conversion
 - [x] Upload of images
 
