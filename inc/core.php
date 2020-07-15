@@ -26,7 +26,7 @@ function architect($url)
     {
         // check if client address is allowed
         $forbidden = false;
-        if(defined('ALLOWED_SUBNET') && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
+        if(defined('ALLOWED_SUBNET') && ALLOWED_SUBNET != '' && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
         {
             $forbidden = true;
         }
