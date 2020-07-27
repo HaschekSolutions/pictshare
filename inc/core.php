@@ -695,7 +695,7 @@ function isCloudflare() {
 
 function executeUploadPermission()
 {
-    if(defined('ALLOWED_SUBNET') && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
+    if(defined('ALLOWED_SUBNET') && ALLOWED_SUBNET != '' && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
     {
         http_response_code(403);
         exit(json_encode(array('status'=>'err','reason'=> 'Access denied')));
