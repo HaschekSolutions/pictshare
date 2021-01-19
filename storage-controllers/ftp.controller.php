@@ -78,7 +78,8 @@ class FTPStorage implements StorageController
     function deleteFile($hash) 
     {
         if(!$this->connect()) return false;
-        $ftpfilepath = FTP_BASEDIR.$hash;
+        $subdir = $this->hashToDir($hash);
+        $ftpfilepath = FTP_BASEDIR.$subdir.'/'.$hash;
         return (ftp_delete($this->connection,$ftpfilepath)?true:false);
     }
 
