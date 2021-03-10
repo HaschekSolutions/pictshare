@@ -341,16 +341,19 @@ function renderSize($byte)
 
 function getTypeOfFile($url)
 {
-    $fi = new finfo(FILEINFO_MIME);
-    $type = $fi->buffer(file_get_contents($url, false, null, -1, 1024));
-    
     // on linux use the "file" command or it will handle everything as octet-stream
-	if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' && startsWith($type,'application/octet-stream'))
+	if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
 	{
 		$content_type = exec("file -bi " . escapeshellarg($url));
 		if($content_type && $content_type!=$type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
 			$type = $content_type;
     }
+    else
+    {
+        $fi = new finfo(FILEINFO_MIME);
+        $type = $fi->buffer(file_get_contents($url, false, null, -1, 1024));
+    }
+    if(!$type) return false;
     if(startsWith($type,'text')) return 'text';
 	$arr = explode(';', trim($type));
 	if(count($arr)>1)
