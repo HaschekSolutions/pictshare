@@ -3,6 +3,7 @@
 PictShare is written to be run on a linux server with PHP 7 and nginx. We tried to support Windows for some time but ever since we started integrating ffmpeg for MP4 hosting we ditched Windows.
 
 - Make sure you have all PHP7 libraries installed (note on some systems the packages are not called php7-* but just php-* also on some systems php7-mbstring is called php7-mb): ```apt-get install php7-exif php7-gd php7-json php7-openssl php7-fileinfo php7-mbstring php7-mcrypt```
+- If you are not using windows, make sure your os have the ```file``` command working: ```apt-get install file```
 - Unpack the [PictShare zip](https://github.com/chrisiaut/pictshare/archive/master.zip)
 - Rename /inc/example.config.inc.php to /inc/config.inc.php
 - ```chmod +x bin/ffmpeg``` if you want to be able to use mp4 uploads
