@@ -433,7 +433,7 @@ function sha1Exists($sha1)
     $handle = fopen(ROOT.DS.'data'.DS.'sha1.csv', "r");
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
-            if(substr($line,0,40)==$sha1) return trim(substr($line,41));
+            if(substr($line,0,40)===$sha1) return trim(substr($line,41));
         }
 
         fclose($handle);
