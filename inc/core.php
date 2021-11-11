@@ -195,6 +195,7 @@ function getNewHash($type,$length=10)
 
 function isExistingHash($hash)
 {
+    if(!trim($hash)) return false;
     return is_dir(ROOT.DS.'data'.DS.$hash);
 }
 

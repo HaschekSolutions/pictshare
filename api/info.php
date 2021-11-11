@@ -16,8 +16,6 @@ $hash = $_REQUEST['hash'];
 
 if(!isExistingHash($hash))
 {
-    //check storage controllers
-
     exit(json_encode(array('status'=>'err','reason'=>'File not found')));
 }
 else
@@ -31,10 +29,12 @@ else
 function getInfoAboutHash($hash)
 {
     $file = ROOT.DS.'data'.DS.$hash.DS.$hash;
+    if(!$file_exists($file))
+        return array('status'=>'err','reason'=>'File not found');
     $size = filesize($file);
     $size_hr = renderSize($size);
     $content_type = exec("file -bi " . escapeshellarg($file));
-    if($content_type && $content_type!=$type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
+    if($content_type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
     {
         $type = $content_type;
         $c = explode(';',$type);
