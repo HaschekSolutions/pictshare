@@ -23,14 +23,14 @@ docker run -d -p 80:80 --name=pictshare hascheksolutions/pictshare
 ```bash
 mkdir /data/pictshareuploads
 chown 1000 -R /data/pictshareuploads
-docker run -d -v /data/pictshareuploads:/usr/share/nginx/html/data -p 80:80 --name=pictshare hascheksolutions/pictshare
+docker run -d -v /data/pictshareuploads:/var/www/data -p 80:80 --name=pictshare hascheksolutions/pictshare
 ```
 
 ### Persistent data with increased max upload size
 ```bash
 mkdir /data/pictshareuploads
 chown 1000 -R /data/pictshareuploads
-docker run -d -e "MAX_UPLOAD_SIZE=1024" -v /data/pictshareuploads:/usr/share/nginx/html/data -p 80:80 --name=pictshare hascheksolutions/pictshare
+docker run -d -e "MAX_UPLOAD_SIZE=1024" -v /data/pictshareuploads:/var/www/data -p 80:80 --name=pictshare hascheksolutions/pictshare
 ```
 
 ## ENV Variables
