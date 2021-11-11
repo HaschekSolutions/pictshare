@@ -558,6 +558,8 @@ function storeFile($srcfile,$hash,$deleteoriginal=false)
 		fwrite($fh, time().';'.$url.';'.$hash.';'.getUserIP()."\n");
 		fclose($fh);
 	}
+
+    return $file;
 }
 
 function getDeleteCodeOfHash($hash)

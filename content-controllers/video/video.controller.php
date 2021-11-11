@@ -72,7 +72,7 @@ class VideoController implements ContentController
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 
-        storeFile($tmpfile,$hash,true);
+        $file = storeFile($tmpfile,$hash,true);
 
         if(!$this->rightEncodedMP4($file))
             system("nohup php ".ROOT.DS.'tools'.DS.'re-encode_mp4.php force '.$hash." > /dev/null 2> /dev/null &");
@@ -91,6 +91,7 @@ class VideoController implements ContentController
             $start = 0;  
             $end = $size - 1; 
             header('Content-type: video/mp4');
+            header('Cache-control: public, max-age=31536000');
             header("Accept-Ranges: 0-$length");
             if (isset($_SERVER['HTTP_RANGE'])) {
             $c_start = $start;

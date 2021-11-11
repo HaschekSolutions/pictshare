@@ -155,7 +155,7 @@ class ImageController implements ContentController
                         
                                     header ("Content-type: image/jpeg");
                                     readfile($preview);
-                                    
+                                    exit;
                                 }
                                 else if(in_array('download',$url))
                                 {
@@ -175,6 +175,7 @@ class ImageController implements ContentController
                                 {
                                     $data = array('url'=>implode('/',$url),'hash'=>$hash,'filesize'=>renderSize(filesize($path)));
                                     renderTemplate('video',$data);
+                                    exit;
                                 }
                         break;
                     }
@@ -194,6 +195,7 @@ class ImageController implements ContentController
                 header ("Content-type: image/jpeg");
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
+                header('Cache-control: public, max-age=31536000');
                 readfile($path);
             break;
 
@@ -201,6 +203,7 @@ class ImageController implements ContentController
                 header ("Content-type: image/png");
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
+                header('Cache-control: public, max-age=31536000');
                 readfile($path);
             break;
 
@@ -208,6 +211,7 @@ class ImageController implements ContentController
                 header ("Content-type: image/gif");
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
+                header('Cache-control: public, max-age=31536000');
                 readfile($path);
             break;
 
@@ -215,6 +219,7 @@ class ImageController implements ContentController
                 header ("Content-type: image/webp");
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
+                header('Cache-control: public, max-age=31536000');
                 readfile($path);
             break;
         }
