@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Get current date
       id: date
-      run: echo "::set-output name=date::$(date +%s)"
+      run: echo "::set-output name=date::$(date '+%Y%m%d%H%M%S')"
     - uses: actions/checkout@v2
     - name: Build the Docker image
       run: docker build . --file docker/Dockerfile --tag hascheksolutions/pictshare:${{ steps.date.outputs.date }} --tag hascheksolutions/pictshare:latest
