@@ -69,9 +69,6 @@ if(in_array('altfolder',$argv) && defined('ALT_FOLDER') && ALT_FOLDER && is_dir(
     }
 }
 
-//making sure ffmpeg is executable
-system("chmod +x ".ROOT.DS.'bin'.DS.'ffmpeg');
-
 if(count($localfiles)==0)
 {
     echo "[i] Finding local mp4 files\n";

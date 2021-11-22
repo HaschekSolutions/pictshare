@@ -34,9 +34,6 @@ if(in_array('noskip',$argv))
 else
     $allowskipping = true;
 
-//making sure ffmpeg is executable
-system("chmod +x ".ROOT.DS.'bin'.DS.'ffmpeg');
-
 echo "[i] Finding local mp4 files ..";
 while (false !== ($filename = readdir($dh))) {
     $img = $dir.$filename.DS.$filename;

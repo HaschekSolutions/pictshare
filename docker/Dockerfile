@@ -39,7 +39,7 @@ WORKDIR /var/www
 ADD . /var/www/.
 
 ADD docker/rootfs/start.sh /etc/start.sh
-RUN chmod +x /etc/start.sh
+RUN  +x /etc/start.sh
 
 # nginx stuff
 ADD docker/rootfs/nginx.conf /etc/nginx/http.d/default.conf
@@ -59,5 +59,4 @@ VOLUME /var/www/data
 
 EXPOSE 80
 
-#CMD ["/bin/ash"]
 ENTRYPOINT ["/etc/start.sh"]
