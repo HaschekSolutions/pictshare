@@ -18,6 +18,7 @@ $dir = ROOT.DS.'data'.DS;
 $sc = getStorageControllers();
 $count = 0;
 $controllers = array();
+$filehashes = [];
 foreach($sc as $contr)
 {
     if((new $contr())->isEnabled()===true)
@@ -61,6 +62,9 @@ if(!in_array('p2',$argv))
                 if(endswith($cfile,'.enc'))
                     $hash = substr($cfile,0,-4);
                 else $hash = $cfile;
+
+                $filehashes[$contr][] = $hash;
+
                 if(!is_dir($dir.$hash) || !file_exists($dir.$hash.DS.$hash)) //file only on storage controller. Will download
                 {
                     echo "    [P1] $hash is not on the Server but on ".get_class($contr)."\n";
@@ -115,10 +119,12 @@ while (false !== ($hash = readdir($dh))) {
         continue;
     $allhashes++;
     $allsize+=$thissize;
+    $realhash = ($enc===false?$hash:$hash.'.enc');
     
     foreach($controllers as $contr)
     {
-        if((!$enc && !$contr->hashExists($hash)) || $enc && !$contr->hashExists($hash.'.enc'))
+
+        if( (count($filehashes[$contr]) > 0 && !in_array($hash,$filehashes[$contr])) || !$contr->hashExists($realhash) )
         {
             //if($sim!==true)
             
