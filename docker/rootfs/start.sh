@@ -45,6 +45,7 @@ _buildConfig() {
     echo "define('FTP_PORT', ${FTP_PORT:-21});"
     echo "define('FTP_USER', '${FTP_USER:-}');"
     echo "define('FTP_PASS', '${FTP_PASS:-}');"
+    echo "define('FTP_PASSIVEMODE', ${FTP_PASSIVEMODE:-true});"
     echo "define('FTP_SSL', ${FTP_SSL:-false});"
     echo "define('FTP_BASEDIR', '${FTP_BASEDIR:-}');"
     echo "define('ENCRYPTION_KEY', '${ENCRYPTION_KEY:-}');"

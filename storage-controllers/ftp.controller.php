@@ -23,7 +23,15 @@ class FTPStorage implements StorageController
         if($this->connection && !$this->login)
         {
             $this->login = ftp_login($this->connection, FTP_USER, FTP_PASS);
-            ftp_pasv($this->connection, TRUE);
+
+            if( (defined('FTP_PASSIVEMODE') && FTP_PASSIVEMODE === true) || !defined('FTP_PASSIVEMODE') )
+            {
+                ftp_set_option($this->connection, FTP_USEPASVADDRESS, false);
+                ftp_pasv($this->connection, TRUE);
+            }
+            else 
+                ftp_pasv($this->connection, false);
+            
         }
 
         // Was the connection successful?

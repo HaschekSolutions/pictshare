@@ -81,3 +81,4 @@ This probably requires the php-ftp package but on some platforms it's included i
 |FTP_USER                 | string      | FTP Username |
 |FTP_PASS                 | string      | FTP Password |
 |FTP_BASEDIR              | string      | Base path where files will be stored. Must end with / eg `/web/pictshare/` |
+|FTP_PASSIVEMODE          | bool        | Wether to use passive mode or not. If you have troubles with uploading, switch this setting maybe |
