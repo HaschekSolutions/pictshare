@@ -3,6 +3,7 @@ FROM alpine:3.14.2
 RUN apk add --no-cache bash socat wget curl nginx file ffmpeg unzip \
         php7-fileinfo \
         php7-session \
+        zlib \
         php \
         php-curl \
         php-openssl \
