@@ -22,6 +22,12 @@
 </div>
 
 -----------------------------------------
+<center>
+
+<p align="center">
+    <img src="https://www.pictshare.net/39928d8239.gif" alt="PictShare demo">
+</p>
+
 
 Table of contents
 =================
