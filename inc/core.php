@@ -601,6 +601,15 @@ function deleteHash($hash)
  * via https://stackoverflow.com/a/56050595/1174516
  */
 function isIPInRange( $ip, $range ) {
+
+    if(substr(',',$range)!==false)
+    {
+        // we got a list of ranges. splitting
+        $ranges = array_map('trim',explode(',',$range));
+        foreach($ranges as $range)
+            if(isIPInRange($ip,$range)) return true;
+        return false;
+    }
     // Get mask bits
     list($net, $maskBits) = explode('/', $range);
 
