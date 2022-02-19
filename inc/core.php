@@ -602,7 +602,7 @@ function deleteHash($hash)
  */
 function isIPInRange( $ip, $range ) {
 
-    if(substr(',',$range)!==false)
+    if(strpos($range,',')!==false)
     {
         // we got a list of ranges. splitting
         $ranges = array_map('trim',explode(',',$range));
