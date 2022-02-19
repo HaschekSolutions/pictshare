@@ -594,31 +594,38 @@ function deleteHash($hash)
 }
 
 /**
- * Check if a given ip is in a network
+ * Check if a given IPv4 or IPv6 is in a network
  * @param  string $ip    IP to check in IPV4 format eg. 127.0.0.1
- * @param  string $range IP/CIDR netmask eg. 127.0.0.0/24, also 127.0.0.1 is accepted and /32 assumed
+ * @param  string $range IP/CIDR netmask eg. 127.0.0.0/24, or 2001:db8::8a2e:370:7334/128
  * @return boolean true if the ip is in this range / false if not.
- * via https://gist.github.com/tott/7684443
+ * via https://stackoverflow.com/a/56050595/1174516
  */
 function isIPInRange( $ip, $range ) {
-    if(strpos($range,',')!==false)
-    {
-        $ranges = explode(',',$range);
-        foreach($ranges as $range)
-            if(isIPInRange( $ip, $range )) return true;
-        return false;
+    // Get mask bits
+    list($net, $maskBits) = explode('/', $range);
+
+    // Size
+    $size = (strpos($ip, ':') === false) ? 4 : 16;
+
+    // Convert to binary
+    $ip = inet_pton($ip);
+    $net = inet_pton($net);
+    if (!$ip || !$net) {
+        throw new InvalidArgumentException('Invalid IP address');
     }
-    if ( strpos( $range, '/' ) == false )
-    {
-        $range .= '/32';
+
+    // Build mask
+    $solid = floor($maskBits / 8);
+    $solidBits = $solid * 8;
+    $mask = str_repeat(chr(255), $solid);
+    for ($i = $solidBits; $i < $maskBits; $i += 8) {
+        $bits = max(0, min(8, $maskBits - $i));
+        $mask .= chr((pow(2, $bits) - 1) << (8 - $bits));
     }
-    // $range is in IP/CIDR format eg 127.0.0.1/24
-    list( $range, $netmask ) = explode( '/', $range, 2 );
-    $range_decimal = ip2long( $range );
-    $ip_decimal = ip2long( $ip );
-    $wildcard_decimal = pow( 2, ( 32 - $netmask ) ) - 1;
-    $netmask_decimal = ~ $wildcard_decimal;
-    return ( ( $ip_decimal & $netmask_decimal ) == ( $range_decimal & $netmask_decimal ) );
+    $mask = str_pad($mask, $size, chr(0));
+
+    // Compare the mask
+    return ($ip & $mask) === ($net & $mask);
 }
 
 function loadContentControllers()
