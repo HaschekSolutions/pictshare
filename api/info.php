@@ -10,6 +10,9 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
 //loading core and controllers
 include_once(ROOT . DS . 'inc' .         DS. 'core.php');
+
+if($_REQUEST['ip']=='pls') exit(getUserIP());
+
 loadAllContentControllers();
 
 $hash = $_REQUEST['hash'];
