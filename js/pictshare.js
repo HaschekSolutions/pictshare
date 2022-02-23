@@ -2,8 +2,10 @@ Dropzone.autoDiscover = false;
 
 $(function() {
     var myDropzone = new Dropzone("#dropzone");
+    console.log(myDropzone.options);
     if(maxUploadFileSize !== undefined)
         myDropzone.options.maxFilesize = maxUploadFileSize;
+    myDropzone.options.timeout = 0,
     myDropzone.on("success", function(file,response) {
         console.log("raw response: "+response);
         if(response==null || response =="null")
