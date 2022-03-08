@@ -346,13 +346,13 @@ function getTypeOfFile($url)
 	if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
 	{
 		$content_type = exec("file -bi " . escapeshellarg($url));
-		if($content_type && $content_type!=$type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
+		if($content_type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
 			$type = $content_type;
     }
     else
     {
-        $fi = new finfo(FILEINFO_MIME);
-        $type = $fi->buffer(file_get_contents($url, false, null, -1, 1024));
+        //for windows we'll use mime_content_type. Make sure you have enabled the "exif" extension in php.ini
+        $type = mime_content_type($url);
     }
     if(!$type) return false;
     if(startsWith($type,'text')) return 'text';
@@ -431,7 +431,10 @@ function getUserIP()
 // checks the list of uploaded files for this hash
 function sha1Exists($sha1)
 {
-    $handle = fopen(ROOT.DS.'data'.DS.'sha1.csv', "r");
+    $shafile = ROOT.DS.'data'.DS.'sha1.csv';
+
+    if(!file_exists($shafile)) touch($shafile);
+    $handle = fopen($shafile, "r");
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
             if(substr($line,0,40)===$sha1) return trim(substr($line,41));

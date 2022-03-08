@@ -1,7 +1,7 @@
 <?php
 // basic path definitions
 define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', dirname(__FILE__).'/..');
+define('ROOT', dirname(__FILE__).DS.'..');
 
 //loading default settings if exist
 if(!file_exists(ROOT.DS.'inc'.DS.'config.inc.php'))
