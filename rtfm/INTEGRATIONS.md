@@ -61,7 +61,7 @@ Configure Greenshot:
 Create a new External command, under Settings -> Plugins -> Click on External command Plugin -> Configure -> New
 - Name: what ever you want here
 - Command: find and point to pwsh.exe
-- Argument: -F Path\to\this\script -Address consto.com
+- Argument: -w Hidden -F Path\to\this\script -Address consto.com
 
 Create a PowerShell script with the code below.
 
