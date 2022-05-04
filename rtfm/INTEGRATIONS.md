@@ -44,3 +44,35 @@ result=$(curl -s -F "file=@${1}" https://pictshare.net/api/upload.php | jq -r .u
 xclip -selection clipboard -t image/png -i $1
 google-chrome $result
 ```
+
+# PHP
+
+```php
+/*
+* @param $path string Path to the file that should be uploaded
+* @param $hash string Optional. File name we want on pictshare for the file
+*/
+function pictshareUploadImage($path,$hash=false)
+{
+    if(!file_exists($path)) return false;
+    $request = curl_init('https://pictshare.net/api/upload.php');
+    
+    curl_setopt($request, CURLOPT_POST, true);
+    curl_setopt(
+        $request,
+        CURLOPT_POSTFIELDS,
+        array(
+        'file' => curl_file_create($path),
+        'hash'=>$hash
+        ));
+
+    // output the response
+    curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
+    $json = json_decode(curl_exec($request).PHP_EOL,true);
+
+    // close the session
+    curl_close($request);
+
+    return $json;
+}
+```
