@@ -67,6 +67,7 @@ You can also store all uploaded files on S3 or S3 compatible storage like [Minio
 |S3_ACCESS_KEY                      | string        | Access key for your bucket|
 |S3_SECRET_KEY                      | string        | Secret key for your bucket |
 |S3_ENDPOINT                        | URL           | Server URL. If you're using S3 compatible software like [Minio](https://min.io/) you can enter the URL here |
+|S3_REGION                          | string        | Region of your bucket |
 
 ### FTP
 
