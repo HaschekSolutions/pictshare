@@ -57,6 +57,7 @@ Every other variable can be referenced against the [default PictShare configurat
 - S3_BUCKET (string | Name of your S3 bucket)
 - S3_ACCESS_KEY (string | Access Key for your Bucket)
 - S3_SECRET_KEY (string | Secrety Key)
+- S3_REGION (string | S3 bucket region)
 - S3_ENDPOINT (url | If you are using a selfhosted version of S3 like Minio, put your URL here)
 - ENCRYPTION_KEY (string | If you want to use encryption for storage controllers, put your encryption key here. [Read more](https://github.com/HaschekSolutions/pictshare/blob/master/rtfm/ENCRYPTION.md))
 
