@@ -558,7 +558,7 @@ function storeFile($srcfile,$hash,$deleteoriginal=false)
     if(defined('LOG_UPLOADER') && LOG_UPLOADER)
 	{
 		$fh = fopen(ROOT.DS.'data'.DS.'uploads.csv', 'a');
-		fwrite($fh, time().';'.$url.';'.$hash.';'.getUserIP()."\n");
+		fwrite($fh, time().';;'.$hash.';'.getUserIP()."\n");
 		fclose($fh);
 	}
 
