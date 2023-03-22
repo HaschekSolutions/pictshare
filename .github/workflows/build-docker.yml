@@ -20,7 +20,7 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE="hascheksolutions/pictshare"
+          DOCKER_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           VERSION=latest
           SHORTREF=${GITHUB_SHA::8}
 
