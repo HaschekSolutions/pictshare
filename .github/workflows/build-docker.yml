@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
 
 jobs:
   docker:
