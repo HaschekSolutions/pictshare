@@ -28,9 +28,13 @@
     <img src="https://www.pictshare.net/39928d8239.gif" alt="PictShare demo">
 </p>
 
+# [INFO] March '23
+Since Docker Hub won't allow team Organizations anymore, we moved our images to GitHub Container Registry.
+So if you want to use the latest version, please use the new image `ghcr.io/hascheksolutions/pictshare` instead of `hascheksolutions/pictshare`
 
 Table of contents
 =================
+* [Quick Start](#quickstart)
 * [Features](#features)
 * [Installation](/rtfm/INSTALL.md)
 * [Configuration](/rtfm/CONFIG.md)
@@ -40,6 +44,14 @@ Table of contents
 * [Development roadmap](#development-roadmap)
 
 ---
+
+## Quickstart
+
+```bash
+docker run -d -p 8080:80 --name=pictshare ghcr.io/hascheksolutions/pictshare
+```
+
+Then open http://localhost:8080 in your browser
 
 ## New Features in v2
 
