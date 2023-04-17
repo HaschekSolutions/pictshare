@@ -1,6 +1,7 @@
 <p align="center">
   <a href="" rel="noopener">
- <img height=200px src="https://pictshare.net/phhynj.png" alt="PictShare logo"></a>
+    <img height=200px src="./css/imgs/logo/logo.svg" alt="PictShare logo">
+  </a>
 </p>
 
 <h1 align="center">PictShare</h1>
