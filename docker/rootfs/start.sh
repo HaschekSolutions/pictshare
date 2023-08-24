@@ -18,6 +18,8 @@ _maxUploadSize() {
 
 _filePermissions() {
     chown -R nginx:nginx /var/www
+    touch data/sha1.csv
+    chown nginx:nginx data/sha1.csv
 }
 
 _buildConfig() {
@@ -65,15 +67,15 @@ if [[ ${MAX_UPLOAD_SIZE:=100} =~ ^[0-9]+$ ]]; then
         _maxUploadSize
 fi
 
+# run _filePermissions function unless SKIP_FILEPERMISSIONS is set to true
+if [[ ${SKIP_FILEPERMISSIONS:=false} != true ]]; then
+        _filePermissions
+fi
+
 echo ' [+] Starting php'
 php-fpm7
 
-chown -R nginx:nginx /var/www/
-
 echo ' [+] Creating config'
-
-touch data/sha1.csv
-chown nginx:nginx data/sha1.csv
 
 _buildConfig > inc/config.inc.php
 

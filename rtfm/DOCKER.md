@@ -33,6 +33,14 @@ chown 1000 -R /data/pictshareuploads
 docker run -d -e "MAX_UPLOAD_SIZE=1024" -v /data/pictshareuploads:/var/www/data -p 80:80 --name=pictshare ghcr.io/hascheksolutions/pictshare
 ```
 
+### Development
+Using these commands it will mount the current directory in the docker container so you can develop locally without building after each change.
+
+```bash
+docker build -t pictshare -f docker/Dockerfile .
+docker run -it --rm --name pictshare-dev -p 8080:80 -v $(pwd):/var/www -v $(pwd)/data:/var/www/data -e "URL=http://localhost:8080/" -e "SKIP_FILEPERMISSIONS=true" pictshare
+```
+
 ## ENV Variables
 There are some ENV variables that only apply to the Docker image
 - MAX_UPLOAD_SIZE (int | size in MB that will be used for nginx. default 50)
@@ -53,6 +61,8 @@ Every other variable can be referenced against the [default PictShare configurat
 - LOG_UPLOADER (true/false | log IPs of uploaders)
 - MAX_RESIZED_IMAGES (int | how many versions of a single image may exist? -1 for infinite)
 - SHOW_ERRORS (true/false | show upload/size/server errors?)
+- SKIP_FILEPERMISSIONS (true/false | enables/disables fixing file permissions on start. default is false)
+- ALWAYS_WEBP (true/false | Always tries to server JPGs as WEBp if the client supports it. Default is false)
 - ALT_FOLDER (path to a folder where all hashes will be copied to and looked for offsite backup via nfs for example)
 - S3_BUCKET (string | Name of your S3 bucket)
 - S3_ACCESS_KEY (string | Access Key for your Bucket)

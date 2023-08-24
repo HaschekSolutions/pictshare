@@ -123,7 +123,7 @@ class ImageController implements ContentController
                 }
             }
 
-            if(in_array('webp',$url) && $type!='webp')
+            if( (in_array('webp',$url) && $type!='webp') || ( $this->shouldAlwaysBeWebp() && $type=='jpg' ) )
                 $modifiers['webp'] = true;
             if(in_array('forcesize',$url) && $modifiers['size'])
                 $modifiers['forcesize'] = true;
@@ -218,10 +218,13 @@ class ImageController implements ContentController
 
                 $this->saveObjOfImage($im,$newpath,$type);
             }
+            else if($modifiers['webp'])
+            {
+                $type = 'webp';
+            }
             $path = $newpath;
             
         }
-
         
         switch($type)
         {
@@ -281,22 +284,41 @@ class ImageController implements ContentController
 
     function saveObjOfImage($im,$path,$type)
     {
+        $tmppath = '/tmp/'.getNewHash($type,12);
         switch($type)
         {
             case 'jpeg':
             case 'jpg': 
-                imagejpeg($im,$path,(defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
+                imagejpeg($im,$tmppath,(defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
             break;
 
             case 'png': 
-                imagepng($im,$path,(defined('PNG_COMPRESSION')?PNG_COMPRESSION:6));
+                imagepng($im,$tmppath,(defined('PNG_COMPRESSION')?PNG_COMPRESSION:6));
             break;
 
             case 'webp': 
-                imagewebp($im,$path,(defined('WEBP_COMPRESSION')?WEBP_COMPRESSION:80));
+                imagewebp($im,$tmppath,(defined('WEBP_COMPRESSION')?WEBP_COMPRESSION:80));
             break;
         }
 
-        return $im;
+        if(file_exists($tmppath) && filesize($tmppath)>0)
+        {
+            rename($tmppath,$path);
+            return $im;
+        }
+        else
+        {
+            return false;
+        }
+
+        
+    }
+
+    function shouldAlwaysBeWebp()
+    {
+        if(defined('ALWAYS_WEBP') && ALWAYS_WEBP && strpos( $_SERVER['HTTP_ACCEPT'], 'image/webp' ) !== false )
+            return true;
+        else
+        return false;
     }
 }
