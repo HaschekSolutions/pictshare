@@ -32,12 +32,29 @@ class ImageController implements ContentController
                 $exif = exif_read_data($tmpfile);
                 if (!empty($exif['Orientation'])) {
                     switch ($exif['Orientation']) {
+                        case 2:
+                            imageflip($res, IMG_FLIP_HORIZONTAL);
+                        case 1:
+                            // Nothing to do
+                            break;
+
+                        case 4:
+                            imageflip($res, IMG_FLIP_HORIZONTAL);
+                            // Also rotate
                         case 3:
                             $res = imagerotate($res, 180, 0);
                             break;
+
+                        case 5:
+                            imageflip($res, IMG_FLIP_VERTICAL);
+                            // Also rotate
                         case 6:
                             $res = imagerotate($res, -90, 0);
                             break;
+
+                        case 7:
+                            imageflip($res, IMG_FLIP_VERTICAL);
+                            // Also rotate
                         case 8:
                             $res = imagerotate($res, 90, 0);
                             break;
