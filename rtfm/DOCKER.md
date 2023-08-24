@@ -11,7 +11,7 @@ docker run -d -p 80:80 -e "TITLE=My own PictShare" -e "URL=http://localhost/" gh
 
 ### Building it
 ```bash
-docker build -t pictshare .
+docker build -t pictshare -f docker/Dockerfile .
 ```
 
 ### Quick start
