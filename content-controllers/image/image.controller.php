@@ -123,7 +123,7 @@ class ImageController implements ContentController
                 }
             }
 
-            if( (in_array('webp',$url) && $type!='webp') || ( $this->shouldAlwaysBeWebp() && $type=='jpg' ) )
+            if( (in_array('webp',$url) && $type!='webp') || ( $this->shouldAlwaysBeWebp() && ($type=='jpg' || $type=='png') ) )
                 $modifiers['webp'] = true;
             if(in_array('forcesize',$url) && $modifiers['size'])
                 $modifiers['forcesize'] = true;
