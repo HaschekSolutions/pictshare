@@ -6,6 +6,14 @@
 
 interface ContentController
 {
+    /**
+     * When implementing a new content controller, you must specify a constant with the name of "ctype"
+     * This constant will be used to distinguish static controllers (which have files on disk) from dynamic ones (which don't, like the placeholder controller)
+     * 
+     * Possible values: 'static' or 'dynamic'
+     */
+    //const ctype = 'static';
+
     /** This method will return all file extensions that will be associated with this content type
      *  for example 'pdf' but it could be anything really. You just need a way later to confirm that a type is what it says it is
      * 

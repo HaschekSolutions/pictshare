@@ -56,6 +56,7 @@ Then open http://localhost:8080 in your browser
 
 ## New Features in v2
 
+- Generate placeholder images by specifying the size in the URL. [example](https://pictshare.net/placeholder/555x250/color-white-blue)
 - Added support for external storage
 - [Encryption of files in external storage](/rtfm/ENCRYPTION.md)
 - Added text hosting (like pastebin)
@@ -105,13 +106,13 @@ Read [here](/rtfm/CONFIG.md) what those options do
 - [x] MASTER_DELETE_CODE
 - [x] MASTER_DELETE_IP
 - [x] UPLOAD_FORM_LOCATION
+- [x] S3 Backend
 - [ ] UPLOAD_QUOTA
 - [ ] UPLOAD_CODE
 - [ ] LOW_PROFILE
 - [ ] IMAGE_CHANGE_CODE
 - [ ] MAX_RESIZED_IMAGES
 - [ ] ALLOW_BLOATING
-- [ ] BACKBLAZE
 
 ### Image hosting
 - [x] Resizing

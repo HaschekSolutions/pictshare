@@ -10,6 +10,7 @@
 
 class ImageController implements ContentController
 {
+    public const ctype = 'static';
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('png','bmp','gif','jpg','jpeg','x-png','webp');}
 
