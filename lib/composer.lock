@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ef2729074d82a701a7df40571d9210ea",
+    "content-hash": "55774a7c38a82a511932ca4321acb7f8",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -90,6 +90,49 @@
                 "source": "https://github.com/aws/aws-sdk-php/tree/master"
             },
             "time": "2017-08-21T20:34:30+00:00"
+        },
+        {
+            "name": "bitverse/identicon",
+            "version": "1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bitverseio/identicon.git",
+                "reference": "65a50a5a8bd86b3591795937f9652b2e9075626c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bitverseio/identicon/zipball/65a50a5a8bd86b3591795937f9652b2e9075626c",
+                "reference": "65a50a5a8bd86b3591795937f9652b2e9075626c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kuba Birecki",
+                    "email": "kuba.birecki@bitverse.io"
+                }
+            ],
+            "description": "A PHP library for generating identicons.",
+            "support": {
+                "issues": "https://github.com/bitverseio/identicon/issues",
+                "source": "https://github.com/bitverseio/identicon/tree/master"
+            },
+            "time": "2015-11-01T21:19:42+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",

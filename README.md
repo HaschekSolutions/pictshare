@@ -54,8 +54,9 @@ docker run -d -p 8080:80 --name=pictshare ghcr.io/hascheksolutions/pictshare
 
 Then open http://localhost:8080 in your browser
 
-## New Features in v2
+## New Features
 
+- Generate identicons based on strings in the URL [example1](https://pictshare.net/identicon/example1) [example2](https://pictshare.net/identicon/example2)            
 - Generate placeholder images by specifying the size in the URL. [example](https://pictshare.net/placeholder/555x250/color-white-blue)
 - Added support for external storage
 - [Encryption of files in external storage](/rtfm/ENCRYPTION.md)
