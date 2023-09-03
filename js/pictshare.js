@@ -12,7 +12,7 @@ $(function() {
             $("#uploadinfo").append("<div class='alert alert-danger' role='alert'><strong>Error uploading "+file.name+"</strong><br/>Reason is unknown :(</div>")
         else
         {
-            var o = JSON.parse(response);
+            var o = response;
             if(o.status=='ok')
                 $("#uploadinfo").append("<div class='alert alert-success' role='alert'><strong>"+file.name+"</strong> uploaded as <a target='_blank' href='/"+o.hash+"'>"+o.hash+"</a><br/>URL: <a target='_blank' href='"+o.url+"'>"+o.url+"</a> <button class='btn btn-xs' onClick='navigator.clipboard.writeText(\""+o.url+"\");'>Copy URL</button></div>")
             else if(o.status=='err')
