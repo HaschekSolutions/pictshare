@@ -13,7 +13,7 @@ class S3Storage implements StorageController
 {
 	private $s3;
 	function connect(){
-		require_once(ROOT.DS.'storage-controllers'.DS.'s3'.DS.'aws-autoloader.php');
+		
 		$this->s3 = new Aws\S3\S3Client([
 			'version' => 'latest',
 			'region'  => (defined('S3_REGION') && S3_REGION ?S3_REGION:'us-east-1'),

@@ -1,6 +1,7 @@
 tmp/*
 inc/config.inc.php
 data/*
+lib/vendor
 bin
 .git
 .github

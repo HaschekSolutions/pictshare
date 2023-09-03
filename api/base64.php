@@ -10,6 +10,9 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 
 //loading core and controllers
 include_once(ROOT . DS . 'inc' . DS. 'core.php');
+//load external things if existing
+if(file_exists(ROOT.'/lib/vendor/autoload.php'))
+	require ROOT.'/lib/vendor/autoload.php';
 loadAllContentControllers();
 
 // check if client has permission to upload

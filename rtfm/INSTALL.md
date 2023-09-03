@@ -5,6 +5,7 @@ PictShare is written to be run on a linux server with PHP 7 and nginx. We tried 
  It's highly recommended t hat you use [the official Docker container](https://github.com/HaschekSolutions/pictshare/pkgs/container/pictshare) so you don't have to do any manual setup. But if you know what you're doing, you can set it up yourself.
 
 - Make sure you have all PHP7 libraries installed (note on some systems the packages are not called php7-* but just php-* also on some systems php7-mbstring is called php7-mb): ```apt-get install php7-exif php7-gd php7-json php7-openssl php7-fileinfo php7-mbstring php7-mcrypt```
+- Run `composer install` from the `/lib` directory
 - If you are not using windows, make sure your os have the ```file``` command working: ```apt-get install file```
 - Unpack the [PictShare zip](https://github.com/hascheksolutions/pictshare/archive/master.zip)
 - Rename /inc/example.config.inc.php to /inc/config.inc.php

@@ -42,7 +42,12 @@ ADD . /var/www/.
 ADD docker/rootfs/start.sh /etc/start.sh
 RUN chmod +x /etc/start.sh
 
+# Composer intall
+WORKDIR /var/www/lib
+RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
+
 # nginx stuff
+WORKDIR /var/www
 ADD docker/rootfs/nginx.conf /etc/nginx/http.d/default.conf
 RUN mkdir -p /run/nginx
 RUN mkdir -p /var/log/nginx

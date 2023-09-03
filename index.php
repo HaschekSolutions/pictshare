@@ -12,6 +12,10 @@ include_once(ROOT.DS.'inc'.DS.'config.inc.php');
 include_once(ROOT.DS.'inc'.DS.'core.php');
 loadAllContentControllers();
 
+//load external things if existing
+if(file_exists(ROOT.'/lib/vendor/autoload.php'))
+	require ROOT.'/lib/vendor/autoload.php';
+
 
 //send the URL to the architect. It'll know what to do
 $url = $_GET['url']?$_GET['url']:ltrim($_SERVER['REQUEST_URI'],'/');
