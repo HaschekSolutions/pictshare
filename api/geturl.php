@@ -3,6 +3,8 @@
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', dirname(__FILE__).'/..');
 
+header('Content-Type: application/json; charset=utf-8');
+
 //loading default settings if exist
 if(!file_exists(ROOT.DS.'inc'.DS.'config.inc.php'))
 	exit('Rename /inc/example.config.inc.php to /inc/config.inc.php first!');
