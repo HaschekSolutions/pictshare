@@ -919,4 +919,12 @@ function executeUploadPermission()
         http_response_code(403);
         exit(json_encode(array('status'=>'err','reason'=> 'Access denied')));
     }
+    else if(defined('UPLOAD_CODE') && UPLOAD_CODE!='')
+    {
+        if(!isset($_REQUEST['uploadcode']) || $_REQUEST['uploadcode']!=UPLOAD_CODE)
+        {
+            http_response_code(403);
+            exit(json_encode(array('status'=>'err','reason'=> 'Incorrect upload code specified - Access denied')));
+        }
+    }
 }

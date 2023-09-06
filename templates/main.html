@@ -58,6 +58,9 @@
                             <?php 
                                 echo "Max Upload size: ". (int)(ini_get('upload_max_filesize'))."MB / File<br/>";
                                 echo "Allowed file types: ". implode(', ',getAllContentFiletypes());
+
+                                if(defined('UPLOAD_CODE') && UPLOAD_CODE!='')
+                                    echo '<br>Upload Code: <input type="text" id="uploadcode"  />';
                             ?>
                         </p>
                             <form class="dropzone well" id="dropzone" method="post" action="/api/upload.php" enctype="multipart/form-data">

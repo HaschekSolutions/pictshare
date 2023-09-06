@@ -108,8 +108,8 @@ Read [here](/rtfm/CONFIG.md) what those options do
 - [x] MASTER_DELETE_IP
 - [x] UPLOAD_FORM_LOCATION
 - [x] S3 Backend
+- [x] UPLOAD_CODE
 - [ ] UPLOAD_QUOTA
-- [ ] UPLOAD_CODE
 - [ ] LOW_PROFILE
 - [ ] IMAGE_CHANGE_CODE
 - [ ] MAX_RESIZED_IMAGES

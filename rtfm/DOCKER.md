@@ -54,7 +54,7 @@ Every other variable can be referenced against the [default PictShare configurat
 - MASTER_DELETE_IP (string | ip which can delete any image)
 - ALLOWED_SUBNET (CIDR IP range (can be comma separated) | IP subnets which are allowed to upload files)
 - ALLOW_BLOATING (true/false | can images be bloated to higher resolutions than the originals)
-- UPLOAD_CODE (string | code that has to be supplied to upload an image)
+- UPLOAD_CODE (string | Code that has to be supplied via POST or GET, to upload an image)
 - UPLOAD_FORM_LOCATION (string | absolute path where upload gui will be shown)
 - LOW_PROFILE (string | won't display error messages on failed uploads)
 - IMAGE_CHANGE_CODE (string | code if provided, needs to be added to image to apply filter/rotation/etc)
