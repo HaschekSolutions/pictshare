@@ -700,7 +700,9 @@ function getAllContentFiletypes()
     $controllers = loadAllContentControllers();
     foreach($controllers as $c)
     {
-        $types = array_merge($types,(new $c)->getRegisteredExtensions());
+        $instance = new $c;
+        if($instance::ctype=='static')
+            $types = array_merge($types,(new $instance)->getRegisteredExtensions());
     }
 
     return $types;
