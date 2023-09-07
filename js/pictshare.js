@@ -7,7 +7,8 @@ $(function () {
         myDropzone.options.maxFilesize = maxUploadFileSize;
     myDropzone.options.timeout = 0,
         myDropzone.on("sending", function(file, xhr, formData) { 
-         formData.append("uploadcode", document.getElementById("uploadcode").value);  
+            if(document.getElementById("uploadcode"))
+                formData.append("uploadcode", document.getElementById("uploadcode").value);  
         });
         myDropzone.on('error', function(file, response) {
            alert("Error: "+response.reason);
