@@ -298,6 +298,8 @@ class ImageController implements ContentController
             break;
 
             case 'webp': 
+                imagepalettetotruecolor($im);
+                imagealphablending($im, true);
                 imagewebp($im,$tmppath,(defined('WEBP_COMPRESSION')?WEBP_COMPRESSION:80));
             break;
         }
