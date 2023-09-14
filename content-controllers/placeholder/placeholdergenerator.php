@@ -38,8 +38,8 @@ class PlaceholderGenerator {
         if($textwidth > imagesx($im) || $textheight > imagesy($im))
             return $im;
 
-        $x = (imagesx($im) - $textwidth) / 2;
-        $y = (imagesy($im) - $textheight) / 2 + $textheight;
+        $x = intval((imagesx($im) - $textwidth) / 2);
+        $y = intval((imagesy($im) - $textheight) / 2 + $textheight);
         imagettftext($im, $fontsize, 0, $x, $y, $textcolor, $font, $text);
 
         return $im;
@@ -63,7 +63,7 @@ class PlaceholderGenerator {
         for($x=0;$x<=$w;$x++) { // loop columns
             for($y=0;$y<=$h;$y++) { // loop rows
                 // set pixel color 
-                $col=imagecolorallocate($im,$rgb[0],$rgb[1],$rgb[2]);
+                $col=imagecolorallocate($im,intval($rgb[0]),intval($rgb[1]),intval($rgb[2]));
                 imagesetpixel($im,$x-1,$y-1,$col);
                 // calculate new color  
                 for($i=0;$i<=2;$i++) {

@@ -5,15 +5,18 @@
 _maxUploadSize() {
     echo "[i] Setting uploadsize to ${MAX_UPLOAD_SIZE}M"
 	
-	sed -i "/post_max_size/c\post_max_size=${MAX_UPLOAD_SIZE}M" /etc/php7/php.ini
-	sed -i "/upload_max_filesize/c\upload_max_filesize=${MAX_UPLOAD_SIZE}M" /etc/php7/php.ini
+	sed -i "/post_max_size/c\post_max_size=${MAX_UPLOAD_SIZE}M" /etc/php82/php.ini
+	sed -i "/upload_max_filesize/c\upload_max_filesize=${MAX_UPLOAD_SIZE}M" /etc/php82/php.ini
+
+    # set error reporting no notices, no warnings
+    sed -i "/^error_reporting/c\error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING & ~E_NOTICE" /etc/php82/php.ini
     
 	sed -i -e "s/50M/${MAX_UPLOAD_SIZE}M/g" /etc/nginx/http.d/default.conf
 
     MAX_RAM=$((MAX_UPLOAD_SIZE + 30)) # 30megs more than the upload size
     echo "[i] Also changing memory limit of PHP to ${MAX_RAM}M"
-    sed -i -e "s/128M/${MAX_RAM}M/g" /etc/php7/php.ini
-	sed -i "/memory_limit/c\memory_limit=${MAX_RAM}M" /etc/php7/php.ini
+    sed -i -e "s/128M/${MAX_RAM}M/g" /etc/php82/php.ini
+	sed -i "/memory_limit/c\memory_limit=${MAX_RAM}M" /etc/php82/php.ini
 }
 
 _filePermissions() {
@@ -74,7 +77,7 @@ if [[ ${SKIP_FILEPERMISSIONS:=false} != true ]]; then
 fi
 
 echo ' [+] Starting php'
-php-fpm7
+php-fpm82
 
 echo ' [+] Creating config'
 

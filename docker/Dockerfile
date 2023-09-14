@@ -1,9 +1,8 @@
-FROM alpine:3.14.2
+FROM alpine:3.18
 
-RUN apk add --no-cache bash socat wget curl nginx file ffmpeg unzip \
-        php7-fileinfo \
-        php7-session \
-        zlib \
+RUN apk add --no-cache bash socat wget curl nginx file ffmpeg unzip zlib \
+        php82-fileinfo \
+        php82-session \
         php \
         php-curl \
         php-openssl \
@@ -12,26 +11,27 @@ RUN apk add --no-cache bash socat wget curl nginx file ffmpeg unzip \
         php-gd \
         php-dom \
         php-fpm \
-        php7 \
-        php7-pdo \
-        php7-exif \
-        php7-mcrypt \
-        php7-curl \
-        php7-gd \
-        php7-json \
-        php7-phar \
-        php7-fpm \
-        php7-openssl \
-        php7-ctype \
-        php7-opcache \
-        php7-mbstring \
-        php7-sodium \
-        php7-xml \
-        php7-ftp \
-        php7-simplexml \
-        php7-session \
-        php7-fileinfo \
-        php7-pcntl
+        php82 \
+        php82-pdo \
+        php82-exif \
+        php82-curl \
+        php82-gd \
+        php82-json \
+        php82-phar \
+        php82-fpm \
+        php82-openssl \
+        php82-ctype \
+        php82-opcache \
+        php82-mbstring \
+        php82-sodium \
+        php82-xml \
+        php82-ftp \
+        php82-simplexml \
+        php82-session \
+        php82-fileinfo \
+        php82-pcntl
+
+RUN ln -s /usr/bin/php82 /usr/bin/php
 
 RUN curl -sS https://getcomposer.org/installer | /usr/bin/php -- --install-dir=/usr/bin --filename=composer 
 RUN mkdir -p /var/www
@@ -51,11 +51,11 @@ WORKDIR /var/www
 ADD docker/rootfs/nginx.conf /etc/nginx/http.d/default.conf
 RUN mkdir -p /run/nginx
 RUN mkdir -p /var/log/nginx
-RUN sed -i 's/nobody/nginx/g' /etc/php7/php-fpm.d/www.conf
+RUN sed -i 's/nobody/nginx/g' /etc/php82/php-fpm.d/www.conf
 
 # Since requests can trigger conversion, let's give the server enough time to respond
-RUN sed -i "/max_execution_time/c\max_execution_time=3600" /etc/php7/php.ini
-RUN sed -i "/max_input_time/c\max_input_time=3600" /etc/php7/php.ini
+RUN sed -i "/max_execution_time/c\max_execution_time=3600" /etc/php82/php.ini
+RUN sed -i "/max_input_time/c\max_input_time=3600" /etc/php82/php.ini
 
 WORKDIR /var/www/
 

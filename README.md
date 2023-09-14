@@ -11,11 +11,11 @@
 <div align="center">
  
   
-![](https://img.shields.io/badge/php-7.1%2B-brightgreen.svg)
+![](https://img.shields.io/badge/php-8.2%2B-brightgreen.svg)
 [![](https://img.shields.io/docker/pulls/hascheksolutions/pictshare?color=brightgreen)](https://hub.docker.com/r/hascheksolutions/pictshare)
-[![](https://img.shields.io/docker/cloud/build/hascheksolutions/pictshare?color=brightgreen)](https://hub.docker.com/r/hascheksolutions/pictshare/builds)
+![](https://github.com/hascheksolutions/pictshare/actions/workflows/build-docker.yml/badge.svg)]
 [![Apache License](https://img.shields.io/badge/license-Apache-brightgreen.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
-![HitCount](https://visitor-badge.glitch.me/badge?page_id=pictshare)
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fhascheksolutions%2Fpictshare&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
 [![](https://img.shields.io/github/stars/HaschekSolutions/pictshare.svg?label=Stars&style=social)](https://github.com/HaschekSolutions/pictshare)
 
 #### Host your own `images` `gifs` `mp4s` `text bins` and stay in control
@@ -28,10 +28,6 @@
 <p align="center">
     <img src="https://www.pictshare.net/39928d8239.gif" alt="PictShare demo">
 </p>
-
-# [INFO] March '23
-Since Docker Hub won't allow team Organizations anymore, we moved our images to GitHub Container Registry.
-So if you want to use the latest version, please use the new image `ghcr.io/hascheksolutions/pictshare` instead of `hascheksolutions/pictshare`
 
 Table of contents
 =================
@@ -62,7 +58,7 @@ Then open http://localhost:8080 in your browser
 - [Encryption of files in external storage](/rtfm/ENCRYPTION.md)
 - Added text hosting (like pastebin)
 - Added URL shortening
-- Added WebP to images (and conversion from jpg,png to webp)
+- Added WebP to images (and automatic conversion from jpg, png to webp if the requesting browser supports it)
 - Massive code rework. Actually we designed it from the ground up to be more modular and easier to debug
 
 # Features
@@ -70,13 +66,13 @@ Then open http://localhost:8080 in your browser
 - Selfhostable
 - [Simple upload API](/rtfm/API.md)
 - 100% file based - no database needed
-- [Scalable](/rtfm/SCALING.md)
+- [Scalable hosting](/rtfm/SCALING.md)
 - Many [Filters](/rtfm/IMAGEFILTERS.md) for images
 - GIF to MP4 conversion
 - JPG, PNG to WEBP conversion
 - MP4 resizing
 - PictShare removes all exif data so you can upload photos from your phone and all GPS tags and camera model info get wiped
-- Change and resize your uploads just by editing the URL
+- Change and resize your images and videos just by editing the URL
 - Duplicates don't take up space. If the exact same file is uploaded twice, the second upload will link to the first
 - Many [configuration options](/rtfm/CONFIG.md)
 - Full control over your data. Delete images with individual and global delete codes
