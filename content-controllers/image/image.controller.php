@@ -319,6 +319,9 @@ class ImageController implements ContentController
 
     function shouldAlwaysBeWebp()
     {
+        //sanity check
+        if(!$_SERVER['HTTP_ACCEPT']) return false;
+
         if(defined('ALWAYS_WEBP') && ALWAYS_WEBP && strpos( $_SERVER['HTTP_ACCEPT'], 'image/webp' ) !== false )
             return true;
         else

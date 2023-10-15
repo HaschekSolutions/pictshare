@@ -26,7 +26,10 @@ else if(!isFolderWritable(ROOT.DS.'tmp'))
 // check if client has permission to upload
 executeUploadPermission();
 
-$hash = sanatizeString(trim($_REQUEST['hash']))?sanatizeString(trim($_REQUEST['hash'])):false;
+if(isset($_REQUEST['hash']))
+    $hash = sanatizeString(trim($_REQUEST['hash']));
+else
+    $hash = false;
 
 // check for POST upload
 if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
