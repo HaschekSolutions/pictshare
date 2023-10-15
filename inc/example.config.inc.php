@@ -2,6 +2,9 @@
 /**
  * All settings that are uncommented are mandatory
  * Others optional
+ * 
+ * For all possible config options, check https://github.com/HaschekSolutions/pictshare/blob/master/rtfm/CONFIG.md
+ * or /rtfm/CONFIG.md in your installation
  */
 
 //Use a specific domain for links presented to the user

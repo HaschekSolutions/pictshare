@@ -1,6 +1,6 @@
 FROM alpine:3.18
 
-RUN apk add --no-cache bash socat wget curl nginx file ffmpeg unzip zlib \
+RUN apk add --no-cache bash socat wget curl nginx file ffmpeg unzip zlib redis \
         php82-fileinfo \
         php82-session \
         php \
@@ -29,7 +29,8 @@ RUN apk add --no-cache bash socat wget curl nginx file ffmpeg unzip zlib \
         php82-simplexml \
         php82-session \
         php82-fileinfo \
-        php82-pcntl
+        php82-pcntl \
+        php82-pecl-redis
 
 RUN ln -s /usr/bin/php82 /usr/bin/php
 

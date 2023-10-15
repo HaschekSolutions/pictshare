@@ -20,6 +20,7 @@ In this file you can set the following options. For a simple working example con
 | ALLOWED_SUBNET          | IPv4 or IPv6 CIDR | If set, will limit uploads to IPs that match this CIDR |
 | ALWAYS_WEBP | bool | If set to `true`, JPGs will always be served as WebP, if the client supports it (if `image/webp` is in header `HTTP_ACCEPT`) | 
 | UPLOAD_CODE | string  | If set, all uploads require this code via GET or POST variable "uploadcode" to succeed |
+| REDIS_SERVER (NOT IMPLEMENTED) | IP | If you define a REDIS server IP here, it will enable you to use the FFMPEG Worker |
 | UPLOAD_QUOTA (NOT IMPLEMENTED)            | int     | Size in MB. If set, will only allow uploads if combined size of uploads on Server is smaller than this value. Does not account for ALT_FOLDER data and resized versions of original uploads won't be added to calculation |
 | MAX_RESIZED_IMAGES (NOT IMPLEMENTED      | string  | If set, limits count of resized images/videos per file on server |
 
@@ -85,3 +86,11 @@ This probably requires the php-ftp package but on some platforms it's included i
 |FTP_PASS                 | string      | FTP Password |
 |FTP_BASEDIR              | string      | Base path where files will be stored. Must end with / eg `/web/pictshare/` |
 |FTP_PASSIVEMODE          | bool        | Wether to use passive mode or not. If you have troubles with uploading, switch this setting maybe |
+
+# FFMPEG Worker
+
+For faster video en/transcoding there is a php script called `/tools/ffmpeg_worker.php` which is a CLI application looping every second, checking the REDIS Queue for encoding tasks.
+
+This way the rendering queue is detached from php-fpm since PHP can't have threaded workloads and it will make sure a encoding task like resizing of a video won't block the rest of the site from functioning.
+
+For the FFMPEG Worker to be enabled, the config option `REDIS_SERVER` must be set to the IP Address of a redis server.
