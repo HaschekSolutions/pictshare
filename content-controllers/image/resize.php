@@ -91,14 +91,14 @@ function rotate(&$im,$direction)
         if ($height > $width) 
         {   
             $ratio = $maxheight / $height;  
-            $newheight = $maxheight;
-            $newwidth = $width * $ratio; 
+            $newheight = intval($maxheight);
+            $newwidth = intval($width * $ratio) ;
         }
         else 
         {
             $ratio = $maxwidth / $width;   
-            $newwidth = $maxwidth;  
-            $newheight = $height * $ratio;   
+            $newwidth = intval($maxwidth) ;
+            $newheight = intval($height * $ratio);
         }
         
         $newimg = imagecreatetruecolor($newwidth,$newheight); 
