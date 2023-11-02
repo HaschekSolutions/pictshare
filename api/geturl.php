@@ -42,7 +42,15 @@ else if(remote_filesize($url)*0.000001 > 20)
 
 $name = basename($url);
 $tmpfile = ROOT.DS.'tmp'.DS.$name;
-file_put_contents($tmpfile,file_get_contents($url));
+
+$context = stream_context_create(
+    array(
+        "http" => array(
+            "follow_location" => false,
+        ),
+    )
+);
+file_put_contents($tmpfile,file_get_contents($url, false, $context));
 
 $type = getTypeOfFile($tmpfile);
 
