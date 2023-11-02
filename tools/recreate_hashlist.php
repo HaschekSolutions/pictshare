@@ -4,7 +4,7 @@ define('ROOT', dirname(__FILE__).DS.'..');
 
 echo "[i] Starting recreation of hashes.csv\n";
 
-$dir = ROOT.DS.'data'.DS;
+$dir = getDataDir().DS;
 $dh  = opendir($dir);
 
 $fp = fopen($dir.'hashes.csv','w');

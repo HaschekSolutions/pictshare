@@ -52,7 +52,7 @@ interface StorageController
      * Whenever a new file is uploaded this method will be called
      * You should then upload it or do whatever your storage system is meant to do with new files
      * 
-     * @param string $hash is the hash of the new file. The file path of this file is always ROOT.DS.'data'.DS.$hash.DS.$hash
+     * @param string $hash is the hash of the new file. The file path of this file is always getDataDir().DS.$hash.DS.$hash
      * 
      * @return bool true if successful
      */

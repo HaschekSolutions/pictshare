@@ -41,9 +41,9 @@
             <video id="video" poster="<?php echo URL.$url.'/preview/'.$hash; ?>" preload="auto" autoplay="autoplay" controls muted="muted" loop="loop" webkit-playsinline>   
                 <source src="<?php echo URL.$url.'/raw' ?>" type="video/mp4">
                 <?php
-                    if(file_exists(ROOT.DS.'data'.DS.$hash.DS.'webm_1.'.$hash))
+                    if(file_exists(getDataDir().DS.$hash.DS.'webm_1.'.$hash))
                         echo '<source src="'.URL.'raw/webm/'.$hash.'" type="video/webm">'."\n";
-                    if(file_exists(ROOT.DS.'data'.DS.$hash.DS.'ogg_1.'.$hash))
+                    if(file_exists(getDataDir().DS.$hash.DS.'ogg_1.'.$hash))
                         echo '<source src="'.URL.'raw/ogg/'.$hash.'" type="video/ogg">'."\n";
                 ?>
             </video>

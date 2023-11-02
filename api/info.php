@@ -36,7 +36,7 @@ else
 
 function getInfoAboutHash($hash)
 {
-    $file = ROOT.DS.'data'.DS.$hash.DS.$hash;
+    $file = getDataDir().DS.$hash.DS.$hash;
     if(!file_exists($file))
         return array('status'=>'err','reason'=>'File not found');
     $size = filesize($file);

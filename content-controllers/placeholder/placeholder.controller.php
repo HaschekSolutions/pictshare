@@ -9,7 +9,7 @@ class PlaceholderController implements ContentController
 
     public function handleHash($hash,$url)
     {
-        $path = ROOT.DS.'data'.DS.$hash.DS.$hash;
+        $path = getDataDir().DS.$hash.DS.$hash;
         
         include_once(dirname(__FILE__).DS.'placeholdergenerator.php');
         $pg = new PlaceholderGenerator();

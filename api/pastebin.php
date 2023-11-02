@@ -21,7 +21,7 @@ if(!in_array('TextController',$controllers))
 executeUploadPermission();
 
 // check write permissions first
-if(!isFolderWritable(ROOT.DS.'data'))
+if(!isFolderWritable(getDataDir()))
     exit(json_encode(array('status'=>'err','reason'=>'Data directory not writable')));
 else if(!isFolderWritable(ROOT.DS.'tmp'))
     exit(json_encode(array('status'=>'err','reason'=>'Temp directory not writable')));
@@ -37,11 +37,11 @@ if($_REQUEST['api_paste_code'])
     $sha1 = sha1_file($tmpfile);
     $sha_hash = sha1Exists($sha1);
     if($sha_hash)
-        exit(URL.$sha_hash);
+        exit(getURL().$sha_hash);
 
     $answer = (new TextController())->handleUpload($tmpfile,$hash);
     if($answer['hash'] && $answer['status']=='ok')
         addSha1($answer['hash'],$sha1);
 
-    echo URL.$hash;
+    echo getURL().$hash;
 }

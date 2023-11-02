@@ -154,7 +154,7 @@ function storageControllerUpload($hash)
         $controller = new $contr();
         if($controller->isEnabled()===true)
         {
-            $source = ROOT.DS.'data'.DS.$hash.DS.$hash;
+            $source = getDataDir().DS.$hash.DS.$hash;
             if(defined('ENCRYPTION_KEY') && ENCRYPTION_KEY) //ok so we got an encryption key which means we'll store only  the encrypted file
             {
                 $enc = new Encryption;
@@ -213,7 +213,7 @@ function getNewHash($type,$length=10)
 function isExistingHash($hash)
 {
     if(!trim($hash)) return false;
-    return is_dir(ROOT.DS.'data'.DS.$hash);
+    return is_dir(getDataDir().DS.$hash);
 }
 
 function mightBeAHash($string)
@@ -448,7 +448,7 @@ function getUserIP()
 // checks the list of uploaded files for this hash
 function sha1Exists($sha1)
 {
-    $shafile = ROOT.DS.'data'.DS.'sha1.csv';
+    $shafile = getDataDir().DS.'sha1.csv';
 
     if(!file_exists($shafile)) touch($shafile);
     $handle = fopen($shafile, "r");
@@ -466,7 +466,7 @@ function sha1Exists($sha1)
 function addSha1($hash,$sha1)
 {
     if(sha1Exists($sha1)) return;
-    $fp = fopen(ROOT.DS.'data'.DS.'sha1.csv','a');
+    $fp = fopen(getDataDir().DS.'sha1.csv','a');
     fwrite($fp,"$sha1;$hash\n");
     fclose($fp);
     return true;
@@ -728,9 +728,9 @@ function rrmdir($dir) {
 
 function storeFile($srcfile,$hash,$deleteoriginal=false)
 {
-    if(is_dir(ROOT.DS.'data'.DS.$hash) && file_exists(ROOT.DS.'data'.DS.$hash.DS.$hash)) return;
-    mkdir(ROOT.DS.'data'.DS.$hash);
-	$file = ROOT.DS.'data'.DS.$hash.DS.$hash;
+    if(is_dir(getDataDir().DS.$hash) && file_exists(getDataDir().DS.$hash.DS.$hash)) return;
+    mkdir(getDataDir().DS.$hash);
+	$file = getDataDir().DS.$hash.DS.$hash;
 	
     copy($srcfile, $file);
     if($deleteoriginal===true)
@@ -740,13 +740,13 @@ function storeFile($srcfile,$hash,$deleteoriginal=false)
 
     //creating a delete code
     $deletecode = getRandomString(32);
-    $fh = fopen(ROOT.DS.'data'.DS.$hash.DS.'deletecode', 'w');
+    $fh = fopen(getDataDir().DS.$hash.DS.'deletecode', 'w');
 	fwrite($fh, $deletecode);
 	fclose($fh);
        
     if(defined('LOG_UPLOADER') && LOG_UPLOADER)
 	{
-		$fh = fopen(ROOT.DS.'data'.DS.'uploads.csv', 'a');
+		$fh = fopen(getDataDir().DS.'uploads.csv', 'a');
 		fwrite($fh, time().';;'.$hash.';'.getUserIP()."\n");
 		fclose($fh);
 	}
@@ -756,8 +756,8 @@ function storeFile($srcfile,$hash,$deleteoriginal=false)
 
 function getDeleteCodeOfHash($hash)
 {
-    if(file_exists(ROOT.DS.'data'.DS.$hash.DS.'deletecode'))
-        return file_get_contents(ROOT.DS.'data'.DS.$hash.DS.'deletecode');
+    if(file_exists(getDataDir().DS.$hash.DS.'deletecode'))
+        return file_get_contents(getDataDir().DS.$hash.DS.'deletecode');
     return false;
 }
 
@@ -766,7 +766,7 @@ function deleteHash($hash)
     //@todo: add hash to deleted list. also on all controllers
 
     //delete all files in directory
-    rrmdir(ROOT.DS.'data'.DS.$hash);
+    rrmdir(getDataDir().DS.$hash);
 
     //tell every storage controller to delete theirs as well
     $sc = getStorageControllers();
@@ -863,13 +863,6 @@ function ip_in_range($ip, $range) {
 // and  https://www.cloudflare.com/ips-v6
 function _cloudflare_CheckIP($ip) {
     $cf_ips = array_filter(array_map('trim',explode("\n","
-    2400:cb00::/32
-    2606:4700::/32
-    2803:f800::/32
-    2405:b500::/32
-    2405:8100::/32
-    2a06:98c0::/29
-    2c0f:f248::/32
     173.245.48.0/20
     103.21.244.0/22
     103.22.200.0/22
@@ -885,6 +878,13 @@ function _cloudflare_CheckIP($ip) {
     104.24.0.0/14
     172.64.0.0/13
     131.0.72.0/22
+    2400:cb00::/32
+    2606:4700::/32
+    2803:f800::/32
+    2405:b500::/32
+    2405:8100::/32
+    2a06:98c0::/29
+    2c0f:f248::/32
     ")));
 
     $is_cf_ip = false;
@@ -964,4 +964,41 @@ function is_public_ipv6($ip=NULL)
         FILTER_VALIDATE_IP,
         FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
     ) === $ip ? TRUE : FALSE;
+}
+
+function getDataDir()
+{
+    if(defined('SPLITDATA') && SPLITDATA===true && getDomain())
+    {
+        $dir = ROOT.DS.'data'.DS.getDomain();
+        if(!is_dir($dir)) mkdir($dir);
+        return $dir;
+    }
+    return ROOT.DS.'data';
+}
+
+function getDomain($stripport=true)
+{
+    $host = $_SERVER['HTTP_HOST'];
+    //strip port
+    if(strpos($host,':')!==false)
+        $strippedhost = substr($host,0,strpos($host,':'));
+
+    //check if it's in ALLOWED_DOMAINS
+    if(defined('ALLOWED_DOMAINS') && ALLOWED_DOMAINS!='')
+    {
+        $domains = explode(',',ALLOWED_DOMAINS);
+        if(!in_array($strippedhost,$domains)) //always check without port
+            return false;
+        else return ($stripport ? $strippedhost : $host);
+    }
+    else return false;
+}
+
+function getURL()
+{
+    if(defined('URL') && URL !='')
+        return URL;
+    $protocol = strpos(strtolower($_SERVER['SERVER_PROTOCOL']), 'https') === FALSE ? 'http' : 'https';
+    return $protocol . '://' . getDomain(false).'/';
 }

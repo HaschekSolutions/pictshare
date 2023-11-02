@@ -14,7 +14,7 @@ define('ROOT', dirname(__FILE__).DS.'..');
 include_once(ROOT.DS.'inc/config.inc.php');
 include_once(ROOT.DS.'inc/core.php');
 
-$dir = ROOT.DS.'data'.DS;
+$dir = getDataDir().DS;
 $sc = getStorageControllers();
 $count = 0;
 $controllers = array();

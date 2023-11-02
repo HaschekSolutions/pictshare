@@ -18,7 +18,7 @@ if(file_exists(ROOT.'/lib/vendor/autoload.php'))
 $allowedcontentcontrollers = loadAllContentControllers();
 
 // check write permissions first
-if(!isFolderWritable(ROOT.DS.'data'))
+if(!isFolderWritable(getDataDir()))
     exit(json_encode(array('status'=>'err','reason'=>'Data directory not writable')));
 else if(!isFolderWritable(ROOT.DS.'tmp'))
     exit(json_encode(array('status'=>'err','reason'=>'Temp directory not writable')));
@@ -40,8 +40,8 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
     //check for duplicates
     $sha1 = sha1_file($_FILES['file']["tmp_name"]);
     $ehash = sha1Exists($sha1);
-    if($ehash && file_exists(ROOT.DS.'data'.DS.$ehash.DS.$ehash))
-        exit(json_encode(array('status'=>'ok','hash'=>$ehash,'filetype'=>$type,'url'=>URL.$ehash)));
+    if($ehash && file_exists(getDataDir().DS.$ehash.DS.$ehash))
+        exit(json_encode(array('status'=>'ok','hash'=>$ehash,'filetype'=>$type,'url'=>getURL().$ehash)));
 
     //cross check filetype for controllers
     //
@@ -85,7 +85,7 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
         if(getDeleteCodeOfHash($answer['hash']))
         {
             $answer['delete_code'] = getDeleteCodeOfHash($answer['hash']);
-            $answer['delete_url'] = URL.'delete_'.getDeleteCodeOfHash($answer['hash']).'/'.$answer['hash'];
+            $answer['delete_url'] = getURL().'delete_'.getDeleteCodeOfHash($answer['hash']).'/'.$answer['hash'];
         }
             
 

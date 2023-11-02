@@ -9,7 +9,7 @@ class VideoController implements ContentController
 
     public function handleHash($hash,$url)
     {
-        $path = ROOT.DS.'data'.DS.$hash.DS.$hash;
+        $path = getDataDir().DS.$hash.DS.$hash;
 
         //@todo: - resize by changing $path
 
@@ -21,7 +21,7 @@ class VideoController implements ContentController
         {
             $s = sizeStringToWidthHeight($size);
             $width = $s['width'];
-            $newpath = ROOT.DS.'data'.DS.$hash.DS.$width.'_'.$hash;
+            $newpath = getDataDir().DS.$hash.DS.$width.'_'.$hash;
             if(!file_exists($newpath))
                 $this->resize($path,$newpath,$width);
             $path = $newpath;
@@ -79,7 +79,7 @@ class VideoController implements ContentController
         if(!$this->rightEncodedMP4($file))
             system("nohup php ".ROOT.DS.'tools'.DS.'re-encode_mp4.php force '.$hash." > /dev/null 2> /dev/null &");
         
-        return array('status'=>'ok','hash'=>$hash,'url'=>URL.$hash);
+        return array('status'=>'ok','hash'=>$hash,'url'=>getURL().$hash);
     }
 
 

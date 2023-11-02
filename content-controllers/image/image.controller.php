@@ -84,12 +84,12 @@ class ImageController implements ContentController
 
         storeFile($tmpfile,$hash,true);
         
-        return array('status'=>'ok','hash'=>$hash,'url'=>URL.$hash);
+        return array('status'=>'ok','hash'=>$hash,'url'=>getURL().$hash);
     }
 
     public function handleHash($hash,$url)
     {
-        $path = ROOT.DS.'data'.DS.$hash.DS.$hash;
+        $path = getDataDir().DS.$hash.DS.$hash;
         $type = getExtensionOfFilename($hash);
 
         //get all our sub files where all the good functions lie
@@ -142,7 +142,7 @@ class ImageController implements ContentController
             //so if we take all parameters in key=>value form and hash it
             //we get one nice little hash for every eventuality
             $modhash = md5(http_build_query($modifiers,'',','));
-            $newpath = ROOT.DS.'data'.DS.$hash.DS.$modhash.'_'.$hash;
+            $newpath = getDataDir().DS.$hash.DS.$modhash.'_'.$hash;
             $im = $this->getObjOfImage($path);
             $f = new Filter();
 
@@ -174,7 +174,7 @@ class ImageController implements ContentController
                         break;
 
                         case 'mp4':
-                            $mp4path = ROOT.DS.'data'.DS.$hash.DS.$hash.'mp4';
+                            $mp4path = getDataDir().DS.$hash.DS.$hash.'mp4';
                             if(!file_exists($mp4path))
                                 $this->gifToMP4($path,$mp4path);
                             $path = $mp4path;

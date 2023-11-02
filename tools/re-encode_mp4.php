@@ -31,7 +31,7 @@ require_once(ROOT . DS . 'content-controllers' . DS. 'video'. DS . 'video.contro
 if(!defined('FFMPEG_BINARY')||FFMPEG_BINARY=='' || !FFMPEG_BINARY) exit('Error: FFMPEG_BINARY not defined, no clue where to look');
 
 $vc = new VideoController();
-$dir = ROOT.DS.'data'.DS;
+$dir = getDataDir().DS;
 $dh  = opendir($dir);
 $localfiles = array();
 

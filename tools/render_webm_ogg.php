@@ -22,7 +22,7 @@ include_once(ROOT.DS.'inc/core.php');
 
 $pm = new PictshareModel();
 
-$dir = ROOT.DS.'data'.DS;
+$dir = getDataDir().DS;
 $dh  = opendir($dir);
 $localfiles = array();
 

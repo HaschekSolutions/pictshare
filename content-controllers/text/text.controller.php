@@ -9,7 +9,7 @@ class TextController implements ContentController
 
     public function handleHash($hash,$url)
     {
-        $path = ROOT.DS.'data'.DS.$hash.DS.$hash;
+        $path = getDataDir().DS.$hash.DS.$hash;
 
         if(in_array('raw',$url))
         {
@@ -50,11 +50,11 @@ class TextController implements ContentController
 
         storeFile($tmpfile,$hash,true);
         
-        return array('status'=>'ok','hash'=>$hash,'url'=>URL.$hash);
+        return array('status'=>'ok','hash'=>$hash,'url'=>getURL().$hash);
     }
 
     function getTypeOfText($hash)
     {
-        return file_get_contents(ROOT.DS.'data'.DS.$hash.DS.'type');
+        return file_get_contents(getDataDir().DS.$hash.DS.'type');
     }
 }
