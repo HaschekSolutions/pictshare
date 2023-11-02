@@ -30,6 +30,9 @@ $hash = sanatizeString(trim($_REQUEST['hash']))?sanatizeString(trim($_REQUEST['h
 
 $url = trim($_REQUEST['url']);
 
+if(checkURLForPrivateIPRange($url))
+    exit(json_encode(array('status'=>'err','reason'=>'Private IP range')));
+
 if(!$url || !startsWith($url, 'http'))
     exit(json_encode(array('status'=>'err','reason'=>'Invalid URL')));
     

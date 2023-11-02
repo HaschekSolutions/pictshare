@@ -928,3 +928,40 @@ function executeUploadPermission()
         }
     }
 }
+
+/**
+ * Checks if a URL is valid
+ * @param string $url
+ * @return boolean (true if valid, false if not)
+ */
+function checkURLForPrivateIPRange($url)
+{
+    $host = getHost($url);
+    $ip = gethostbyname($host);
+    if(is_public_ipv4($ip) || is_public_ipv6($ip)) return false;
+    return true;
+}
+
+function getHost($url){ 
+    $URIs = parse_url(trim($url)); 
+    $host = !empty($URIs['host'])? $URIs['host'] : explode('/', $URIs['path'])[0];
+    return $host;  
+} 
+
+function is_public_ipv4($ip=NULL)
+{
+    return filter_var(
+        $ip,
+        FILTER_VALIDATE_IP,
+        FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+    ) === $ip ? TRUE : FALSE;
+}
+
+function is_public_ipv6($ip=NULL)
+{
+    return filter_var(
+        $ip,
+        FILTER_VALIDATE_IP,
+        FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+    ) === $ip ? TRUE : FALSE;
+}
