@@ -968,7 +968,7 @@ function is_public_ipv6($ip=NULL)
 
 function getDataDir()
 {
-    if(defined('SPLITDATA') && SPLITDATA===true && getDomain())
+    if(defined('SPLIT_DATA_DIR') && SPLIT_DATA_DIR===true && getDomain() && in_array(getDomain(),explode(',',ALLOWED_DOMAINS)))
     {
         $dir = ROOT.DS.'data'.DS.getDomain();
         if(!is_dir($dir)) mkdir($dir);
