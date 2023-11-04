@@ -983,6 +983,7 @@ function getDomain($stripport=true)
     //strip port
     if(strpos($host,':')!==false)
         $strippedhost = substr($host,0,strpos($host,':'));
+    else $strippedhost = $host;
 
     //check if it's in ALLOWED_DOMAINS
     if(defined('ALLOWED_DOMAINS') && ALLOWED_DOMAINS!='')
