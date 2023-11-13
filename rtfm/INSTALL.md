@@ -16,7 +16,7 @@ PictShare is written to be run on a linux server with PHP 7 and nginx. We tried 
 
 
 ## Upgrading
-- On docker just `docker pull hascheksolutions/pictshare` and run the newer image
+- On docker just `docker pull hascheksolutions/pictshare:2` and run the newer image
 - Manual upgrade:
     - Just re-download the [PictShare zip](https://github.com/hascheksolutions/pictshare/archive/master.zip) file and extract and overwrite existing pictshare files. Uploads and config won't be affected.
     - Check if your ```/inc/config.inc.php``` file has all settings required by the ```/inc/example.config.inc.php``` since new options might get added in new versions

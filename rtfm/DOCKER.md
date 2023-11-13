@@ -2,7 +2,7 @@
 The fastest way to deploy PictShare is via the [official Docker package](https://github.com/HaschekSolutions/pictshare/pkgs/container/pictshare)
 
 ```bash
-docker run -d -p 80:80 -e "TITLE=My own PictShare" -e "URL=http://localhost/" ghcr.io/hascheksolutions/pictshare
+docker run -d -p 80:80 -e "TITLE=My own PictShare" -e "URL=http://localhost/" hascheksolutions/pictshare:2
 ```
 
 [![Docker setup](http://www.pictshare.net/b65dea2117.gif)](https://www.pictshare.net/8a1dec0973.mp4)
@@ -16,21 +16,21 @@ docker build -t pictshare -f docker/Dockerfile .
 
 ### Quick start
 ```bash
-docker run -d -p 80:80 --name=pictshare ghcr.io/hascheksolutions/pictshare
+docker run -d -p 80:80 --name=pictshare hascheksolutions/pictshare:2
 ```
 
 ### Persistent data
 ```bash
 mkdir /data/pictshareuploads
 chown 1000 -R /data/pictshareuploads
-docker run -d -v /data/pictshareuploads:/var/www/data -p 80:80 --name=pictshare ghcr.io/hascheksolutions/pictshare
+docker run -d -v /data/pictshareuploads:/var/www/data -p 80:80 --name=pictshare hascheksolutions/pictshare:2
 ```
 
 ### Persistent data with increased max upload size
 ```bash
 mkdir /data/pictshareuploads
 chown 1000 -R /data/pictshareuploads
-docker run -d -e "MAX_UPLOAD_SIZE=1024" -v /data/pictshareuploads:/var/www/data -p 80:80 --name=pictshare ghcr.io/hascheksolutions/pictshare
+docker run -d -e "MAX_UPLOAD_SIZE=1024" -v /data/pictshareuploads:/var/www/data -p 80:80 --name=pictshare hascheksolutions/pictshare:2
 ```
 
 ### Development
