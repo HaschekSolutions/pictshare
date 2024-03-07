@@ -425,7 +425,7 @@ function getUserIP()
 	$forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
 	$remote  = $_SERVER['REMOTE_ADDR'];
 	
-    if(strpos($forward,','))
+    if($forward != null && strpos($forward,','))
     {
         $a = explode(',',$forward);
         $forward = trim($a[0]);
