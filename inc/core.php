@@ -419,7 +419,7 @@ function endswith($string, $test) {
 
 function getUserIP()
 {
-    if(isCloudflare())
+    if(isCloudflare() || $_SERVER['HTTP_CF_CONNECTING_IP'])
         return $_SERVER['HTTP_CF_CONNECTING_IP'];
 	$client  = @$_SERVER['HTTP_CLIENT_IP'];
 	$forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
