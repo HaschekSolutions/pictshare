@@ -4,7 +4,9 @@
   </a>
 </p>
 
-<h1 align="center">PictShare</h1>
+<h1 align="center">PictShare v3</h1>
+
+<h3 align="center">Caution: Pictshare v3 may not be fully compatible with previous Pictshare versions!</h3>
 
 <h4 align="center">https://pictshare.net</h4>
 
@@ -32,6 +34,7 @@
 Table of contents
 =================
 * [Quick Start](#quickstart)
+* [Breaking changes in v3](#breaking-changes-in-v3)
 * [Features](#features)
 * [Installation](/rtfm/INSTALL.md)
 * [Configuration](/rtfm/CONFIG.md)
@@ -49,6 +52,17 @@ docker run -d -p 8080:80 --name=pictshare ghcr.io/hascheksolutions/pictshare
 ```
 
 Then open http://localhost:8080 in your browser
+
+## Breaking changes in v3
+
+#### File name in URL
+In Picthsare v3 we have changed the requirement for the image to be the last part of the URL. While with older PictShare Versions you could put the file name at any place of the URL, we now require the last part of the URL to be the file name.
+
+- before: https://pictshare.net/roate-left/1234.png/800x600/
+- now: https://pictshare.net/roate-left/600x600/1234.png
+
+#### API changes
+The API has been moved to a more consistant and RESTful design. The API documentation has been updated to reflect these changes.
 
 ## New Features
 
