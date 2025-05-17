@@ -3,6 +3,8 @@
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', dirname(__FILE__).DS.'..');
 
+ini_set('error_log', ROOT.DS.'logs'.DS.'error.log');
+
 //loading default settings if exist
 if(!file_exists(ROOT.DS.'src'.DS.'inc'.DS.'config.inc.php'))
 	exit('Rename /src/inc/example.config.inc.php to /src/inc/config.inc.php first!');

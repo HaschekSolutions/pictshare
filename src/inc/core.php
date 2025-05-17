@@ -471,10 +471,14 @@ function sha1Exists($sha1)
 //adds new sha to  the hash list
 function addSha1($hash,$sha1)
 {
+    if(!$sha1 || !$hash) return false;
     if(sha1Exists($sha1)) return;
     $fp = fopen(getDataDir().DS.'sha1.csv','a');
-    fwrite($fp,"$sha1;$hash\n");
-    fclose($fp);
+    if($fp)
+    {
+        fwrite($fp,"$sha1;$hash\n");
+        fclose($fp);
+    }
     return true;
 }
 
@@ -1013,6 +1017,10 @@ function getDomain($stripport=true)
         if(!in_array($strippedhost,$domains)) //always check without port
             return false;
         else return ($stripport ? $strippedhost : $host);
+    }
+    else if(!defined('ALLOWED_DOMAINS')){
+        //if not defined, we can use any domain
+        return ($stripport ? $strippedhost : $host);
     }
     else return false;
 }
