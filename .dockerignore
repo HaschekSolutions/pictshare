@@ -1,7 +1,8 @@
-tmp/*
-inc/config.inc.php
+src/inc/config.inc.php
 data/*
-lib/vendor
-bin
+logs/*
+tmp/*
+src/lib/vendor
 .git
 .github
+.vscode

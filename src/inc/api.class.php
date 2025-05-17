@@ -20,8 +20,24 @@ class API
             'upload' => $this->upload(),
             'delete' => $this->delete(),
             'info' => $this->info(),
+            'debug' => $this->debug(),
             default => array('status' => 'err', 'reason' => 'Unknown API call', 'hint' => 'Check https://github.com/HaschekSolutions/pictshare/blob/master/rtfm/API.md for more information'),
         };
+    }
+
+
+    public function debug(){
+        $data = array(
+            'server_name' => $_SERVER['SERVER_NAME'],
+            'server_addr' => $_SERVER['SERVER_ADDR'],
+            'remote_addr' => $_SERVER['REMOTE_ADDR'],
+            'remote_port' => $_SERVER['REMOTE_PORT'],
+            'HTTP_CF_CONNECTING_IP' => $_SERVER['HTTP_CF_CONNECTING_IP'],
+            'HTTP_CLIENT_IP' => $_SERVER['HTTP_CLIENT_IP'],
+            'HTTP_X_FORWARDED_FOR' => $_SERVER['HTTP_X_FORWARDED_FOR'],
+        );
+
+        return $data;
     }
 
     public function upload()

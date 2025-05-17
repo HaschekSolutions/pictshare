@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+  pictshare:
+    build:
+        context: .
+        dockerfile: docker/Dockerfile
+    environment:
+        - SERVER_NAME=:80
+        - URL=http://localhost:8080/
+        - ALLOWED_SUBNET=
+        - CONTENTCONTROLLERS=
+        - MASTER_DELETE_CODE=
+        - MASTER_DELETE_IP=
+        - UPLOAD_FORM_LOCATION=
+        - UPLOAD_CODE=
+        - ALLOW_BLOATING=
+        - JPEG_COMPRESSION=
+        - PNG_COMPRESSION=
+        - ALT_FOLDER=
+        - S3_BUCKET=
+        - S3_ACCESS_KEY=
+        - S3_SECRET_KEY=
+        - S3_ENDPOINT=
+        - S3_REGION=
+        - FTP_SERVER=
+        - FTP_PORT=
+        - FTP_USER=
+        - FTP_PASS=
+        - FTP_PASSIVEMODE=
+        - FTP_SSL=
+        - FTP_BASEDIR=
+        - ENCRYPTION_KEY=
+        - ALWAYS_WEBP=
+    ports:
+        - 8080:80
+    volumes:
+        - ./data:/app/public/data
+        - ./logs:/app/public/logs

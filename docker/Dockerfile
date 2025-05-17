@@ -8,6 +8,7 @@ WORKDIR /app/public
 # Add php.ini
 ADD configs/php.ini /usr/local/etc/php/php.ini
 
+# Prepare app tree
 ADD . /app/public/.
 
 ADD docker/rootfs/start.sh /etc/start.sh
