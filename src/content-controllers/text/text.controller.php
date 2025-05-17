@@ -31,7 +31,7 @@ class TextController implements ContentController
             }
         }
         else
-            renderTemplate('text',array('hash'=>$hash,'content'=>htmlentities(file_get_contents($path))));
+            return renderTemplate('text.html.php',array('hash'=>$hash,'content'=>htmlentities(file_get_contents($path))));
     }
 
     public function handleUpload($tmpfile,$hash=false)

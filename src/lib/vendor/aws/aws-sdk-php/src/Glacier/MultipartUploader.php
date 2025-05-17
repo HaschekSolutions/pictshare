@@ -101,6 +101,9 @@ class MultipartUploader extends AbstractUploader
      * - part_size: (int, default=int(1048576)) Part size, in bytes, to use when
      *   doing a multipart upload. This must between 1 MB and 4 GB, and must be
      *   a power of 2 (in megabytes).
+     * - prepare_data_source: (callable) Callback to invoke before starting the
+     *   multipart upload workflow. The callback should have a function
+     *   signature like `function () {...}`.
      * - state: (Aws\Multipart\UploadState) An object that represents the state
      *   of the multipart upload and that is used to resume a previous upload.
      *   When this options is provided, the `account_id`, `key`, and `part_size`
@@ -160,8 +163,8 @@ class MultipartUploader extends AbstractUploader
         // calculates the linear and tree hashes as the data is read.
         if ($seekable) {
             // Case 1: Stream is seekable, can make stream from new handle.
-            $body = Psr7\try_fopen($this->source->getMetadata('uri'), 'r');
-            $body = $this->limitPartStream(Psr7\stream_for($body));
+            $body = Psr7\Utils::tryFopen($this->source->getMetadata('uri'), 'r');
+            $body = $this->limitPartStream(Psr7\Utils::streamFor($body));
             // Create another stream decorated with hashing streams and read
             // through it, so we can get the hash values for the part.
             $decoratedBody = $this->decorateWithHashes($body, $data);
@@ -172,8 +175,8 @@ class MultipartUploader extends AbstractUploader
             // Case 2: Stream is not seekable, must store part in temp stream.
             $source = $this->limitPartStream($this->source);
             $source = $this->decorateWithHashes($source, $data);
-            $body = Psr7\stream_for();
-            Psr7\copy_to_stream($source, $body);
+            $body = Psr7\Utils::streamFor();
+            Psr7\Utils::copyToStream($source, $body);
         }
 
         // Do not create a part if the body size is zero.

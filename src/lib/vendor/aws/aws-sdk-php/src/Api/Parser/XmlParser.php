@@ -4,6 +4,7 @@ namespace Aws\Api\Parser;
 use Aws\Api\DateTimeResult;
 use Aws\Api\ListShape;
 use Aws\Api\MapShape;
+use Aws\Api\Parser\Exception\ParserException;
 use Aws\Api\Shape;
 use Aws\Api\StructureShape;
 
@@ -50,9 +51,26 @@ class XmlParser
             $node = $this->memberKey($member, $name);
             if (isset($value->{$node})) {
                 $target[$name] = $this->dispatch($member, $value->{$node});
+            } else {
+                $memberShape = $shape->getMember($name);
+                if (!empty($memberShape['xmlAttribute'])) {
+                    $target[$name] = $this->parse_xml_attribute(
+                        $shape,
+                        $memberShape,
+                        $value
+                    );
+                }
             }
         }
-
+        if (isset($shape['union'])
+            && $shape['union']
+            && empty($target)
+        ) {
+            foreach ($value as $key => $val) {
+                $name = $val->children()->getName();
+                $target['Unknown'][$name] = $val->$name;
+            }
+        }
         return $target;
     }
 
@@ -124,11 +142,38 @@ class XmlParser
 
     private function parse_boolean(Shape $shape, $value)
     {
-        return $value == 'true' ? true : false;
+        return $value == 'true';
     }
 
     private function parse_timestamp(Shape $shape, $value)
     {
-        return new DateTimeResult($value);
+        if (is_string($value)
+            || is_int($value)
+            || (is_object($value)
+                && method_exists($value, '__toString'))
+        ) {
+            return DateTimeResult::fromTimestamp(
+                (string) $value,
+                !empty($shape['timestampFormat']) ? $shape['timestampFormat'] : null
+            );
+        }
+        throw new ParserException('Invalid timestamp value passed to XmlParser::parse_timestamp');
+    }
+
+    private function parse_xml_attribute(Shape $shape, Shape $memberShape, $value)
+    {
+        $namespace = $shape['xmlNamespace']['uri']
+            ? $shape['xmlNamespace']['uri']
+            : '';
+        $prefix = $shape['xmlNamespace']['prefix']
+            ? $shape['xmlNamespace']['prefix']
+            : '';
+        if (!empty($prefix)) {
+            $prefix .= ':';
+        }
+        $key = str_replace($prefix, '', $memberShape['locationName']);
+
+        $attributes = $value->attributes($namespace);
+        return isset($attributes[$key]) ? (string) $attributes[$key] : null;
     }
 }

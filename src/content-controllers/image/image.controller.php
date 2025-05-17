@@ -11,8 +11,17 @@
 class ImageController implements ContentController
 {
     public const ctype = 'static';
+    public $mimes = array(
+        'image/gif',
+        'image/jpeg',
+        'image/png',
+        'image/bmp',
+        'image/webp',
+        'image/x-icon'
+    );
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('png','bmp','gif','jpg','jpeg','x-png','webp');}
+    
 
     public function handleUpload($tmpfile,$hash=false)
     {
@@ -210,8 +219,8 @@ class ImageController implements ContentController
                                 else
                                 {
                                     $data = array('url'=>implode('/',$url),'hash'=>$hash,'filesize'=>renderSize(filesize($path)));
-                                    renderTemplate('video',$data);
-                                    exit;
+                                    return renderTemplate('video.html.php',$data);
+                                    
                                 }
                         break;
                     }

@@ -2,8 +2,8 @@
 namespace Aws;
 
 use Aws\Api\Parser\Exception\ParserException;
+use Aws\Exception\AwsException;
 use GuzzleHttp\Promise;
-use GuzzleHttp\Promise\FulfilledPromise;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -48,7 +48,7 @@ class WrappedHttpHandler
         callable $httpHandler,
         callable $parser,
         callable $errorParser,
-        $exceptionClass = 'Aws\Exception\AwsException',
+        $exceptionClass = AwsException::class,
         $collectStats = false
     ) {
         $this->httpHandler = $httpHandler;
@@ -74,7 +74,7 @@ class WrappedHttpHandler
         $fn = $this->httpHandler;
         $options = $command['@http'] ?: [];
         $stats = [];
-        if ($this->collectStats) {
+        if ($this->collectStats || !empty($options['collect_stats'])) {
             $options['http_stats_receiver'] = static function (
                 array $transferStats
             ) use (&$stats) {
@@ -85,7 +85,7 @@ class WrappedHttpHandler
                 . ' receiver to Aws\WrappedHttpHandler is not supported.');
         }
 
-        return Promise\promise_for($fn($request, $options))
+        return Promise\Create::promiseFor($fn($request, $options))
             ->then(
                 function (
                     ResponseInterface $res
@@ -172,7 +172,11 @@ class WrappedHttpHandler
             $parts = ['response' => null];
         } else {
             try {
-                $parts = call_user_func($this->errorParser, $err['response']);
+                $parts = call_user_func(
+                    $this->errorParser,
+                    $err['response'],
+                    $command
+                );
                 $serviceError .= " {$parts['code']} ({$parts['type']}): "
                     . "{$parts['message']} - " . $err['response']->getBody();
             } catch (ParserException $e) {

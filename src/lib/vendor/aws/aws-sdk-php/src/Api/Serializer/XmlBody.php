@@ -80,7 +80,7 @@ class XmlBody
     private function defaultShape(Shape $shape, $name, $value, XMLWriter $xml)
     {
         $this->startElement($shape, $name, $xml);
-        $xml->writeRaw($value);
+        $xml->text($value);
         $xml->endElement();
     }
 
@@ -187,7 +187,10 @@ class XmlBody
         XMLWriter $xml
     ) {
         $this->startElement($shape, $name, $xml);
-        $xml->writeRaw(TimestampShape::format($value, 'iso8601'));
+        $timestampFormat = !empty($shape['timestampFormat'])
+            ? $shape['timestampFormat']
+            : 'iso8601';
+        $xml->writeRaw(TimestampShape::format($value, $timestampFormat));
         $xml->endElement();
     }
 

@@ -1,8 +1,8 @@
 <?php
 namespace Aws;
 
+use GuzzleHttp\Utils;
 use Psr\Http\Message\RequestInterface;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Promise\FulfilledPromise;
 
 //-----------------------------------------------------------------------------
@@ -141,8 +141,18 @@ function or_chain()
  */
 function load_compiled_json($path)
 {
-    if ($compiled = @include("$path.php")) {
-        return $compiled;
+    static $compiledList = [];
+
+    $compiledFilepath = "{$path}.php";
+
+    if (!isset($compiledList[$compiledFilepath])) {
+        if (is_readable($compiledFilepath)) {
+            $compiledList[$compiledFilepath] = include($compiledFilepath);
+        }
+    }
+
+    if (isset($compiledList[$compiledFilepath])) {
+        return $compiledList[$compiledFilepath];
     }
 
     if (!file_exists($path)) {
@@ -262,14 +272,17 @@ function describe_type($input)
  */
 function default_http_handler()
 {
-    $version = (string) ClientInterface::VERSION;
-    if ($version[0] === '5') {
-        return new \Aws\Handler\GuzzleV5\GuzzleHandler();
-    } elseif ($version[0] === '6') {
-        return new \Aws\Handler\GuzzleV6\GuzzleHandler();
-    } else {
-        throw new \RuntimeException('Unknown Guzzle version: ' . $version);
-    }
+    return new \Aws\Handler\Guzzle\GuzzleHandler();
+}
+
+/**
+ * Gets the default user agent string depending on the Guzzle version
+ *
+ * @return string
+ */
+function default_user_agent()
+{
+    return Utils::defaultUserAgent();
 }
 
 /**
@@ -341,11 +354,220 @@ function manifest($service = null)
     $service = strtolower($service);
     if (isset($manifest[$service])) {
         return $manifest[$service] + ['endpoint' => $service];
-    } elseif (isset($aliases[$service])) {
-        return manifest($aliases[$service]);
-    } else {
-        throw new \InvalidArgumentException(
-            "The service \"{$service}\" is not provided by the AWS SDK for PHP."
-        );
     }
+
+    if (isset($aliases[$service])) {
+        return manifest($aliases[$service]);
+    }
+
+    throw new \InvalidArgumentException(
+        "The service \"{$service}\" is not provided by the AWS SDK for PHP."
+    );
 }
+
+/**
+ * Checks if supplied parameter is a valid hostname
+ *
+ * @param string $hostname
+ * @return bool
+ */
+function is_valid_hostname($hostname)
+{
+    return (
+        preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*\.?$/i", $hostname)
+        && preg_match("/^.{1,253}$/", $hostname)
+        && preg_match("/^[^\.]{1,63}(\.[^\.]{0,63})*$/", $hostname)
+    );
+}
+
+/**
+ * Checks if supplied parameter is a valid host label
+ *
+ * @param $label
+ * @return bool
+ */
+function is_valid_hostlabel($label)
+{
+    return preg_match("/^(?!-)[a-zA-Z0-9-]{1,63}(?<!-)$/", $label);
+}
+
+/**
+ * Ignores '#' full line comments, which parse_ini_file no longer does
+ * in PHP 7+.
+ *
+ * @param $filename
+ * @param bool $process_sections
+ * @param int $scanner_mode
+ * @return array|bool
+ */
+function parse_ini_file(
+    $filename,
+    $process_sections = false,
+    $scanner_mode = INI_SCANNER_NORMAL)
+{
+    return parse_ini_string(
+        preg_replace('/^#.*\\n/m', "", file_get_contents($filename)),
+        $process_sections,
+        $scanner_mode
+    );
+}
+
+/**
+ * Outputs boolean value of input for a select range of possible values,
+ * null otherwise
+ *
+ * @param $input
+ * @return bool|null
+ */
+function boolean_value($input)
+{
+    if (is_bool($input)) {
+        return $input;
+    }
+
+    if ($input === 0) {
+        return false;
+    }
+
+    if ($input === 1) {
+        return true;
+    }
+
+    if (is_string($input)) {
+        switch (strtolower($input)) {
+            case "true":
+            case "on":
+            case "1":
+                return true;
+                break;
+
+            case "false":
+            case "off":
+            case "0":
+                return false;
+                break;
+        }
+    }
+    return null;
+}
+
+/**
+ * Parses ini sections with subsections (i.e. the service section)
+ *
+ * @param $filename
+ * @param $filename
+ * @return array
+ */
+function parse_ini_section_with_subsections($filename, $section_name) {
+    $config = [];
+    $stream = fopen($filename, 'r');
+
+    if (!$stream) {
+        return $config;
+    }
+
+    $current_subsection = '';
+
+    while (!feof($stream)) {
+        $line = trim(fgets($stream));
+
+        if (empty($line) || in_array($line[0], [';', '#'])) {
+            continue;
+        }
+
+        if (preg_match('/^\[.*\]$/', $line)
+            && trim($line, '[]') === $section_name)
+        {
+            while (!feof($stream)) {
+                $line = trim(fgets($stream));
+
+                if (empty($line) || in_array($line[0], [';', '#'])) {
+                    continue;
+                }
+
+                if (preg_match('/^\[.*\]$/', $line)
+                    && trim($line, '[]') === $section_name)
+                {
+                    continue;
+                } elseif (strpos($line, '[') === 0) {
+                    break;
+                }
+
+                if (strpos($line, ' = ') !== false) {
+                    list($key, $value) = explode(' = ', $line, 2);
+                    if (empty($current_subsection)) {
+                        $config[$key] = $value;
+                    } else {
+                        $config[$current_subsection][$key] = $value;
+                    }
+                } else {
+                    $current_subsection = trim(str_replace('=', '', $line));
+                    $config[$current_subsection] = [];
+                }
+            }
+        }
+    }
+
+    fclose($stream);
+    return $config;
+}
+
+/**
+ * Checks if an input is a valid epoch time
+ *
+ * @param $input
+ * @return bool
+ */
+function is_valid_epoch($input)
+{
+    if (is_string($input) || is_numeric($input)) {
+        if (is_string($input) && !preg_match("/^-?[0-9]+\.?[0-9]*$/", $input)) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Checks if an input is a fips pseudo region
+ *
+ * @param $region
+ * @return bool
+ */
+function is_fips_pseudo_region($region)
+{
+    return strpos($region, 'fips-') !== false || strpos($region, '-fips') !== false;
+}
+
+/**
+ * Returns a region without a fips label
+ *
+ * @param $region
+ * @return string
+ */
+function strip_fips_pseudo_regions($region)
+{
+    return str_replace(['fips-', '-fips'], ['', ''], $region);
+}
+
+/**
+ * Checks if an array is associative
+ *
+ * @param array $array
+ *
+ * @return bool
+ */
+function is_associative(array $array): bool
+{
+    if (empty($array)) {
+        return false;
+    }
+
+    if (function_exists('array_is_list')) {
+        return !array_is_list($array);
+    }
+
+    return array_keys($array) !== range(0, count($array) - 1);
+}
+

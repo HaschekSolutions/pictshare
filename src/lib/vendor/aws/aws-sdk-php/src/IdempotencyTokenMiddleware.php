@@ -37,7 +37,7 @@ class IdempotencyTokenMiddleware
      */
     public static function wrap(
         Service $service,
-        callable $bytesGenerator = null
+        ?callable $bytesGenerator = null
     ) {
         return function (callable $handler) use ($service, $bytesGenerator) {
             return new self($handler, $service, $bytesGenerator);
@@ -47,7 +47,7 @@ class IdempotencyTokenMiddleware
     public function __construct(
         callable $nextHandler,
         Service $service,
-        callable $bytesGenerator = null
+        ?callable $bytesGenerator = null
     ) {
         $this->bytesGenerator = $bytesGenerator
             ?: $this->findCompatibleRandomSource();
@@ -57,7 +57,7 @@ class IdempotencyTokenMiddleware
 
     public function __invoke(
         CommandInterface $command,
-        RequestInterface $request = null
+        ?RequestInterface $request = null
     ) {
         $handler = $this->nextHandler;
         if ($this->bytesGenerator) {
@@ -105,9 +105,13 @@ class IdempotencyTokenMiddleware
     {
         if (function_exists('random_bytes')) {
             return 'random_bytes';
-        } elseif (function_exists('openssl_random_pseudo_bytes')) {
+        }
+
+        if (function_exists('openssl_random_pseudo_bytes')) {
             return 'openssl_random_pseudo_bytes';
-        } elseif (function_exists('mcrypt_create_iv')) {
+        }
+
+        if (function_exists('mcrypt_create_iv')) {
             return 'mcrypt_create_iv';
         }
     }

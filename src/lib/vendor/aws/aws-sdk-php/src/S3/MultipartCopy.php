@@ -1,6 +1,8 @@
 <?php
+
 namespace Aws\S3;
 
+use Aws\Arn\ArnParser;
 use Aws\Multipart\AbstractUploadManager;
 use Aws\ResultInterface;
 use GuzzleHttp\Psr7;
@@ -9,8 +11,10 @@ class MultipartCopy extends AbstractUploadManager
 {
     use MultipartUploadingTrait;
 
-    /** @var string */
+    /** @var string|array */
     private $source;
+    /** @var string */
+    private $sourceVersionId;
     /** @var ResultInterface */
     private $sourceMetadata;
 
@@ -48,21 +52,37 @@ class MultipartCopy extends AbstractUploadManager
      *   options are ignored.
      * - source_metadata: (Aws\ResultInterface) An object that represents the
      *   result of executing a HeadObject command on the copy source.
+     * - display_progress: (boolean) Set true to track status in 1/8th increments
+     *   for upload.
      *
      * @param S3ClientInterface $client Client used for the upload.
-     * @param string            $source Location of the data to be copied
-     *                                  (in the form /<bucket>/<key>).
-     * @param array             $config Configuration used to perform the upload.
+     * @param string|array $source Location of the data to be copied (in the
+     *                       form /<bucket>/<key>).  If the key contains a '?'
+     *                       character, instead pass an array of source_key,
+     *                       source_bucket, and source_version_id.
+     * @param array $config Configuration used to perform the upload.
      */
     public function __construct(
         S3ClientInterface $client,
         $source,
         array $config = []
     ) {
-        $this->source = '/' . ltrim($source, '/');
-        parent::__construct($client, array_change_key_case($config) + [
-            'source_metadata' => null
-        ]);
+        if (is_array($source)) {
+            $this->source = $source;
+        } else {
+            $this->source = $this->getInputSource($source);
+        }
+
+        parent::__construct(
+            $client,
+            array_change_key_case($config) + ['source_metadata' => null]
+        );
+
+        if ($this->displayProgress) {
+            $this->getState()->setProgressThresholds(
+                $this->sourceMetadata["ContentLength"]
+            );
+        }
     }
 
     /**
@@ -80,12 +100,12 @@ class MultipartCopy extends AbstractUploadManager
         return [
             'command' => [
                 'initiate' => 'CreateMultipartUpload',
-                'upload'   => 'UploadPartCopy',
+                'upload' => 'UploadPartCopy',
                 'complete' => 'CompleteMultipartUpload',
             ],
             'id' => [
-                'bucket'    => 'Bucket',
-                'key'       => 'Key',
+                'bucket' => 'Bucket',
+                'key' => 'Key',
                 'upload_id' => 'UploadId',
             ],
             'part_num' => 'PartNumber',
@@ -101,8 +121,7 @@ class MultipartCopy extends AbstractUploadManager
             if (!$this->state->hasPartBeenUploaded($partNumber)) {
                 $command = $this->client->getCommand(
                     $this->info['command']['upload'],
-                    $this->createPart($partNumber, $parts)
-                        + $this->getState()->getId()
+                    $this->createPart($partNumber, $parts) + $this->getState()->getId()
                 );
                 $command->getHandlerList()->appendSign($resultHandler, 'mup');
                 yield $command;
@@ -120,9 +139,29 @@ class MultipartCopy extends AbstractUploadManager
         foreach ($params as $k => $v) {
             $data[$k] = $v;
         }
+        // The source parameter here is usually a string, but can be overloaded as an array
+        // if the key contains a '?' character to specify where the query parameters start
+        if (is_array($this->source)) {
+            $key = str_replace('%2F', '/', rawurlencode($this->source['source_key']));
+            $bucket = $this->source['source_bucket'];
+        } else {
+            list($bucket, $key) = explode('/', ltrim($this->source, '/'), 2);
+            $key = implode(
+                '/',
+                array_map(
+                    'urlencode',
+                    explode('/', rawurldecode($key))
+                )
+            );
+        }
 
-        $data['CopySource'] = $this->source;
+        $uri = ArnParser::isArn($bucket) ? '' : '/';
+        $uri .= $bucket . '/' . $key;
+        $data['CopySource'] = $uri;
         $data['PartNumber'] = $partNumber;
+        if (!empty($this->sourceVersionId)) {
+            $data['CopySource'] .= "?versionId=" . $this->sourceVersionId;
+        }
 
         $defaultPartSize = $this->determinePartSize();
         $startByte = $defaultPartSize * ($partNumber - 1);
@@ -164,20 +203,47 @@ class MultipartCopy extends AbstractUploadManager
         if ($this->config['source_metadata'] instanceof ResultInterface) {
             return $this->config['source_metadata'];
         }
-
-        list($bucket, $key) = explode('/', ltrim($this->source, '/'), 2);
-        $headParams = [
-            'Bucket' => $bucket,
-            'Key' => $key,
-        ];
-        if (strpos($key, '?')) {
-            list($key, $query) = explode('?', $key, 2);
-            $headParams['Key'] = $key;
-            $query = Psr7\parse_query($query, false);
-            if (isset($query['versionId'])) {
-                $headParams['VersionId'] = $query['versionId'];
+        //if the source variable was overloaded with an array, use the inputs for key and bucket
+        if (is_array($this->source)) {
+            $headParams = [
+                'Key' => $this->source['source_key'],
+                'Bucket' => $this->source['source_bucket']
+            ];
+            if (isset($this->source['source_version_id'])) {
+                $this->sourceVersionId = $this->source['source_version_id'];
+                $headParams['VersionId'] = $this->sourceVersionId;
+            }
+        //otherwise, use the default source parsing behavior
+        } else {
+            list($bucket, $key) = explode('/', ltrim($this->source, '/'), 2);
+            $headParams = [
+                'Bucket' => $bucket,
+                'Key' => $key,
+            ];
+            if (strpos($key, '?')) {
+                list($key, $query) = explode('?', $key, 2);
+                $headParams['Key'] = $key;
+                $query = Psr7\Query::parse($query, false);
+                if (isset($query['versionId'])) {
+                    $this->sourceVersionId = $query['versionId'];
+                    $headParams['VersionId'] = $this->sourceVersionId;
+                }
             }
         }
         return $this->client->headObject($headParams);
+    }
+
+    /**
+     * Get the url decoded input source, starting with a slash if it is not an
+     * ARN to standardize the source location syntax.
+     *
+     * @param string $inputSource The source that was passed to the constructor
+     * @return string The source, starting with a slash if it's not an arn
+     */
+    private function getInputSource($inputSource)
+    {
+        $sourceBuilder = ArnParser::isArn($inputSource) ? '' : '/';
+        $sourceBuilder .= ltrim(rawurldecode($inputSource), '/');
+        return $sourceBuilder;
     }
 }

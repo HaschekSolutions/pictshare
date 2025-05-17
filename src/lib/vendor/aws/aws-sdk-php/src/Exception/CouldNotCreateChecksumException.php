@@ -1,9 +1,15 @@
 <?php
 namespace Aws\Exception;
 
-class CouldNotCreateChecksumException extends \RuntimeException
+use Aws\HasMonitoringEventsTrait;
+use Aws\MonitoringEventsInterface;
+
+class CouldNotCreateChecksumException extends \RuntimeException implements
+    MonitoringEventsInterface
 {
-    public function __construct($algorithm, \Exception $previous = null)
+    use HasMonitoringEventsTrait;
+
+    public function __construct($algorithm, ?\Exception $previous = null)
     {
         $prefix = $algorithm === 'md5' ? "An" : "A";
         parent::__construct("{$prefix} {$algorithm} checksum could not be "

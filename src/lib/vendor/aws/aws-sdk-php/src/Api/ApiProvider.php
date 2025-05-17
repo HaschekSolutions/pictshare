@@ -165,7 +165,7 @@ class ApiProvider
     }
 
     /**
-     * Execute the the provider.
+     * Execute the provider.
      *
      * @param string $type    Type of data ('api', 'waiter', 'paginator').
      * @param string $service Service name.
@@ -205,7 +205,7 @@ class ApiProvider
      * @param string $modelsDir Directory containing service models.
      * @param array  $manifest  The API version manifest data.
      */
-    private function __construct($modelsDir, array $manifest = null)
+    private function __construct($modelsDir, ?array $manifest = null)
     {
         $this->manifest = $manifest;
         $this->modelsDir = rtrim($modelsDir, '/');

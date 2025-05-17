@@ -10,7 +10,6 @@ use Aws\Result;
 use Aws\ResultInterface;
 use GuzzleHttp\Promise;
 use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Psr7;
 use InvalidArgumentException as IAE;
 use Psr\Http\Message\RequestInterface;
 
@@ -25,13 +24,14 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
 
     /** @var array Default values for base multipart configuration */
     private static $defaultConfig = [
-        'part_size'       => null,
-        'state'           => null,
-        'concurrency'     => self::DEFAULT_CONCURRENCY,
-        'before_initiate' => null,
-        'before_upload'   => null,
-        'before_complete' => null,
-        'exception_class' => 'Aws\Exception\MultipartUploadException',
+        'part_size'           => null,
+        'state'               => null,
+        'concurrency'         => self::DEFAULT_CONCURRENCY,
+        'prepare_data_source' => null,
+        'before_initiate'     => null,
+        'before_upload'       => null,
+        'before_complete'     => null,
+        'exception_class'     => MultipartUploadException::class,
     ];
 
     /** @var Client Client used for the upload. */
@@ -49,6 +49,9 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
     /** @var UploadState State used to manage the upload. */
     protected $state;
 
+    /** @var bool Configuration used to indicate if upload progress will be displayed. */
+    protected $displayProgress;
+
     /**
      * @param Client $client
      * @param array  $config
@@ -59,6 +62,12 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
         $this->info = $this->loadUploadWorkflowInfo();
         $this->config = $config + self::$defaultConfig;
         $this->state = $this->determineState();
+
+        if (isset($config['display_progress'])
+            && is_bool($config['display_progress'])
+        ) {
+            $this->displayProgress = $config['display_progress'];
+        }
     }
 
     /**
@@ -88,19 +97,26 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
      *
      * @return PromiseInterface
      */
-    public function promise()
+    public function promise(): PromiseInterface
     {
         if ($this->promise) {
             return $this->promise;
         }
 
-        return $this->promise = Promise\coroutine(function () {
+        return $this->promise = Promise\Coroutine::of(function () {
             // Initiate the upload.
             if ($this->state->isCompleted()) {
                 throw new \LogicException('This multipart upload has already '
                     . 'been completed or aborted.'
                 );
-            } elseif (!$this->state->isInitiated()) {
+            }
+
+            if (!$this->state->isInitiated()) {
+                // Execute the prepare callback.
+                if (is_callable($this->config["prepare_data_source"])) {
+                    $this->config["prepare_data_source"]();
+                }
+
                 $result = (yield $this->execCommand('initiate', $this->getInitiateParams()));
                 $this->state->setUploadId(
                     $this->info['id']['upload_id'],
@@ -130,13 +146,29 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
             // Complete the multipart upload.
             yield $this->execCommand('complete', $this->getCompleteParams());
             $this->state->setStatus(UploadState::COMPLETED);
-        })->otherwise(function (\Exception $e) {
-            // Throw errors from the operations as a specific Multipart error.
-            if ($e instanceof AwsException) {
-                $e = new $this->config['exception_class']($this->state, $e);
-            }
-            throw $e;
-        });
+        })->otherwise($this->buildFailureCatch());
+    }
+
+    private function transformException($e)
+    {
+        // Throw errors from the operations as a specific Multipart error.
+        if ($e instanceof AwsException) {
+            $e = new $this->config['exception_class']($this->state, $e);
+        }
+        throw $e;
+    }
+
+    private function buildFailureCatch()
+    {
+        if (interface_exists("Throwable")) {
+            return function (\Throwable $e) {
+                return $this->transformException($e);
+            };
+        } else {
+            return function (\Exception $e) {
+                return $this->transformException($e);
+            };
+        }
     }
 
     protected function getConfig()
@@ -195,10 +227,8 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
     /**
      * Based on the config and service-specific workflow info, creates a
      * `Promise` for an `UploadState` object.
-     *
-     * @return PromiseInterface A `Promise` that resolves to an `UploadState`.
      */
-    private function determineState()
+    private function determineState(): UploadState
     {
         // If the state was provided via config, then just use it.
         if ($this->config['state'] instanceof UploadState) {
@@ -217,7 +247,7 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
             }
             $id[$param] = $this->config[$key];
         }
-        $state = new UploadState($id);
+        $state = new UploadState($id, $this->config);
         $state->setPartSize($this->determinePartSize());
 
         return $state;
@@ -231,7 +261,7 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
      *
      * @return PromiseInterface
      */
-    private function execCommand($operation, array $params)
+    protected function execCommand($operation, array $params)
     {
         // Create the command.
         $command = $this->client->getCommand(
@@ -261,12 +291,12 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
      *
      * @return callable
      */
-    private function getResultHandler(&$errors = [])
+    protected function getResultHandler(&$errors = [])
     {
         return function (callable $handler) use (&$errors) {
             return function (
                 CommandInterface $command,
-                RequestInterface $request = null
+                ?RequestInterface $request = null
             ) use ($handler, &$errors) {
                 return $handler($command, $request)->then(
                     function (ResultInterface $result) use ($command) {

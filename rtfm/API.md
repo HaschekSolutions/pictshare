@@ -1,8 +1,8 @@
 # API
 
-# upload.php
+# upload
 
-- URL https://pictshare.net/api/upload.php
+- URL https://pictshare.net/api/upload
 - Method: POST file
 - Post var name: file
 - Answer type: JSON
@@ -30,7 +30,7 @@ If there is an error the server will answer with status:err and a reason
 
 1. Uploading a file called test.jpg via curl
 
-```curl -F "file=@test.jpg" https://pictshare.net/api/upload.php```
+```curl -F "file=@test.jpg" https://pictshare.net/api/upload```
 
 Answer from the server:
 ```json
@@ -42,7 +42,7 @@ Answer from the server:
 Put this in your `.bashrc` or `.zshrc`:
 ```
 pict () {
-    curl -s -F "file=@${1:--}" https://pictshare.net/api/upload.php | jq -r '.url';
+    curl -s -F "file=@${1:--}" https://pictshare.net/api/upload | jq -r '.url';
 }
 ```
 

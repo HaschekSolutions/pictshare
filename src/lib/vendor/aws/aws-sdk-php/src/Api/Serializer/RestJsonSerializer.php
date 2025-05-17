@@ -24,7 +24,7 @@ class RestJsonSerializer extends RestSerializer
     public function __construct(
         Service $api,
         $endpoint,
-        JsonBody $jsonFormatter = null
+        ?JsonBody $jsonFormatter = null
     ) {
         parent::__construct($api, $endpoint);
         $this->contentType = JsonBody::getContentType($api);
@@ -33,7 +33,10 @@ class RestJsonSerializer extends RestSerializer
 
     protected function payload(StructureShape $member, array $value, array &$opts)
     {
+        $body = isset($value) ?
+            ((string) $this->jsonFormatter->build($member, $value))
+            : "{}";
         $opts['headers']['Content-Type'] = $this->contentType;
-        $opts['body'] = (string) $this->jsonFormatter->build($member, $value);
+        $opts['body'] = $body;
     }
 }

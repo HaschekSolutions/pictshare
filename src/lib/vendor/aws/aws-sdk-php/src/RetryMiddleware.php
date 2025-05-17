@@ -2,17 +2,21 @@
 namespace Aws;
 
 use Aws\Exception\AwsException;
-use Exception;
+use Aws\Retry\RetryHelperTrait;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
-use GuzzleHttp\Promise;
 use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Psr7;
+use GuzzleHttp\Promise;
 
 /**
- * @internal Middleware that retries failures.
+ * Middleware that retries failures. V1 implemention that supports 'legacy' mode.
+ *
+ * @internal
  */
 class RetryMiddleware
 {
+    use RetryHelperTrait;
+
     private static $retryStatusCodes = [
         500 => true,
         502 => true,
@@ -29,6 +33,10 @@ class RetryMiddleware
         'ProvisionedThroughputExceededException' => true,
         'RequestThrottled'                       => true,
         'BandwidthLimitExceeded'                 => true,
+        'RequestThrottledException'              => true,
+        'TooManyRequestsException'               => true,
+        'IDPCommunicationError'                  => true,
+        'EC2ThrottledException'                  => true,
     ];
 
     private $decider;
@@ -51,40 +59,137 @@ class RetryMiddleware
     /**
      * Creates a default AWS retry decider function.
      *
-     * @param int $maxRetries
+     * The optional $extraConfig parameter is an associative array
+     * that specifies additional retry conditions on top of the ones specified
+     * by default by the Aws\RetryMiddleware class, with the following keys:
      *
+     * - errorCodes: (string[]) An indexed array of AWS exception codes to retry.
+     *   Optional.
+     * - statusCodes: (int[]) An indexed array of HTTP status codes to retry.
+     *   Optional.
+     * - curlErrors: (int[]) An indexed array of Curl error codes to retry. Note
+     *   these should be valid Curl constants. Optional.
+     *
+     * @param int $maxRetries
+     * @param array $extraConfig
      * @return callable
      */
-    public static function createDefaultDecider($maxRetries = 3)
-    {
+    public static function createDefaultDecider(
+        $maxRetries = 3,
+        $extraConfig = []
+    ) {
+        $retryCurlErrors = [];
+        if (extension_loaded('curl')) {
+            $retryCurlErrors[CURLE_RECV_ERROR] = true;
+        }
+
         return function (
             $retries,
             CommandInterface $command,
             RequestInterface $request,
-            ResultInterface $result = null,
+            ?ResultInterface $result = null,
             $error = null
-        ) use ($maxRetries) {
+        ) use ($maxRetries, $retryCurlErrors, $extraConfig) {
             // Allow command-level options to override this value
             $maxRetries = null !== $command['@retries'] ?
                 $command['@retries']
                 : $maxRetries;
 
+            $isRetryable = self::isRetryable(
+                $result,
+                $error,
+                $retryCurlErrors,
+                $extraConfig
+            );
+
             if ($retries >= $maxRetries) {
-                return false;
-            } elseif (!$error) {
-                return isset(self::$retryStatusCodes[$result['@metadata']['statusCode']]);
-            } elseif (!($error instanceof AwsException)) {
-                return false;
-            } elseif ($error->isConnectionError()) {
-                return true;
-            } elseif (isset(self::$retryCodes[$error->getAwsErrorCode()])) {
-                return true;
-            } elseif (isset(self::$retryStatusCodes[$error->getStatusCode()])) {
-                return true;
-            } else {
+                if (!empty($error)
+                    && $error instanceof AwsException
+                    && $isRetryable
+                ) {
+                    $error->setMaxRetriesExceeded();
+                }
                 return false;
             }
+
+            return $isRetryable;
         };
+    }
+
+    private static function isRetryable(
+        $result,
+        $error,
+        $retryCurlErrors,
+        $extraConfig = []
+    ) {
+        $errorCodes = self::$retryCodes;
+        if (!empty($extraConfig['error_codes'])
+            && is_array($extraConfig['error_codes'])
+        ) {
+            foreach($extraConfig['error_codes'] as $code) {
+                $errorCodes[$code] = true;
+            }
+        }
+
+        $statusCodes = self::$retryStatusCodes;
+        if (!empty($extraConfig['status_codes'])
+            && is_array($extraConfig['status_codes'])
+        ) {
+            foreach($extraConfig['status_codes'] as $code) {
+                $statusCodes[$code] = true;
+            }
+        }
+
+        if (!empty($extraConfig['curl_errors'])
+            && is_array($extraConfig['curl_errors'])
+        ) {
+            foreach($extraConfig['curl_errors'] as $code) {
+                $retryCurlErrors[$code] = true;
+            }
+        }
+
+        if (!$error) {
+            if (!isset($result['@metadata']['statusCode'])) {
+                return false;
+            }
+            return isset($statusCodes[$result['@metadata']['statusCode']]);
+        }
+
+        if (!($error instanceof AwsException)) {
+            return false;
+        }
+
+        if ($error->isConnectionError()) {
+            return true;
+        }
+
+        if (isset($errorCodes[$error->getAwsErrorCode()])) {
+            return true;
+        }
+
+        if (isset($statusCodes[$error->getStatusCode()])) {
+            return true;
+        }
+
+        if (count($retryCurlErrors)
+            && ($previous = $error->getPrevious())
+            && $previous instanceof RequestException
+        ) {
+            if (method_exists($previous, 'getHandlerContext')) {
+                $context = $previous->getHandlerContext();
+                return !empty($context['errno'])
+                    && isset($retryCurlErrors[$context['errno']]);
+            }
+
+            $message = $previous->getMessage();
+            foreach (array_keys($retryCurlErrors) as $curlError) {
+                if (strpos($message, 'cURL error ' . $curlError . ':') === 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -95,6 +200,8 @@ class RetryMiddleware
      * @param $retries - The number of retries that have already been attempted
      *
      * @return int
+     *
+     * @link https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
      */
     public static function exponentialDelay($retries)
     {
@@ -109,10 +216,11 @@ class RetryMiddleware
      */
     public function __invoke(
         CommandInterface $command,
-        RequestInterface $request = null
+        ?RequestInterface $request = null
     ) {
         $retries = 0;
         $requestStats = [];
+        $monitoringEvents = [];
         $handler = $this->nextHandler;
         $decider = $this->decider;
         $delay = $this->delay;
@@ -127,13 +235,21 @@ class RetryMiddleware
             $request,
             &$retries,
             &$requestStats,
+            &$monitoringEvents,
             &$g
         ) {
             $this->updateHttpStats($value, $requestStats);
 
+            if ($value instanceof MonitoringEventsInterface) {
+                $reversedEvents = array_reverse($monitoringEvents);
+                $monitoringEvents = array_merge($monitoringEvents, $value->getMonitoringEvents());
+                foreach ($reversedEvents as $event) {
+                    $value->prependMonitoringEvent($event);
+                }
+            }
             if ($value instanceof \Exception || $value instanceof \Throwable) {
                 if (!$decider($retries, $command, $request, null, $value)) {
-                    return \GuzzleHttp\Promise\rejection_for(
+                    return Promise\Create::rejectionFor(
                         $this->bindStatsToReturn($value, $requestStats)
                     );
                 }
@@ -157,54 +273,5 @@ class RetryMiddleware
         };
 
         return $handler($command, $request)->then($g, $g);
-    }
-
-    private function addRetryHeader($request, $retries, $delayBy)
-    {
-        return $request->withHeader('aws-sdk-retry', "{$retries}/{$delayBy}");
-    }
-
-    private function updateStats($retries, $delay, array &$stats)
-    {
-        if (!isset($stats['total_retry_delay'])) {
-            $stats['total_retry_delay'] = 0;
-        }
-
-        $stats['total_retry_delay'] += $delay;
-        $stats['retries_attempted'] = $retries;
-    }
-
-    private function updateHttpStats($value, array &$stats)
-    {
-        if (empty($stats['http'])) {
-            $stats['http'] = [];
-        }
-
-        if ($value instanceof AwsException) {
-            $resultStats = isset($value->getTransferInfo('http')[0])
-                ? $value->getTransferInfo('http')[0]
-                : [];
-            $stats['http'] []= $resultStats;
-        } elseif ($value instanceof ResultInterface) {
-            $resultStats = isset($value['@metadata']['transferStats']['http'][0])
-                ? $value['@metadata']['transferStats']['http'][0]
-                : [];
-            $stats['http'] []= $resultStats;
-        }
-    }
-
-    private function bindStatsToReturn($return, array $stats)
-    {
-        if ($return instanceof ResultInterface) {
-            if (!isset($return['@metadata'])) {
-                $return['@metadata'] = [];
-            }
-
-            $return['@metadata']['transferStats'] = $stats;
-        } elseif ($return instanceof AwsException) {
-            $return->setTransferInfo($stats);
-        }
-
-        return $return;
     }
 }

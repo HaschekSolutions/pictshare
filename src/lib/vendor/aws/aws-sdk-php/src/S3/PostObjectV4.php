@@ -56,7 +56,7 @@ class PostObjectV4
         $credentials   = $this->client->getCredentials()->wait();
 
         if ($securityToken = $credentials->getSecurityToken()) {
-            array_push($options, ['x-amz-security-token' => $securityToken]);
+            $options [] = ['x-amz-security-token' => $securityToken];
             $formInputs['X-Amz-Security-Token'] = $securityToken;
         }
 
@@ -143,8 +143,9 @@ class PostObjectV4
     {
         $uri = new Uri($this->client->getEndpoint());
 
-        if ($uri->getScheme() === 'https'
-            && strpos($this->bucket, '.') !== false
+        if ($this->client->getConfig('use_path_style_endpoint') === true
+            || ($uri->getScheme() === 'https'
+            && strpos($this->bucket, '.') !== false)
         ) {
             // Use path-style URLs
             $uri = $uri->withPath("/{$this->bucket}");

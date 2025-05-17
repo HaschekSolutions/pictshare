@@ -5,24 +5,20 @@
 _maxUploadSize() {
     echo "[i] Setting uploadsize to ${MAX_UPLOAD_SIZE}M"
 	
-	sed -i "/post_max_size/c\post_max_size=${MAX_UPLOAD_SIZE}M" /etc/php82/php.ini
-	sed -i "/upload_max_filesize/c\upload_max_filesize=${MAX_UPLOAD_SIZE}M" /etc/php82/php.ini
+	sed -i "/post_max_size/c\post_max_size=${MAX_UPLOAD_SIZE}M" /usr/local/etc/php/php.ini
+	sed -i "/upload_max_filesize/c\upload_max_filesize=${MAX_UPLOAD_SIZE}M" /usr/local/etc/php/php.ini
 
     # set error reporting no notices, no warnings
-    sed -i "/^error_reporting/c\error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING & ~E_NOTICE" /etc/php82/php.ini
-    
-	sed -i -e "s/50M/${MAX_UPLOAD_SIZE}M/g" /etc/nginx/http.d/default.conf
+    sed -i "/^error_reporting/c\error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING & ~E_NOTICE" /usr/local/etc/php/php.ini
 
     MAX_RAM=$((MAX_UPLOAD_SIZE + 30)) # 30megs more than the upload size
     echo "[i] Also changing memory limit of PHP to ${MAX_RAM}M"
-    sed -i -e "s/128M/${MAX_RAM}M/g" /etc/php82/php.ini
-	sed -i "/memory_limit/c\memory_limit=${MAX_RAM}M" /etc/php82/php.ini
+    sed -i -e "s/128M/${MAX_RAM}M/g" /usr/local/etc/php/php.ini
+	sed -i "/memory_limit/c\memory_limit=${MAX_RAM}M" /usr/local/etc/php/php.ini
 }
 
 _filePermissions() {
-    chown -R nginx:nginx /var/www
-    touch data/sha1.csv
-    chown nginx:nginx data/sha1.csv
+    echo "[i] Setting file permissions"
 }
 
 _buildConfig() {
@@ -67,7 +63,7 @@ _buildConfig() {
 
 echo 'Starting Pictshare'
 
-cd /var/www/
+cd /app/public/
 
 if [[ ${MAX_UPLOAD_SIZE:=100} =~ ^[0-9]+$ ]]; then
         _maxUploadSize
@@ -78,19 +74,8 @@ if [[ ${SKIP_FILEPERMISSIONS:=false} != true ]]; then
         _filePermissions
 fi
 
-echo ' [+] Starting php'
-php-fpm82
-
 echo ' [+] Creating config'
 
-_buildConfig > inc/config.inc.php
+_buildConfig > src/inc/config.inc.php
 
-echo ' [+] Starting nginx'
-
-mkdir -p /var/log/nginx/pictshare
-touch /var/log/nginx/pictshare/access.log
-touch /var/log/nginx/pictshare/error.log
-
-nginx
-
-tail -f /var/log/nginx/pictshare/*.log
+frankenphp php-server --listen ":80" --root /app/public/web

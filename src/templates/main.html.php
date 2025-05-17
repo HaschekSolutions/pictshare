@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]>    <html class="no-js iem7"> <![endif]-->
+<!--[if (gt IEMobile 7)|!(IEMobile)]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title><?php echo (defined('TITLE')?TITLE:'PictShare image hosting'); ?></title>
+        
+        <!-- Bootstrap -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- PictShare overwrites -->
+        <link href="/css/pictshare.css" rel="stylesheet">
+        <link href="/css/dropzone.css" rel="stylesheet">
+
+	<!-- github-fork-ribbon-css
+	     https://simonwhitaker.github.io/github-fork-ribbon-css/ -->
+	<link href="/css/gh-fork-ribbon.min.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script>
+            var maxUploadFileSize=<?php echo (int)(ini_get('upload_max_filesize'));?>
+        </script>
+
+		<meta name="description" content="Free image sharing, linking and tracking">
+		<meta name="keywords" content="image, share, hosting, free">
+		<meta name="robots" content="index, follow">
+		<meta name="copyright" content="Haschek Solutions">
+		<meta name="language" content="EN,DE">
+		<meta name="author" content="Haschek Solutions">
+		<meta name="distribution" content="global">
+		<meta name="rating" content="general">
+
+    </HEAD>
+    <BODY>
+        <a class="github-fork-ribbon left-top" href="https://github.com/HaschekSolutions/pictshare" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+
+        <div class="container" id="headcontainer">
+            <div class="row">
+                <div class="col-md-8">
+                    <a href="/"><img src="/css/imgs/logo/horizontalv3.png" /></a>
+                    <?php 
+                        if(file_exists(ROOT.DS.'notice.txt'))
+                            echo '<div class="alert alert-warning" role="alert">'.file_get_contents(ROOT.DS.'notice.txt').'</div>';
+                    ?>
+                    <div class="well">
+                        <?php if($forbidden===true) { ?>
+
+                            <h2>Upload forbidden</h2>
+
+                            <p>Due to configured restrictions, you are not allowed to upload files at this time</p>
+
+                        <?php } else { ?>
+                        <div id="uploadinfo"></div>
+                        <p>
+                            <?php 
+                                echo "Max Upload size: ". (int)(ini_get('upload_max_filesize'))."MB / File<br/>";
+                                echo "Allowed file types: ". implode(', ',getAllContentFiletypes());
+
+                                if(defined('UPLOAD_CODE') && UPLOAD_CODE!='')
+                                    echo '<br>Upload Code: <input type="password" id="uploadcode"  />';
+                            ?>
+                        </p>
+                            <form class="dropzone well" id="dropzone" method="post" action="/api/upload" enctype="multipart/form-data">
+                                <div class="fallback">
+                                        <input name="file" type="file" multiple />
+                                      </div>
+                              </form>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+            
+            <footer>(c)<?php echo date("y");?> by<br/><a href="https://haschek.solutions" target="_blank"><img height="30" src="/css/imgs/hs_logo.png" /></a></footer>
+      </div>
+      
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="/js/bootstrap.min.js"></script>
+        <script src="/js/dropzone.js"></script>
+        <script src="/js/pictshare.js"></script>
+    </BODY>
+</HTML>

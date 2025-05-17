@@ -1,15 +1,10 @@
 <?php
 namespace Aws\Credentials;
 
-use Aws\Exception\AwsException;
 use Aws\Exception\CredentialsException;
 use Aws\Result;
 use Aws\Sts\StsClient;
-use GuzzleHttp\Promise;
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Psr7\Response;
-use Psr\Http\Message\ResponseInterface;
 
 /**
  * Credential provider that provides credentials via assuming a role
@@ -19,7 +14,7 @@ class AssumeRoleCredentialProvider
 {
     const ERROR_MSG = "Missing required 'AssumeRoleCredentialProvider' configuration option: ";
 
-    /** @var callable */
+    /** @var StsClient */
     private $client;
 
     /** @var array */
@@ -57,7 +52,10 @@ class AssumeRoleCredentialProvider
         $client = $this->client;
         return $client->assumeRoleAsync($this->assumeRoleParams)
             ->then(function (Result $result) {
-                return $this->client->createCredentials($result);
+                return $this->client->createCredentials(
+                    $result,
+                    CredentialSources::STS_ASSUME_ROLE
+                );
             })->otherwise(function (\RuntimeException $exception) {
                 throw new CredentialsException(
                     "Error in retrieving assume role credentials.",

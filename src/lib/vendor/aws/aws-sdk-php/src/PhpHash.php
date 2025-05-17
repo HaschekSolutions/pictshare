@@ -6,7 +6,7 @@ namespace Aws;
  */
 class PhpHash implements HashInterface
 {
-    /** @var resource */
+    /** @var resource|\HashContext */
     private $context;
 
     /** @var string */
@@ -63,12 +63,12 @@ class PhpHash implements HashInterface
     /**
      * Get a hash context or create one if needed
      *
-     * @return resource
+     * @return resource|\HashContext 
      */
     private function getContext()
     {
         if (!$this->context) {
-            $key = isset($this->options['key']) ? $this->options['key'] : null;
+            $key = isset($this->options['key']) ? $this->options['key'] : '';
             $this->context = hash_init(
                 $this->algo,
                 $key ? HASH_HMAC : 0,

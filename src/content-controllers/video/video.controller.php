@@ -3,7 +3,12 @@
 class VideoController implements ContentController
 {
     public const ctype = 'static';
-    
+
+    public $mimes = [
+        'video/mp4',
+        'video/x-m4v',
+    ];
+
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('mp4');}
 
@@ -59,7 +64,8 @@ class VideoController implements ContentController
         else
         {
             $data = array('url'=>implode('/',$url),'hash'=>$hash,'filesize'=>renderSize(filesize($path)));
-            renderTemplate('video',$data);
+            return renderTemplate('video.html.php',$data);
+            
         }
     }
 

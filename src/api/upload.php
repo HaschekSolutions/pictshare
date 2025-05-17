@@ -56,23 +56,7 @@ if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
         }
     }
 
-/*
-    if(in_array($type,(new ImageController)->getRegisteredExtensions()))
-    {
-        $answer = (new ImageController())->handleUpload($_FILES['file']['tmp_name'],$hash);
-    }
-    
-    //or, a text
-    else if($type=='text')
-    {
-        $answer = (new TextController())->handleUpload($_FILES['file']['tmp_name'],$hash);
-    }
-    //or, a video
-    else if(in_array($type,(new VideoController)->getRegisteredExtensions()))
-    {
-        $answer = (new VideoController())->handleUpload($_FILES['file']['tmp_name'],$hash);
-    }
-*/
+
     if(!$answer)
         $answer = array('status'=>'err','reason'=>'Unsupported filetype: '.$type,'filetype'=>$type);
 
