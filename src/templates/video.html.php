@@ -1,45 +1,45 @@
 <!doctype html>
 <html>
     <head>
-        <title><?php echo (defined('TITLE')?TITLE:'PictShare image hosting'); ?></title>
+        <title><?= (defined('TITLE')?TITLE:'PictShare image hosting'); ?></title>
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-        <meta name="copyright" content="Copyright <?php echo date("Y"); ?> PictShare" />
-        <meta id="viewport" name="viewport" content="width=<?php echo $width ?>, user-scalable=yes" />
+        <meta name="copyright" content="Copyright <?= date("Y"); ?> PictShare" />
+        <meta id="viewport" name="viewport" content="width=<?= $width ?>, user-scalable=yes" />
         <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
         <style type="text/css">
             *{margin:0px;padding:0px;}
         </style>
         
-        <link rel="alternate" type="application/json+oembed" href="<?php echo URL; ?>backend.php?a=oembed&t=json&url=<?php echo rawurlencode(URL.$hash); ?>" title="PictShare" />
+        <link rel="alternate" type="application/json+oembed" href="<?= URL; ?>backend.php?a=oembed&t=json&url=<?= rawurlencode(URL.$hash); ?>" title="PictShare" />
                 
-        <link rel="canonical"                 href="<?php echo URL.$hash; ?>" />
+        <link rel="canonical"                 href="<?= URL.$hash; ?>" />
 
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-        <meta property="og:site_name"         content="<?php echo (defined('TITLE')?TITLE:'PictShare mp4 hosting'); ?>" />
-        <meta property="og:url"               content="<?php echo URL.$hash; ?>" />
-        <meta property="og:title"             content="<?php echo (defined('TITLE')?TITLE:'PictShare mp4 hosting'); ?> MP4" />
+        <meta property="og:site_name"         content="<?= (defined('TITLE')?TITLE:'PictShare mp4 hosting'); ?>" />
+        <meta property="og:url"               content="<?= URL.$hash; ?>" />
+        <meta property="og:title"             content="<?= (defined('TITLE')?TITLE:'PictShare mp4 hosting'); ?> MP4" />
         <meta property="og:type"              content="video.other" />
         
-        <meta property="og:image"             content="<?php echo URL.'preview/'.$hash; ?>" />
-        <meta property="og:image:width"       content="<?php echo $width ?>" />
-        <meta property="og:image:height"      content="<?php echo $height ?>" />
+        <meta property="og:image"             content="<?= URL.'preview/'.$hash; ?>" />
+        <meta property="og:image:width"       content="<?= $width ?>" />
+        <meta property="og:image:height"      content="<?= $height ?>" />
         <meta property="og:description"       content="MP4 Video" />
-        <meta property="og:video"             content="<?php echo URL.$hash; ?>" />
-        <meta property="og:video:secure_url"  content="<?php echo URL.$hash; ?>" />
+        <meta property="og:video"             content="<?= URL.$hash; ?>" />
+        <meta property="og:video:secure_url"  content="<?= URL.$hash; ?>" />
         <meta property="og:video:type"        content="application/x-shockwave-flash" />
-        <meta property="og:video:width"       content="<?php echo $width ?>" />
-        <meta property="og:video:height"      content="<?php echo $height ?>" />
+        <meta property="og:video:width"       content="<?= $width ?>" />
+        <meta property="og:video:height"      content="<?= $height ?>" />
         <meta property="og:video:type"        content="video/mp4" />
-        <meta property="og:video:width"       content="<?php echo $width ?>" />
-        <meta property="og:video:height"      content="<?php echo $height ?>" />
+        <meta property="og:video:width"       content="<?= $width ?>" />
+        <meta property="og:video:height"      content="<?= $height ?>" />
     </head>
     <body id="body">
 
         <div id="container">
-            <video id="video" poster="<?php echo URL.$url.'/preview/'.$hash; ?>" preload="auto" autoplay="autoplay" controls muted="muted" loop="loop" webkit-playsinline>   
-                <source src="<?php echo URL.$url.'/raw' ?>" type="video/mp4">
+            <video id="video" poster="<?= URL.$url.'/preview/'.$hash; ?>" preload="auto" autoplay="autoplay" controls muted="muted" loop="loop" webkit-playsinline>   
+                <source src="<?= URL.$url.'/raw' ?>" type="video/mp4">
                 <?php
                     if(file_exists(getDataDir().DS.$hash.DS.'webm_1.'.$hash))
                         echo '<source src="'.URL.'raw/webm/'.$hash.'" type="video/webm">'."\n";
@@ -48,7 +48,7 @@
                 ?>
             </video>
         </div>
-            <small><?php echo $filesize; ?> <a href="<?php echo URL.$url.'/raw' ?>">Raw</a> <a href="<?php echo URL.$url.'/download' ?>">Download</a></a></small>
+            <small><?= $filesize; ?> <a href="<?= URL.$url.'/raw' ?>">Raw</a> <a href="<?= URL.$url.'/download' ?>">Download</a></a></small>
             
             <script>
                 var hadToResizeW = false;

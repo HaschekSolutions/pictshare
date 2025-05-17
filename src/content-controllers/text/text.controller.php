@@ -3,6 +3,12 @@
 class TextController implements ContentController
 {
     public const ctype = 'static';
+
+    public $mimes = [
+        'text/plain',
+        'text/csv',
+        'text/tab-separated-values',
+    ];
     
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('txt','text','csv');}

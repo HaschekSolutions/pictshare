@@ -21,7 +21,7 @@ if(file_exists(ROOT.'/src/lib/vendor/autoload.php'))
 //parse the URL to an array and filter it
 $url = array_filter(explode('/',ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH),'/')));
 
-if($url[0] == 'api' || $url[0] == 'raw')
+if($url[0] == 'api')
 {
 	array_shift($url); //remove "api" form the URL
     $a = new API($url);

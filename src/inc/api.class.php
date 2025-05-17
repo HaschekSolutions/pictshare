@@ -75,7 +75,10 @@ class API
 
             //check naughty list (previously deleted files)
             if ($this->isFileInNaughtyList($sha1))
+            {
+                addToLog(getUserIP()." tried to upload a file with the SHA1: ".$sha1." (".$type.", original name:".$_FILES['file']['name'].") but it was previously deleted and therefore on the naughty list");
                 return ['status' => 'err', 'reason' => 'File is in the naughty list'];
+            }
 
             $answer = false;
             foreach(loadAllContentControllers() as $cc)
@@ -89,7 +92,10 @@ class API
             }
 
             if (!$answer)
+            {
+                addToLog(getUserIP()." tried to upload a file with the SHA1: ".$sha1." (".$type.", original name:".$_FILES['file']['name'].") but the file type is not supported");
                 return ['status' => 'err', 'reason' => 'Unsupported mime type: ' . $type];
+            }
             else if($answer['hash'] && $answer['status']=='ok'){
                 $delcode = getRandomString(32);
                 $meta = [
@@ -124,9 +130,16 @@ class API
                 ];
             }
             else
+            {
+                addToLog(getUserIP()." tried to upload a file with the SHA1: ".$sha1." (".$type.", original name:".$_FILES['file']['name'].") but the upload failed. Probably in the handleUpload method of the content controller ".get_class($cc));
                 return ['status' => 'err', 'reason' => 'Strange error during upload'];
+            }
         } else
+        {
+            addToLog(getUserIP()." tried to upload a file with the SHA1: ".$_FILES['file']['name']." (".$_FILES['file']['type'].") but the upload failed with error code: ".$_FILES['file']["error"]." (".$this->uploadErrorMessage($_FILES['file']["error"]).")");
             return ['status' => 'err', 'reason' => 'Upload error: '.$this->uploadErrorMessage($_FILES['file']["error"])];
+        }
+            
     }
 
     
