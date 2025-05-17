@@ -1,8 +1,0 @@
-# Composer dependencies
-/vendor
-
-# Sublime files
-*.sublime*
-
-# OS X files
-.DS_Store
