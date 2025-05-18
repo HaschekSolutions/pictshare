@@ -60,6 +60,7 @@ _buildConfig() {
     echo "define('REDIS_CACHING', ${REDIS_CACHING:-true});"
     echo "define('REDIS_SERVER', '${REDIS_SERVER:-/run/redis/redis.sock}');"
     echo "define('REDIS_PORT', ${REDIS_PORT:-6379});"
+    echo "define('ADMIN_PASSWORD', '${ADMIN_PASSWORD:-}');"
 }
 
 # starting redis

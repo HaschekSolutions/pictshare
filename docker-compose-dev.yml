@@ -9,6 +9,7 @@ services:
         - URL=http://localhost:8080/
         - MAX_UPLOAD_SIZE=1000
         # Security settings
+        - ADMIN_PASSWORD=test # password for the admin panel. if empty, admin panel is disabled
         - ALLOWED_SUBNET= #IP address or subnet mask to allow upload to the server
         - CONTENTCONTROLLERS= # limit uploaded file types
         - MASTER_DELETE_CODE= # code to delete all files

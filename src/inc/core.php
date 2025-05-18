@@ -32,6 +32,25 @@ function architect($u)
         return renderTemplate('main.html.php',['forbidden'=>$forbidden]);
     }
 
+    // admin logic
+    if($u[0] == 'admin' && defined('ADMIN_PASSWORD') && ADMIN_PASSWORD != '')
+    {
+        session_start();
+        if($_REQUEST['password'] && $_REQUEST['password']== ADMIN_PASSWORD)
+        {
+            $_SESSION['admin'] = true;
+        }
+        if($_SESSION['admin'])
+        {
+            if(isset($_REQUEST['logout']))
+            {
+                unset($_SESSION['admin']);
+                session_destroy();
+            }
+        }
+        return renderTemplate('admin.html.php');
+    }
+
     //check cache
     if(isset($GLOBALS['redis']))
     {
@@ -41,6 +60,7 @@ function architect($u)
             list($cc, $hash) = explode(';', $cache_data);
             if(defined('LOG_VIEWS') && LOG_VIEWS===true)
                 addToLog("Cache hit: ".getUserIP()." viewed $hash\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
+            $GLOBALS['redis']->incr("served:$hash");
             return (new $cc())->handleHash($hash,$u);
         }
     }
@@ -162,6 +182,10 @@ function architect($u)
                 {
                     $GLOBALS['redis']->set('cache:byurl:'.implode('/',$u),"$cc;$hash");
                     addToLog("Caching URL \t".implode('/',$u)."\thash: $hash\tto content controller: $cc");
+                    if($hash!==true)
+                        $GLOBALS['redis']->incr("served:$hash");
+                    else //if it's a dynamic image, we count how many times this url was served
+                        $GLOBALS['redis']->incr("served:".implode('/',$u));
                 }
                 return (new $cc())->handleHash($hash,$u);
             }
