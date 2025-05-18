@@ -217,39 +217,7 @@
 
             </div>
             <div class="col-6">
-                <h2>Free vs Key</h2>
-
-                <p>If no valid key is sent to the API, the free quota of 10 calls per IP and day will be used. The
-                    daily free quota will reset 24 hours after the last API call (with a quota cost of 1) was
-                    received.</p>
-
-                Quota costs
-                <table class="table table-dark">
-                    <thead>
-                        <tr>
-                            <th scope="col"></th>
-                            <th scope="col">No key</th>
-                            <th scope="col">With key</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">Uploading a new image</th>
-                            <td>1</td>
-                            <td>1</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Uploading an existing image</th>
-                            <td>1</td>
-                            <td>0</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Checking a hash</th>
-                            <td>0</td>
-                            <td>0</td>
-                        </tr>
-                    </tbody>
-                </table>
+                
             </div>
 
         </div>

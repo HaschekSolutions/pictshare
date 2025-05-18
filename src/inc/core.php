@@ -1,7 +1,5 @@
 <?php
 
-use function PHPSTORM_META\map;
-
 spl_autoload_register('autoload');
 
 //disable output buffering
@@ -10,7 +8,7 @@ if (ob_get_level()) ob_end_clean();
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
 if(!defined('FFMPEG_BINARY'))
-    define('FFMPEG_BINARY',ROOT.DS.'bin'.DS.'ffmpeg');
+    define('FFMPEG_BINARY','ffmpeg');
 
 /**
  * The Architect function is the main controller 
