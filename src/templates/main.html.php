@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo (defined('TITLE') ? TITLE : 'PictShare image hosting'); ?></title>
+    <title>PictShare - the smart CDN</title>
 
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
@@ -149,7 +149,7 @@
                 API call
                 <pre><code class="url">/upload</code></pre>
 
-                <p>You can post a file using the POST variable <span class="badge text-bg-secondary">image</span></p>
+                <p>You can post a file using the POST variable <span class="badge text-bg-secondary">file</span></p>
 
                 CURL example
                 <pre><code class="bash">curl -s -F "file=@myphoto.jpg" "<?= getURL() ?>upload"</code></pre>
@@ -199,7 +199,7 @@
                 <p>It's also possible to upload supported files via Base64 strings by providing the <span class="badge text-bg-secondary">base64</span> http parameter</p>
 
                 API call
-                <pre><code class="url">/hash/<span class="badge badge-success">sha1 hash of file</span></code></pre>
+                <pre><code class="url">/upload/?base64=<span class="badge text-bg-secondary">sha1 hash of file</span></code></pre>
 
                 CURL example
                 <pre><code class="bash">(echo -n "base64="; echo -n "data:image/jpeg;base64,$(base64 -w 0 Screenshot3.jpg)") | curl --data @- <?= getURL() ?>api/upload</code></pre>

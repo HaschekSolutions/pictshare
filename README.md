@@ -55,6 +55,9 @@ Then open http://localhost:8080 in your browser
 
 ## Breaking changes in v3
 
+#### Dropped configuration options
+- TITLE
+
 #### File name in URL
 In Picthsare v3 we have changed the requirement for the image to be the last part of the URL. While with older PictShare Versions you could put the file name at any place of the URL, we now require the last part of the URL to be the file name.
 
