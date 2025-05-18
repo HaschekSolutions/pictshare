@@ -62,7 +62,11 @@ _buildConfig() {
     echo "define('REDIS_PORT', ${REDIS_PORT:-6379});"
 }
 
-
+# starting redis
+if [[ ${REDIS_CACHING:=true} == true ]]; then
+    echo "[i] Starting Redis"
+    redis-server --daemonize yes
+fi
 
 ######### main
 

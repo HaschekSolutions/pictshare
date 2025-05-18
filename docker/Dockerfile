@@ -1,11 +1,11 @@
 FROM dunglas/frankenphp:php8.4-alpine
 
-RUN apk add --no-cache bash socat file ffmpeg 
+RUN apk add --no-cache bash socat file ffmpeg redis
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer 
 WORKDIR /app/public
 
-RUN install-php-extensions redis
+RUN install-php-extensions redis exif gd
 
 # Add php.ini
 ADD configs/php.ini /usr/local/etc/php/php.ini

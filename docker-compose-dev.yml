@@ -7,21 +7,28 @@ services:
     environment:
         - SERVER_NAME=:80
         - URL=http://localhost:8080/
-        - ALLOWED_SUBNET=
-        - CONTENTCONTROLLERS=
-        - MASTER_DELETE_CODE=
-        - MASTER_DELETE_IP=
-        - UPLOAD_FORM_LOCATION=
-        - UPLOAD_CODE=
-        - ALLOW_BLOATING=
+        - MAX_UPLOAD_SIZE=1000
+        # Security settings
+        - ALLOWED_SUBNET= #IP address or subnet mask to allow upload to the server
+        - CONTENTCONTROLLERS= # limit uploaded file types
+        - MASTER_DELETE_CODE= # code to delete all files
+        - MASTER_DELETE_IP= # IP address to delete all files even without delete code
+        - UPLOAD_FORM_LOCATION= # moves the upload form from / to whatever you set here
+        - UPLOAD_CODE= # if set, requires this code to upload files via api or web
+        # image settings settings
+        - ALLOW_BLOATING=false
         - JPEG_COMPRESSION=
         - PNG_COMPRESSION=
+        - ALWAYS_WEBP=false # if true, will always serve webp images if the request included the capability
+        # alternate folder. all uploads will also be copied to this folder
         - ALT_FOLDER=
+        # s3 settings
         - S3_BUCKET=
         - S3_ACCESS_KEY=
         - S3_SECRET_KEY=
         - S3_ENDPOINT=
         - S3_REGION=
+        # FTP settings
         - FTP_SERVER=
         - FTP_PORT=
         - FTP_USER=
@@ -29,11 +36,14 @@ services:
         - FTP_PASSIVEMODE=
         - FTP_SSL=
         - FTP_BASEDIR=
+        # encryption settings
         - ENCRYPTION_KEY=
-        - ALWAYS_WEBP=
-        - LOG_VIEWS=false
+        # logging settings
+        - LOG_VIEWS=true
     ports:
         - 8080:80
     volumes:
         - ./data:/app/public/data
         - ./logs:/app/public/logs
+        - ./src:/app/public/src
+        - ./web:/app/public/web
