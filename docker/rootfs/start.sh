@@ -58,14 +58,14 @@ _buildConfig() {
     echo "define('SPLIT_DATA_DIR', ${SPLIT_DATA_DIR:-false});"
     echo "define('LOG_VIEWS', ${LOG_VIEWS:-false});"
     echo "define('REDIS_CACHING', ${REDIS_CACHING:-true});"
-    echo "define('REDIS_SERVER', '${REDIS_SERVER:-localhost}');"
+    echo "define('REDIS_SERVER', '${REDIS_SERVER:-/run/redis/redis.sock}');"
     echo "define('REDIS_PORT', ${REDIS_PORT:-6379});"
 }
 
 # starting redis
 if [[ ${REDIS_CACHING:=true} == true ]]; then
     echo "[i] Starting Redis"
-    redis-server --daemonize yes
+    redis-server /etc/redis.conf --daemonize yes
 fi
 
 ######### main

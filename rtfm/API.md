@@ -183,8 +183,7 @@ Answer from the server:
 ```
 
 # base64.php
-- URL https://pictshare.net/api/base64.php
-- Method: POST/GET
+- URL https://pictshare.net/api/upload
 - Query var name: base64
 - Answer: JSON
 
@@ -192,7 +191,7 @@ Answer from the server:
 
 Upload local image "test.jpg" to pictshare 
 
-```(echo -n "base64="; echo -n "data:image/jpeg;base64,$(base64 -w 0 test.jpg)") | curl --data @- https://pictshare.net/api/base64.php```
+```(echo -n "base64="; echo -n "data:image/jpeg;base64,$(base64 -w 0 test.jpg)") | curl --data @- https://pictshare.net/api/upload```
 
 ```json
 {

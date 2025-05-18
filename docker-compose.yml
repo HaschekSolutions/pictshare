@@ -38,6 +38,10 @@ services:
         - ENCRYPTION_KEY=
         # logging settings
         - LOG_VIEWS=false
+        # caching
+        - REDIS_CACHING=true
+        - REDIS_SERVER=/run/redis/redis.sock
+        - REDIS_PORT=0
     ports:
         - 8080:80
     volumes:

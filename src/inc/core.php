@@ -32,7 +32,20 @@ function architect($u)
         return renderTemplate('main.html.php',array('forbidden'=>$forbidden));
     }
 
-    //check all elements for a valid hash
+    //check cache
+    if(isset($GLOBALS['redis']))
+    {
+        $cache_data = $GLOBALS['redis']->get('cache:byurl:'.implode('/',$u));
+        if($cache_data)
+        {
+            list($cc, $hash) = explode(';', $cache_data);
+            if(defined('LOG_VIEWS') && LOG_VIEWS===true)
+                addToLog("Cache hit: ".getUserIP()." viewed $hash\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
+            return (new $cc())->handleHash($hash,$u);
+        }
+    }
+
+    //check all parts of the URL for a valid hash
     $hash = false;
     foreach($u as $el)
     {
@@ -122,6 +135,11 @@ function architect($u)
                 {
                     addToLog(getUserIP()." deleted $hash\tIt was deleted by the user\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/deletes.log');
                     deleteHash($hash);
+                    if(isset($GLOBALS['redis']))
+                    {
+                        $GLOBALS['redis']->del('cache:byurl:'.implode('/',$u));
+                        addToLog("Deleting cache for URL \t".implode('/',$u)." because $hash was deleted");
+                    }
                     exit($hash.' deleted successfully');
                 }
             }
@@ -139,6 +157,12 @@ function architect($u)
                 ((new $cc)::ctype=='static' && in_array($extension,(new $cc)->getRegisteredExtensions()))
             )
             {
+                //cache it so we don't have to check again
+                if(isset($GLOBALS['redis']))
+                {
+                    $GLOBALS['redis']->set('cache:byurl:'.implode('/',$u),"$cc;$hash");
+                    addToLog("Caching URL \t".implode('/',$u)."\thash: $hash\tto content controller: $cc");
+                }
                 return (new $cc())->handleHash($hash,$u);
             }
         }
