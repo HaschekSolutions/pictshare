@@ -29,7 +29,7 @@ function architect($u)
         {
             $forbidden = true;
         }
-        return renderTemplate('main.html.php',array('forbidden'=>$forbidden));
+        return renderTemplate('main.html.php',['forbidden'=>$forbidden]);
     }
 
     //check cache

@@ -199,7 +199,7 @@
                 <p>It's also possible to upload supported files via Base64 strings by providing the <span class="badge text-bg-secondary">base64</span> http parameter</p>
 
                 API call
-                <pre><code class="url">/upload/?base64=<span class="badge text-bg-secondary">sha1 hash of file</span></code></pre>
+                <pre><code class="url">/upload/?base64=<span class="badge text-bg-secondary">base64 encoded string</span></code></pre>
 
                 CURL example
                 <pre><code class="bash">(echo -n "base64="; echo -n "data:image/jpeg;base64,$(base64 -w 0 Screenshot3.jpg)") | curl --data @- <?= getURL() ?>api/upload</code></pre>
