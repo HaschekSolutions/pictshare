@@ -25,6 +25,7 @@ _buildConfig() {
     echo "<?php"
     echo "define('URL', '${URL:-}');"
     echo "define('TITLE', '${TITLE:-PictShare}');"
+    echo "define('REDIS_CACHING', '${REDIS_CACHING:-true}');"
     echo "define('ALLOWED_SUBNET', '${ALLOWED_SUBNET:-}');"
     echo "define('CONTENTCONTROLLERS', '${CONTENTCONTROLLERS:-}');"
     echo "define('MASTER_DELETE_CODE', '${MASTER_DELETE_CODE:-}');"
@@ -56,6 +57,9 @@ _buildConfig() {
     echo "define('ALLOWED_DOMAINS', '${ALLOWED_DOMAINS:-}');"
     echo "define('SPLIT_DATA_DIR', ${SPLIT_DATA_DIR:-false});"
     echo "define('LOG_VIEWS', ${LOG_VIEWS:-false});"
+    echo "define('REDIS_CACHING', ${REDIS_CACHING:-true});"
+    echo "define('REDIS_SERVER', '${REDIS_SERVER:-localhost}');"
+    echo "define('REDIS_PORT', ${REDIS_PORT:-6379});"
 }
 
 

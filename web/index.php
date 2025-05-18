@@ -17,7 +17,14 @@ loadAllContentControllers();
 
 //load external things if existing
 if(file_exists(ROOT.'/src/lib/vendor/autoload.php'))
-	require ROOT.'/src/lib/vendor/autoload.php';
+	require_once(ROOT.'/src/lib/vendor/autoload.php');
+
+// redis
+if(!defined('REDIS_CACHING') || REDIS_CACHING == true)
+{
+	$GLOBALS['redis'] = new Redis();
+	$GLOBALS['redis']->connect((!defined('REDIS_SERVER'))?'localhost':REDIS_SERVER, (!defined('REDIS_PORT'))?6379:REDIS_PORT);
+}
 
 
 //parse the URL to an array and filter it

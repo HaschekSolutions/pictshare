@@ -24,6 +24,8 @@ In this file you can set the following options. For a simple working example con
 | UPLOAD_QUOTA (NOT IMPLEMENTED)            | int     | Size in MB. If set, will only allow uploads if combined size of uploads on Server is smaller than this value. Does not account for ALT_FOLDER data and resized versions of original uploads won't be added to calculation |
 | MAX_RESIZED_IMAGES (NOT IMPLEMENTED )      | string  | If set, limits count of resized images/videos per file on server |
 | LOG_VIEWS | bool | If set, will log all views into the ./logs/app.log. Pretty resource heavy, only use for debugging purposes |
+| REDIS_CACHING | bool | true by default, Used to cache URL to file mapping. If set to false, PictShare will not use Redis for caching. This is not recommended as it will slow down the server significantly |
+| REDIS_SERVER | string | IP address of the Redis server. If set, PictShare will use this server for caching. If not set, PictShare will use the default Redis server on localhost |
 
 
 # Content controllers

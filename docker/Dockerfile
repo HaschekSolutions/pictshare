@@ -5,6 +5,8 @@ RUN apk add --no-cache bash socat file ffmpeg
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer 
 WORKDIR /app/public
 
+RUN install-php-extensions redis
+
 # Add php.ini
 ADD configs/php.ini /usr/local/etc/php/php.ini
 
