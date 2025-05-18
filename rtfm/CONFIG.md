@@ -22,7 +22,8 @@ In this file you can set the following options. For a simple working example con
 | UPLOAD_CODE | string  | If set, all uploads require this code via GET or POST variable "uploadcode" to succeed |
 | REDIS_SERVER (NOT IMPLEMENTED) | IP | If you define a REDIS server IP here, it will enable you to use the FFMPEG Worker |
 | UPLOAD_QUOTA (NOT IMPLEMENTED)            | int     | Size in MB. If set, will only allow uploads if combined size of uploads on Server is smaller than this value. Does not account for ALT_FOLDER data and resized versions of original uploads won't be added to calculation |
-| MAX_RESIZED_IMAGES (NOT IMPLEMENTED      | string  | If set, limits count of resized images/videos per file on server |
+| MAX_RESIZED_IMAGES (NOT IMPLEMENTED )      | string  | If set, limits count of resized images/videos per file on server |
+| LOG_VIEWS | bool | If set, will log all views into the ./logs/app.log. Pretty resource heavy, only use for debugging purposes |
 
 
 # Content controllers

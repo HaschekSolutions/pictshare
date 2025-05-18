@@ -1,5 +1,7 @@
 # Todos
 
+- [ ] Caching in Redis for already handled URLs so it doesn't need to go through the whole algorithm again
+- [ ] View stats in redis
 - [ ] Keep track of deleted (and therefore forbidden) hashes
     - [ ] Store list in Storage Controllers as well
 - [ ] Add a way for users to report content

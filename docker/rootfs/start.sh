@@ -55,6 +55,7 @@ _buildConfig() {
     echo "define('ALWAYS_WEBP', ${ALWAYS_WEBP:-false});"
     echo "define('ALLOWED_DOMAINS', '${ALLOWED_DOMAINS:-}');"
     echo "define('SPLIT_DATA_DIR', ${SPLIT_DATA_DIR:-false});"
+    echo "define('LOG_VIEWS', ${LOG_VIEWS:-false});"
 }
 
 

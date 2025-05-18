@@ -1,40 +1,91 @@
 Dropzone.autoDiscover = false;
+hljs.initHighlightingOnLoad();
 
-$(function () {
+document.addEventListener("DOMContentLoaded", function () {
     var myDropzone = new Dropzone("#dropzone");
-    //console.log(myDropzone.options);
-    if (maxUploadFileSize !== undefined)
+    if (typeof maxUploadFileSize !== "undefined")
         myDropzone.options.maxFilesize = maxUploadFileSize;
-    myDropzone.options.timeout = 0,
-        myDropzone.on("sending", function(file, xhr, formData) { 
-            if(document.getElementById("uploadcode"))
-                formData.append("uploadcode", document.getElementById("uploadcode").value);  
-        });
-        myDropzone.on('error', function(file, response) {
-           alert("Error: "+response.reason);
-        });
-        myDropzone.on("success", function (file, response) {
-            console.log("raw response: " + response);
-            if (response == null || response == "null")
-                $("#uploadinfo").append("<div class='alert alert-danger' role='alert'><strong>Error uploading " + file.name + "</strong><br/>Reason is unknown :(</div>")
-            else {
-                var o = response;
-                if (o.status == 'ok')
-                    $("#uploadinfo").append("<div class='alert alert-success' role='alert'><strong>" + file.name + "</strong> uploaded as <a target='_blank' href='/" + o.hash + "'>" + o.hash + "</a><br/>URL: <a target='_blank' href='" + o.url + "'>" + o.url + "</a> <button class='btn btn-xs' onClick='navigator.clipboard.writeText(\"" + o.url + "\");'>Copy URL</button></div>")
-                else if (o.status == 'err')
-                    $("#uploadinfo").append("<div class='alert alert-danger' role='alert'><strong>Error uploading " + file.name + "</strong><br/>Reason: " + o.reason + "</div>")
-                console.log(o)
+
+    myDropzone.options.timeout = 0;
+
+    myDropzone.on("sending", function(file, xhr, formData) { 
+        var uploadCodeElem = document.getElementById("uploadcode");
+        if (uploadCodeElem)
+            formData.append("uploadcode", uploadCodeElem.value);  
+    });
+
+    myDropzone.on('error', function(file, response) {
+        var uploadInfo = document.getElementById("uploadinfo");
+        if (response == null || response == "null") {
+            uploadInfo.insertAdjacentHTML("beforeend",
+                renderMessage(
+                    "Error uploading " + file.name,
+                    "Reason is unknown :(",
+                    "danger"
+                )
+            );
+        } else {
+            if (response.status == 'err') {
+                uploadInfo.insertAdjacentHTML("beforeend",
+                    renderMessage(
+                        "Error uploading " + file.name,
+                        "Reason: " + response.reason,
+                        "danger"
+                    )
+                );
+            } else {
+                uploadInfo.insertAdjacentHTML("beforeend",
+                    renderMessage(
+                        "Error uploading " + file.name,
+                        "Reason: " + response,
+                        "danger"
+                    )
+                );
             }
-        });
+        }
+    });
+
+    myDropzone.on("success", function (file, response) {
+        console.log("raw response: " + response);
+        var uploadInfo = document.getElementById("uploadinfo");
+        if (response == null || response == "null") {
+            uploadInfo.insertAdjacentHTML("beforeend",
+                renderMessage(
+                    "Error uploading " + file.name,
+                    "Reason is unknown :(",
+                    "danger"
+                )
+            );
+        } else {
+            if (response.status == 'ok') {
+                uploadInfo.insertAdjacentHTML("beforeend",
+                    renderMessage(file.name+" uploaded as <a target='_blank' href='/" + response.hash + "'>" + response.hash + "</a>","URL: <a target='_blank' href='" + response.url + "'>" + response.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + response.url + "\");'>Copy URL</button>","success")
+                );
+            } else if (response.status == 'err') {
+                uploadInfo.insertAdjacentHTML("beforeend",
+                    renderMessage(
+                        "Error uploading " + file.name,
+                        response.reason,
+                        "danger"
+                    )
+                );
+            }
+        }
+    });
 
     document.onpaste = function (event) {
         var items = (event.clipboardData || event.originalEvent.clipboardData).items;
-        for (index in items) {
+        for (var index in items) {
             var item = items[index];
             if (item.kind === 'file') {
-                // adds the file to your dropzone instance
-                myDropzone.addFile(item.getAsFile())
+                myDropzone.addFile(item.getAsFile());
             }
         }
-    }
-})
+    };
+});
+
+function renderMessage(title,message,type){
+    if(!type)
+        type = "danger";
+    return `<div class='alert alert-${type}' role='alert'><strong>${title}</strong><br/>${message}</div>`;
+}

@@ -29,6 +29,7 @@ services:
         - FTP_BASEDIR=
         - ENCRYPTION_KEY=
         - ALWAYS_WEBP=
+        - LOG_VIEWS=false
     ports:
         - 8080:80
     volumes:

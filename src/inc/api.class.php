@@ -58,7 +58,7 @@ class API
 
         //check if we should get a file from a remote URL
         if ($_REQUEST['url']) {
-            $url = trim($_REQUEST['url']);
+            $url = trim(rawurldecode($_REQUEST['url']));
             if (checkURLForPrivateIPRange($url)) {
                 addToLog(getUserIP() . " tried to get us to download a file from: " . $url . " but it is in a private IP range");
                 return ['status' => 'err', 'reason' => 'Private IP range'];
