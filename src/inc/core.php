@@ -40,7 +40,7 @@ function architect($u)
         {
             $hash = $el;
             if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                addToLog(getUserIP()." viewed $hash (".$_SERVER['HTTP_USER_AGENT'].")\tIt was locally found", ROOT.DS.'logs/views.log');
+                addToLog(getUserIP()." viewed $hash\tIt was locally found\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
             break;
         }
         // if we don't have a hash yet but the element looks like it could be a hash
@@ -60,7 +60,7 @@ function architect($u)
                     storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
 
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                        addToLog(getUserIP()." viewed $hash (".$_SERVER['HTTP_USER_AGENT'].")\tIt was found in Storage Controller $contr", ROOT.DS.'logs/views.log');
+                        addToLog(getUserIP()." viewed $hash\tIt was found in Storage Controller $contr\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
                     
                     break; // we break here because we already have the file. no need to check other storage controllers
                 }
@@ -77,7 +77,7 @@ function architect($u)
                     unlink(ROOT.DS.'tmp'.DS.$el.'.enc');
 
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                        addToLog(getUserIP()." viewed $hash (".$_SERVER['HTTP_USER_AGENT'].")\tIt was found encrypted in Storage Controller $contr", ROOT.DS.'logs/views.log');
+                        addToLog(getUserIP()." viewed $hash\tIt was found encrypted in Storage Controller $contr\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
 
                     break; // we break here because we already have the file. no need to check other storage controllers
                 }
@@ -92,7 +92,7 @@ function architect($u)
                 if((new $cc)::ctype=='dynamic' &&  in_array((new $cc)->getRegisteredExtensions()[0],$u) )
                 {
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                        addToLog(getUserIP()." (".$_SERVER['HTTP_USER_AGENT'].") requested ".implode("/",$u)."\tIt's a dynamic image handled by  $cc", ROOT.DS.'logs/views.log');
+                        addToLog(getUserIP()." requested ".implode("/",$u)."\tIt's a dynamic image handled by  $cc\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
                     $hash = true;
                     break;
                 }
@@ -120,7 +120,7 @@ function architect($u)
                 //@todo: allow MASTER_DELETE_IP to be CIDR range or coma separated
                 if(getDeleteCodeOfHash($hash)==$code || (defined('MASTER_DELETE_CODE') && MASTER_DELETE_CODE==$code ) || (defined('MASTER_DELETE_IP') && MASTER_DELETE_IP==getUserIP()) )
                 {
-                    addToLog(getUserIP()." (".$_SERVER['HTTP_USER_AGENT'].") deleted $hash");
+                    addToLog(getUserIP()." deleted $hash\tIt was deleted by the user\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/deletes.log');
                     deleteHash($hash);
                     exit($hash.' deleted successfully');
                 }
