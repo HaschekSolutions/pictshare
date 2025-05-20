@@ -29,7 +29,7 @@
       <td><?=$data['views']?:0?></td>
       <td><?=$data['metadata']['original_filename']?></td>
       <td><?=$data['metadata']['mime']?></td>
-      <td><?=date("Y-m-d H:i",$data['metadata']['uploaded'])?></td>
+      <td><?=$data['metadata']['uploaded']?date("Y-m-d H:i",$data['metadata']['uploaded']):''?></td>
       <td><?=$data['metadata']['ip']?></td>
       <?php if(defined('LOG_VIEWS') && LOG_VIEWS==true): ?>
         <td scope="col" data-sortable="true"><a class="btn btn-secondary" href="/admin/logs/views/<?=$hash?>">View logs</a></td>

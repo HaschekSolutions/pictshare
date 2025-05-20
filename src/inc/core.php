@@ -42,6 +42,10 @@ function architect($u)
             return;
         session_start();
         switch($u[1]){
+            case 'rebuild-meta':
+                if(!$_SESSION['admin'])
+                    header('Location: /admin');
+                return renderTemplate('index.html.php',['main'=>'<code><pre>'.rebuildMeta().'</pre></code>']);
             case 'stats':
                 if(!$_SESSION['admin'])
                     header('Location: /admin');
@@ -1171,4 +1175,105 @@ function getLogs($type='app',$filter=false)
         }
     }
     return $logs;
+}
+
+function getAllHashes()
+{
+    $hashes = [];
+    foreach (glob(getDataDir().DS.'*') as $dir) {
+        if (is_dir($dir) && file_exists($dir.DS.basename($dir))) {
+            $hashes[] = basename($dir);
+        }
+    }
+    return $hashes;
+}
+
+function rebuildMeta(){
+    $hashes = getAllHashes();
+    $o = '';
+
+    foreach($hashes as $h){
+        $o.= "[i] $h\n";
+        $metaFile = getDataDir() . DS . $h . DS . 'meta.json';
+        $metadata = [];
+        if (file_exists($metaFile)) {
+            $metadata = json_decode(file_get_contents($metaFile), true);
+        }
+
+        if(!$metadata['mime'])
+        {
+            $metadata['mime'] = getFileMimeType(getDataDir() . DS . $h . DS . $h);
+            $o.= "  [+] Added MIME type: ".$metadata['mime']."\n";
+        }
+        if(!$metadata['size'])
+        {
+            $metadata['size'] = filesize(getDataDir() . DS . $h . DS . $h);
+            $metadata['size_human'] = renderSize($metadata['size']);
+
+            $o.= "  [+] Added size: ".$metadata['size']." (".$metadata['size_human'].")\n";
+        }
+        if(!$metadata['uploaded'])
+        {
+            $metadata['uploaded'] = filectime(getDataDir() . DS . $h . DS . $h);
+            $o.= "  [+] Restored creation time from file parameter: ".$metadata['uploaded']." -> ".date('d.m.y H:i',$metadata['uploaded'])."\n";
+        }
+        if(!$metadata['hash'])
+        {
+            $metadata['hash'] = $h;
+            $o.= "  [+] Added hash\n";
+        }
+        if(!$metadata['delete_code'])
+        {
+            if(file_exists(getDataDir() . DS . $h . DS . 'deletecode'))
+            {
+                $metadata['delete_code'] = file_get_contents(getDataDir() . DS . $h . DS . 'deletecode');
+                unlink(getDataDir() . DS . $h . DS . 'deletecode');
+                $metadata['delete_url'] = getURL().'delete_'.$metadata['delete_code'].'/'.$h;
+                $o.= "  [+] Imported old style delete code and updated delete_url to ".$metadata['delete_url']."\n";
+            }
+            else{
+                $metadata['delete_code'] = getRandomString(32);
+                $metadata['delete_url'] = getURL().'delete_'.$metadata['delete_code'].'/'.$h;
+                $o.= "  [+] Created new delete code and updated delete_url to ".$metadata['delete_url']."\n";
+            }
+        }
+        if(!$metadata['ip'])
+        {
+            if(file_exists(getDataDir() . DS . 'uploads.csv'))
+            {
+                $handle = fopen(getDataDir() . DS . 'uploads.csv', "r");
+                if ($handle) {
+                    while (($line = fgets($handle)) !== false) {
+                        if(strpos($line,$h)===false) continue;
+                        $a = explode(';',$line);
+                        $time = $a[0];
+                        $hash = $a[2];
+                        $ip = $a[3];
+                        if($hash!=$h) continue;
+                        $metadata['ip'] = $ip;
+                        $metadata['uploaded'] = $time;
+                        $o.= "  [+] Found uploader ip in uploads.csv: ".$ip."\tupload time: ".date('d.m.y H:i',$time)."\n";
+                        break;
+                    }
+                    fclose($handle);
+                }
+            }
+        }
+
+        file_put_contents($metaFile, json_encode($metadata));
+    }
+
+    return $o;
+}
+
+function getFileMimeType($file)
+{
+    try {
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        return $finfo->file($file);
+    } catch (Exception $e) {
+        //fallback to shell command if finfo is not available
+        $mimeType = shell_exec('file --mime-type -b ' . escapeshellarg($file));
+        return trim($mimeType);
+    }
 }

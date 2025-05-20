@@ -111,7 +111,7 @@ class API
     {
         //get the file type
         $size = filesize($tmpfile);
-        $type = $this->getFileMimeType($tmpfile);
+        $type = getFileMimeType($tmpfile);
 
         //check for duplicates
         $sha1 = sha1_file($tmpfile);
@@ -201,18 +201,6 @@ class API
             if (!isset($_REQUEST['uploadcode']) || $_REQUEST['uploadcode'] != UPLOAD_CODE) {
                 throw new Exception('Incorrect upload code specified - Access denied');
             }
-        }
-    }
-
-    public function getFileMimeType($file)
-    {
-        try {
-            $finfo = new finfo(FILEINFO_MIME_TYPE);
-            return $finfo->file($file);
-        } catch (Exception $e) {
-            //fallback to shell command if finfo is not available
-            $mimeType = shell_exec('file --mime-type -b ' . escapeshellarg($file));
-            return trim($mimeType);
         }
     }
 
