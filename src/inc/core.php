@@ -29,26 +29,54 @@ function architect($u)
         {
             $forbidden = true;
         }
-        return renderTemplate('main.html.php',['forbidden'=>$forbidden]);
+        return renderTemplate('index.html.php',['main'=>renderTemplate('main.html.php',['forbidden'=>$forbidden])]);
     }
 
     // admin logic
     if($u[0] == 'admin' && defined('ADMIN_PASSWORD') && ADMIN_PASSWORD != '')
     {
+        // block checks
+        if (defined('ALLOWED_SUBNET') && ALLOWED_SUBNET != '' && !isIPInRange(getUserIP(), ALLOWED_SUBNET))
+            return;
+        else if (defined('MASTER_DELETE_IP') && MASTER_DELETE_IP != '' && !isIPInRange(getUserIP(), MASTER_DELETE_IP))
+            return;
         session_start();
-        if($_REQUEST['password'] && $_REQUEST['password']== ADMIN_PASSWORD)
-        {
-            $_SESSION['admin'] = true;
+        switch($u[1]){
+            case 'stats':
+                if(!$_SESSION['admin'])
+                    header('Location: /admin');
+                return renderTemplate('index.html.php',['main'=>renderTemplate('admin.stats.html.php',['stats'=>getStats()])]);
+            case 'logs':
+                if(!$_SESSION['admin'])
+                    header('Location: /admin');
+                switch($u[2])
+                {
+                    case 'app':
+                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',['type'=>'app','logs'=>getLogs('app',$u[3])])]);
+                    case 'error':
+                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',['type'=>'error','logs'=>getLogs('error',$u[3])])]);
+                    case 'views':
+                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',['type'=>'views','logs'=>getLogs('views',$u[3])])]);
+                    default:
+                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs.html.php')]);
+                }
+            default:
+                if($_REQUEST['password'] && $_REQUEST['password']== ADMIN_PASSWORD)
+                {
+                    $_SESSION['admin'] = true;
+                }
+                if($_SESSION['admin'])
+                {
+                    if(isset($_REQUEST['logout']))
+                    {
+                        unset($_SESSION['admin']);
+                        session_destroy();
+                    }
+                }
+                return renderTemplate('index.html.php',['main'=>renderTemplate('admin.html.php')]);
         }
-        if($_SESSION['admin'])
-        {
-            if(isset($_REQUEST['logout']))
-            {
-                unset($_SESSION['admin']);
-                session_destroy();
-            }
-        }
-        return renderTemplate('admin.html.php');
+        
+        
     }
 
     //check cache
@@ -59,7 +87,7 @@ function architect($u)
         {
             list($cc, $hash) = explode(';', $cache_data);
             if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                addToLog("Cache hit: ".getUserIP()." viewed $hash\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
+                addToLog(getUserIP()."\tviewed\t$hash\tFrom cache. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
             $GLOBALS['redis']->incr("served:$hash");
             return (new $cc())->handleHash($hash,$u);
         }
@@ -73,7 +101,7 @@ function architect($u)
         {
             $hash = $el;
             if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                addToLog(getUserIP()." viewed $hash\tIt was locally found\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
+                addToLog(getUserIP()."\tviewed\t$hash\tIt was locally found. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
             break;
         }
         // if we don't have a hash yet but the element looks like it could be a hash
@@ -93,7 +121,7 @@ function architect($u)
                     storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
 
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                        addToLog(getUserIP()." viewed $hash\tIt was found in Storage Controller $contr\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
+                        addToLog(getUserIP()."\tviewed\t$hash\tIt was found in Storage Controller $contr. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
                     
                     break; // we break here because we already have the file. no need to check other storage controllers
                 }
@@ -110,7 +138,7 @@ function architect($u)
                     unlink(ROOT.DS.'tmp'.DS.$el.'.enc');
 
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                        addToLog(getUserIP()." viewed $hash\tIt was found encrypted in Storage Controller $contr\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
+                        addToLog(getUserIP()."\tviewed\t$hash\tIt was found encrypted in Storage Controller $contr. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
 
                     break; // we break here because we already have the file. no need to check other storage controllers
                 }
@@ -125,7 +153,7 @@ function architect($u)
                 if((new $cc)::ctype=='dynamic' &&  in_array((new $cc)->getRegisteredExtensions()[0],$u) )
                 {
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                        addToLog(getUserIP()." requested ".implode("/",$u)."\tIt's a dynamic image handled by  $cc\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/views.log');
+                        addToLog(getUserIP()." requested ".implode("/",$u)."\tIt's a dynamic image handled by  $cc. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
                     $hash = true;
                     break;
                 }
@@ -833,7 +861,7 @@ function getDeleteCodeOfHash($hash)
 
 function getMetadataOfHash($hash)
 {
-    $metadata = array();
+    $metadata = [];
     $metadatafile = getDataDir().DS.$hash.DS.'meta.json';
     if(file_exists($metadatafile))
     {
@@ -1107,4 +1135,40 @@ function addToLog($data,$logfile=ROOT.DS.'logs/app.log')
     $fp = fopen($logfile,'a');
     fwrite($fp,date("d.m.y H:i")."\t[".getURL()."] | ".$data."\n");
     fclose($fp);
+}
+
+function getStats(){
+    $stats = array();
+    $stats['total_files'] = 0;
+    $stats['total_size'] = 0;
+    $stats['total_files'] = count(glob(getDataDir().DS.'*', GLOB_ONLYDIR));
+    foreach (glob(getDataDir().DS.'*') as $dir) {
+        if (is_dir($dir)) {
+            $stats['hashes'][basename($dir)] = [
+                'size' => filesize($dir.DS.basename($dir)),
+                'files' => count(glob($dir.DS.'*')),
+                'views' => $GLOBALS['redis']->get('served:'.basename($dir)),
+                'metadata' => getMetadataOfHash(basename($dir)),
+            ];
+        }
+    }
+    return $stats;
+}
+
+function getLogs($type='app',$filter=false)
+{
+    $logs = array();
+    $logfile = ROOT.DS.'logs/'.$type.'.log';
+    if($type && file_exists($logfile))
+    {
+        $handle = fopen($logfile, "r");
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                if($filter && strpos($line,$filter)===false) continue;
+                $logs[] = $line;
+            }
+            fclose($handle);
+        }
+    }
+    return $logs;
 }

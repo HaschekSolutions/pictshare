@@ -3,12 +3,11 @@ services:
   pictshare:
     image: 'HaschekSolutions/pictshare:3'
     environment:
-        - SERVER_NAME=:80 # required by caddy
         - URL=http://localhost:8080/
         - MAX_UPLOAD_SIZE=20 #in MB
         # Security settings
         - ADMIN_PASSWORD= # password for the admin panel. if empty, admin panel is disabled
-        - ALLOWED_SUBNET= #IP address or subnet mask to allow upload to the server
+        - ALLOWED_SUBNET= #IP address or subnet mask to allow upload and access to the admin panel
         - CONTENTCONTROLLERS= # limit uploaded file types
         - MASTER_DELETE_CODE= # code to delete all files
         - MASTER_DELETE_IP= # IP address to delete all files even without delete code
@@ -43,6 +42,7 @@ services:
         - REDIS_CACHING=true
         - REDIS_SERVER=/run/redis/redis.sock
         - REDIS_PORT=0
+        - SERVER_NAME=:80 # required by caddy
     ports:
         - 8080:80
     volumes:
