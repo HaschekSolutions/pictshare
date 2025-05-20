@@ -65,7 +65,16 @@ _buildConfig() {
 
 # starting redis
 if [[ ${REDIS_CACHING:=true} == true ]]; then
-    echo "[i] Starting Redis"
+    echo "[i] Redis steps"
+    # tell redis how often to save
+    ## save <seconds> <changes>
+    echo "  [+] Configuring Redis save intervals"
+    echo "save 60 100" >> /etc/redis.conf # every minute if at least 100 keys changed
+    echo "save 300 10" >> /etc/redis.conf # every 5 minutes if at least 10 keys changed
+    echo "save 600 1" >> /etc/redis.conf # every 10 minutes if at least 1 key changed
+
+    # Trap SIGTERM and SIGINT signals to save Redis data before shutdown
+    trap "echo 'Stopping Redis'; redis-cli save; redis-cli shutdown; exit" TERM INT
     redis-server /etc/redis.conf --daemonize yes
 fi
 

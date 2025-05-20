@@ -48,3 +48,4 @@ services:
     volumes:
         - ./data:/app/public/data
         - ./logs:/app/public/logs
+        - ./redis:/var/lib/redis # can be commeted out if REDIS_CACHING is set to false
