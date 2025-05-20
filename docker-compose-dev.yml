@@ -52,3 +52,4 @@ services:
         - ./logs:/app/public/logs
         - ./src:/app/public/src
         - ./web:/app/public/web
+        - ./tmp/redis:/var/lib/redis
