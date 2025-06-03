@@ -91,7 +91,7 @@ if (file_exists(ROOT . DS . 'notice.txt'))
         <p>You can post a file using the POST variable <span class="badge text-bg-secondary">file</span></p>
 
         CURL example
-        <pre><code class="bash">curl -s -F "file=@myphoto.jpg" "<?= getURL() ?>upload"</code></pre>
+        <pre><code class="bash">curl -s -F "file=@myphoto.jpg" "<?= getURL() ?>api/upload"</code></pre>
 
         Output
         <pre><code class="json">
