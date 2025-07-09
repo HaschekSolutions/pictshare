@@ -44,8 +44,8 @@ class VideoController implements ContentController
             }
 
             header ("Content-type: image/jpeg");
-            readfile($preview);
-            
+            header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$preview));
+
         }
         else if(in_array('download',$url))
         {
@@ -57,7 +57,7 @@ class VideoController implements ContentController
                 header('Cache-Control: must-revalidate');
                 header('Pragma: public');
                 header('Content-Length: ' . filesize($path));
-                readfile($path);
+                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
                 exit;
             }
         }

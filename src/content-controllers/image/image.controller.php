@@ -199,7 +199,7 @@ class ImageController implements ContentController
                                     }
                         
                                     header ("Content-type: image/jpeg");
-                                    readfile($preview);
+                                    header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$preview));
                                     exit;
                                 }
                                 else if(in_array('download',$url))
@@ -212,7 +212,7 @@ class ImageController implements ContentController
                                         header('Cache-Control: must-revalidate');
                                         header('Pragma: public');
                                         header('Content-Length: ' . filesize($path));
-                                        readfile($path);
+                                        header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
                                         exit;
                                     }
                                 }
@@ -244,7 +244,7 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
-                readfile($path);
+                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
             break;
 
             case 'png': 
@@ -252,7 +252,8 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
-                readfile($path);
+                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
+
             break;
 
             case 'gif': 
@@ -260,7 +261,7 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
-                readfile($path);
+                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
             break;
 
             case 'webp': 
@@ -268,7 +269,7 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
-                readfile($path);
+                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
             break;
         }
     }

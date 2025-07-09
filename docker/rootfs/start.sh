@@ -96,4 +96,4 @@ echo ' [+] Creating config'
 
 _buildConfig > src/inc/config.inc.php
 
-frankenphp php-server --listen ":80" --root /app/public/web
+frankenphp run --config /etc/caddy/Caddyfile

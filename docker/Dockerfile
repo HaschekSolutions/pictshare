@@ -7,6 +7,8 @@ WORKDIR /app/public
 
 RUN install-php-extensions redis exif gd
 
+ADD docker/rootfs/Caddyfile /etc/caddy/Caddyfile
+
 # Add php.ini
 ADD configs/php.ini /usr/local/etc/php/php.ini
 

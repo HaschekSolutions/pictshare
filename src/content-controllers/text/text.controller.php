@@ -32,7 +32,7 @@ class TextController implements ContentController
                 header('Cache-Control: must-revalidate');
                 header('Pragma: public');
                 header('Content-Length: ' . filesize($path));
-                readfile($path);
+                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
                 exit;
             }
         }
