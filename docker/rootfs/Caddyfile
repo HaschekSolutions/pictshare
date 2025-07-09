@@ -2,7 +2,7 @@
 	frankenphp
 }
 
-localhost:80 {
+:80 {
 	log
 
 	encode zstd br gzip
