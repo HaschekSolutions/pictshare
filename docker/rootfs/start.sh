@@ -25,7 +25,6 @@ _buildConfig() {
     echo "<?php"
     echo "define('URL', '${URL:-}');"
     echo "define('TITLE', '${TITLE:-PictShare}');"
-    echo "define('REDIS_CACHING', '${REDIS_CACHING:-true}');"
     echo "define('ALLOWED_SUBNET', '${ALLOWED_SUBNET:-}');"
     echo "define('CONTENTCONTROLLERS', '${CONTENTCONTROLLERS:-}');"
     echo "define('MASTER_DELETE_CODE', '${MASTER_DELETE_CODE:-}');"
