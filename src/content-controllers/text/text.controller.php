@@ -13,7 +13,7 @@ class TextController implements ContentController
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('txt','text','csv');}
 
-    public function handleHash($hash,$url)
+    public function handleHash($hash,$url,$path=false)
     {
         $path = getDataDir().DS.$hash.DS.$hash;
 
@@ -32,7 +32,7 @@ class TextController implements ContentController
                 header('Cache-Control: must-revalidate');
                 header('Pragma: public');
                 header('Content-Length: ' . filesize($path));
-                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
+                serveFile($path);
                 exit;
             }
         }
@@ -40,7 +40,7 @@ class TextController implements ContentController
             return renderTemplate('text.html.php',array('hash'=>$hash,'content'=>htmlentities(file_get_contents($path))));
     }
 
-    public function handleUpload($tmpfile,$hash=false)
+    public function handleUpload($tmpfile,$hash=false,$passthrough=false)
     {
         if($hash===false)
         {
@@ -54,7 +54,8 @@ class TextController implements ContentController
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 
-        storeFile($tmpfile,$hash,true);
+        if($passthrough===false)
+            storeFile($tmpfile,$hash,true);
         
         return array('status'=>'ok','hash'=>$hash,'url'=>getURL().$hash);
     }

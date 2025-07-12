@@ -7,7 +7,7 @@ class PlaceholderController implements ContentController
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('placeholder');}
 
-    public function handleHash($hash,$url)
+    public function handleHash($hash,$url,$path=false)
     {
         $path = getDataDir().DS.$hash.DS.$hash;
         
@@ -43,7 +43,7 @@ class PlaceholderController implements ContentController
         imagejpeg($img,null,(defined('JPEG_COMPRESSION')?JPEG_COMPRESSION:90));
     }
 
-    public function handleUpload($tmpfile,$hash=false)
+    public function handleUpload($tmpfile,$hash=false,$passthrough=false)
     {
         return array('status'=>'err','hash'=>$hash,'reason'=>'Cannot upload to placeholder image');
     }

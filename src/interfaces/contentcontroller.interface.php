@@ -31,7 +31,7 @@ interface ContentController
      * @param string $hash the hash (with extension eg '5saB2.pdf') of the file this controller will work with
      * @param array $url contains all URL elements exploded with '/' so you can do your magic. 
     */
-    public function handleHash($hash,$url);
+    public function handleHash($hash,$url,$path=false);
 
     /** This method will be called if the upload script detects the content of a newly uploaded file as one of the
      *  extensions registered at "getRegisteredExtensions".
@@ -41,5 +41,5 @@ interface ContentController
      * @param string $tmpfile is the location on disk of the temp file that was uploaded. It is your job to put it somewhere, your handleHash method will find it again
      * @param array $hash (optional) if you want your upload to have a certain hash then add it here. This allows for user chosen hashes
     */
-    public function handleUpload($tmpfile,$hash=false);
+    public function handleUpload($tmpfile,$hash=false,$passthrough=false);
 }

@@ -17,12 +17,46 @@ class API
         }
 
         return match ($this->url[0]) {
+            'passthrough' => $this->passthrough(),
             'upload' => $this->upload(),
             'delete' => $this->delete(),
             'info' => $this->info(),
             'debug' => $this->debug(),
             default => array('status' => 'err', 'reason' => 'Unknown API call', 'hint' => 'Check https://github.com/HaschekSolutions/pictshare/blob/master/rtfm/API.md for more information'),
         };
+    }
+
+    public function passthrough(){
+        $type = $this->url[1];
+        array_shift($this->url); //remove the first element which is 'passthrough'
+        array_shift($this->url); //remove the second element which is the type so now what's left is the modifiers
+        $tmpfile = $_FILES['file']['tmp_name'] ?? false;
+        if (!$tmpfile || !is_file($tmpfile))
+        {
+            header('HTTP/1.1 400 Bad Request');
+            return array('status' => 'err', 'reason' => 'No file uploaded');
+        }
+        $tmp_target = $tmpfile;
+        //$tmp_target = ROOT.DS.'tmp'.DS.'pt-'.md5(rand(1,9999)).basename($_FILES['file']['name']);
+        //move_uploaded_file($tmpfile, $tmp_target);
+
+        switch($type) {
+            case 'image':
+                $controller = new ImageController();
+                $upload = $controller->handleUpload($tmp_target, false, true); //only to validate the file
+                if ($upload['status'] == 'ok') {
+                    $controller->handleHash($upload['hash'], $this->url, $tmp_target);
+                    unlink($tmp_target); //remove the temporary file
+                    exit();
+                }
+                else {
+                    header('HTTP/1.1 400 Bad Request');
+                    return $upload; //error
+                }
+                break;
+            default:
+                return array('status' => 'err', 'reason' => 'Unknown passthrough type');
+        }
     }
 
 

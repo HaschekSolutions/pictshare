@@ -40,9 +40,8 @@ services:
         - LOG_VIEWS=false
         # caching
         - REDIS_CACHING=true
-        - REDIS_SERVER=/run/redis/redis.sock
-        - REDIS_PORT=0
-        - SERVER_NAME=:80 # required by caddy
+        - REDIS_SERVER=localhost
+        - REDIS_PORT=6379
     ports:
         - 8080:80
     volumes:

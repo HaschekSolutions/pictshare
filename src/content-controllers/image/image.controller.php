@@ -23,7 +23,7 @@ class ImageController implements ContentController
     public function getRegisteredExtensions(){return array('png','bmp','gif','jpg','jpeg','x-png','webp');}
     
 
-    public function handleUpload($tmpfile,$hash=false)
+    public function handleUpload($tmpfile,$hash=false,$passthrough=false)
     {
         $type = exif_imagetype($tmpfile); //http://www.php.net/manual/en/function.exif-imagetype.php
         switch($type)
@@ -91,14 +91,16 @@ class ImageController implements ContentController
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 
-        storeFile($tmpfile,$hash,true);
+        if($passthrough===false)
+            storeFile($tmpfile,$hash,true);
         
         return array('status'=>'ok','hash'=>$hash,'url'=>getURL().$hash);
     }
 
-    public function handleHash($hash,$url)
+    public function handleHash($hash,$url,$path=false)
     {
-        $path = getDataDir().DS.$hash.DS.$hash;
+        if($path===false)
+            $path = getDataDir().DS.$hash.DS.$hash;
         $type = getExtensionOfFilename($hash);
 
         //get all our sub files where all the good functions lie
@@ -151,7 +153,7 @@ class ImageController implements ContentController
             //so if we take all parameters in key=>value form and hash it
             //we get one nice little hash for every eventuality
             $modhash = md5(http_build_query($modifiers,'',','));
-            $newpath = getDataDir().DS.$hash.DS.$modhash.'_'.$hash;
+            $newpath = dirname($path).DS.$modhash.'_'.$hash;
             $im = $this->getObjOfImage($path);
             $f = new Filter();
 
@@ -183,7 +185,7 @@ class ImageController implements ContentController
                         break;
 
                         case 'mp4':
-                            $mp4path = getDataDir().DS.$hash.DS.$hash.'mp4';
+                            $mp4path = dirname($path).DS.$hash.'mp4';
                             if(!file_exists($mp4path))
                                 $this->gifToMP4($path,$mp4path);
                             $path = $mp4path;
@@ -199,7 +201,7 @@ class ImageController implements ContentController
                                     }
                         
                                     header ("Content-type: image/jpeg");
-                                    header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$preview));
+                                    serveFile($preview);
                                     exit;
                                 }
                                 else if(in_array('download',$url))
@@ -212,7 +214,7 @@ class ImageController implements ContentController
                                         header('Cache-Control: must-revalidate');
                                         header('Pragma: public');
                                         header('Content-Length: ' . filesize($path));
-                                        header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
+                                        serveFile($path);
                                         exit;
                                     }
                                 }
@@ -244,7 +246,7 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
-                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
+                serveFile($path);
             break;
 
             case 'png': 
@@ -252,7 +254,7 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
-                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
+                serveFile($path);
 
             break;
 
@@ -261,7 +263,7 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
-                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
+                serveFile($path);
             break;
 
             case 'webp': 
@@ -269,7 +271,7 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
-                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
+                serveFile($path);
             break;
         }
     }

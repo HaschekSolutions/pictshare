@@ -156,7 +156,26 @@ if (file_exists(ROOT . DS . 'notice.txt'))
 
     </div>
     <div class="col-6">
+        <h2>On-the-fly modifications to images</h2>
 
+        <p>You can modify images on-the-fly (without saving them to the server) by specifying additional parameters in the API call to use Pictshare to "clean up" or "normalize" images uploaded to your app. The passthrough endpoint allows you to use the normal image modifiers in the URL. It won't save the image on the Server and will respond with the modified image directly.</p>
+
+        API call
+        <pre><code class="url">/passthrough/image/[modifiers]</code></pre>
+
+        <p>For example to force an uploaded image to 400x400 and have it grayscale you can do this:</p>
+
+        CURL example
+        <pre><code class="bash">curl -s -F "file=@myphoto.jpg" "<?= getURL() ?>api/passthrough/image/400x400/forcesize/gray" > result.jpg</code></pre>
+
+        If the status code is anything other than "200", it will return an error message in JSON format.
+        <pre><code class="json">
+{
+    "status": "err",
+    "reason": "Not a valid image"
+}</code></pre>
+
+If the status code is "200", it will return the modified image directly.
     </div>
 
 </div>

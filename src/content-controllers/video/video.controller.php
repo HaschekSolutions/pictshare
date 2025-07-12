@@ -12,9 +12,10 @@ class VideoController implements ContentController
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('mp4');}
 
-    public function handleHash($hash,$url)
+    public function handleHash($hash,$url,$path=false)
     {
-        $path = getDataDir().DS.$hash.DS.$hash;
+        if($path===false)
+            $path = getDataDir().DS.$hash.DS.$hash;
 
         //@todo: - resize by changing $path
 
@@ -44,7 +45,7 @@ class VideoController implements ContentController
             }
 
             header ("Content-type: image/jpeg");
-            header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$preview));
+            serveFile($preview);
 
         }
         else if(in_array('download',$url))
@@ -57,7 +58,7 @@ class VideoController implements ContentController
                 header('Cache-Control: must-revalidate');
                 header('Pragma: public');
                 header('Content-Length: ' . filesize($path));
-                header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
+                serveFile($path);
                 exit;
             }
         }
@@ -69,7 +70,7 @@ class VideoController implements ContentController
         }
     }
 
-    public function handleUpload($tmpfile,$hash=false)
+    public function handleUpload($tmpfile,$hash=false,$passthrough=false)
     {
         if($hash===false)
             $hash = getNewHash('mp4',6);
@@ -80,10 +81,13 @@ class VideoController implements ContentController
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 
-        $file = storeFile($tmpfile,$hash,true);
+        if($passthrough===false)
+        {
+            $file = storeFile($tmpfile,$hash,true);
 
-        if(!$this->rightEncodedMP4($file))
-            system("nohup php ".ROOT.DS.'tools'.DS.'re-encode_mp4.php force '.$hash." > /dev/null 2> /dev/null &");
+            if(!$this->rightEncodedMP4($file))
+                system("nohup php ".ROOT.DS.'tools'.DS.'re-encode_mp4.php force '.$hash." > /dev/null 2> /dev/null &");
+        }
         
         return array('status'=>'ok','hash'=>$hash,'url'=>getURL().$hash);
     }
@@ -96,7 +100,7 @@ class VideoController implements ContentController
         header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
         header ("ETag: ".sha1_file($path));
         header('Cache-control: public, max-age=31536000');
-        header('X-Accel-Redirect: '.str_replace(getDataDir().DS,'',$path));
+        serveFile($path);
         exit();
     }
 

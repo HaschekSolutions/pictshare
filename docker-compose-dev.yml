@@ -5,7 +5,6 @@ services:
         context: .
         dockerfile: docker/Dockerfile
     environment:
-        - SERVER_NAME=:80
         - URL=http://localhost:8080/
         - MAX_UPLOAD_SIZE=1000
         # Security settings
@@ -43,8 +42,8 @@ services:
         - LOG_VIEWS=true
         # caching
         - REDIS_CACHING=true
-        - REDIS_SERVER=/run/redis/redis.sock
-        - REDIS_PORT=0
+        - REDIS_SERVER=localhost
+        - REDIS_PORT=6379
     ports:
         - 8080:80
     volumes:
@@ -52,4 +51,5 @@ services:
         - ./logs:/app/public/logs
         - ./src:/app/public/src
         - ./web:/app/public/web
+        - ./tmp:/app/public/tmp
         - ./tmp/redis:/var/lib/redis

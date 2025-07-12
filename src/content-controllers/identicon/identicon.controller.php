@@ -12,7 +12,7 @@ class IdenticonController implements ContentController
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('identicon');}
 
-    public function handleHash($hash,$url)
+    public function handleHash($hash,$url,$path=false)
     {
         unset($url[array_search('identicon',$url)]);
         $url = array_values($url);
@@ -29,7 +29,7 @@ class IdenticonController implements ContentController
         echo $icon;
     }
 
-    public function handleUpload($tmpfile,$hash=false)
+    public function handleUpload($tmpfile,$hash=false,$passthrough=false)
     {
         return array('status'=>'err','hash'=>$hash,'reason'=>'Cannot upload to Identicons');
     }

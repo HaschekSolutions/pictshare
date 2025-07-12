@@ -18,12 +18,9 @@ if(!defined('FFMPEG_BINARY'))
 function architect($u)
 {
 
-    //if there is no info in the URL, don't even bother checking with the controllers
-    //just show the site
-    if( ( (!defined('UPLOAD_FORM_LOCATION') || (defined('UPLOAD_FORM_LOCATION') && !UPLOAD_FORM_LOCATION)) && count($u)==0) || (defined('UPLOAD_FORM_LOCATION') && UPLOAD_FORM_LOCATION && '/'.implode('/',$u)==UPLOAD_FORM_LOCATION) )
+    // check if client address is allowed
+    if($u[0] == '' || $u[0] == '/')
     {
-        
-        // check if client address is allowed
         $forbidden = false;
         if(defined('ALLOWED_SUBNET') && ALLOWED_SUBNET != '' && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
         {
@@ -99,6 +96,7 @@ function architect($u)
 
     //check all parts of the URL for a valid hash
     $hash = false;
+    $sc = getStorageControllers();
     foreach($u as $el)
     {
         if(isExistingHash($el))
@@ -111,8 +109,6 @@ function architect($u)
         // if we don't have a hash yet but the element looks like it could be a hash
         if($hash === false && mightBeAHash($el))
         {
-            if(!$sc)
-                $sc = getStorageControllers();
             foreach($sc as $contr)
             {                    
                 $c = new $contr();
@@ -361,69 +357,6 @@ function sizeStringToWidthHeight($size)
     }
 	
 	return array('width'=>$maxwidth,'height'=>$maxheight);
-}
-
-//
-// from: https://stackoverflow.com/questions/25975943/php-serve-mp4-chrome-provisional-headers-are-shown-request-is-not-finished-ye
-//
-function serveFile($filename, $filename_output = false, $mime = 'application/octet-stream')
-{
-    $buffer_size = 8192;
-    $expiry = 90; //days
-    if(!file_exists($filename))
-    {
-        throw new Exception('File not found: ' . $filename);
-    }
-    if(!is_readable($filename))
-    {
-        throw new Exception('File not readable: ' . $filename);
-    }
-    header_remove('Cache-Control');
-    header_remove('Pragma');
-    $byte_offset = 0;
-    $filesize_bytes = $filesize_original = filesize($filename);
-    header('Accept-Ranges: bytes', true);
-    header('Content-Type: ' . $mime, true);
-
-    header("Content-Disposition: inline;");
-    // Content-Range header for byte offsets
-    if (isset($_SERVER['HTTP_RANGE']) && preg_match('%bytes=(\d+)-(\d+)?%i', $_SERVER['HTTP_RANGE'], $match))
-    {
-        $byte_offset = (int) $match[1];//Offset signifies where we should begin to read the file            
-        if (isset($match[2]))//Length is for how long we should read the file according to the browser, and can never go beyond the file size
-        {
-            $filesize_bytes = min((int) $match[2], $filesize_bytes - $byte_offset);
-        }
-        header("HTTP/1.1 206 Partial content");
-        header(sprintf('Content-Range: bytes %d-%d/%d', $byte_offset, $filesize_bytes - 1, $filesize_original)); ### Decrease by 1 on byte-length since this definition is zero-based index of bytes being sent
-    }
-    $byte_range = $filesize_bytes - $byte_offset;
-    header('Content-Length: ' . $byte_range);
-    header('Expires: ' . date('D, d M Y H:i:s', time() + 60 * 60 * 24 * $expiry) . ' GMT');
-    $buffer = '';
-    $bytes_remaining = $byte_range;
-    $handle = fopen($filename, 'r');
-    if(!$handle)
-    {
-        throw new Exception("Could not get handle for file: " .  $filename);
-    }
-    if (fseek($handle, $byte_offset, SEEK_SET) == -1)
-    {
-        throw new Exception("Could not seek to byte offset %d", $byte_offset);
-    }
-    while ($bytes_remaining > 0)
-    {
-        $chunksize_requested = min($buffer_size, $bytes_remaining);
-        $buffer = fread($handle, $chunksize_requested);
-        $chunksize_real = strlen($buffer);
-        if ($chunksize_real == 0)
-        {
-            break;
-        }
-        $bytes_remaining -= $chunksize_real;
-        echo $buffer;
-        flush();
-    }
 }
 
 function sanatizeString($string)
@@ -1276,4 +1209,39 @@ function getFileMimeType($file)
         $mimeType = shell_exec('file --mime-type -b ' . escapeshellarg($file));
         return trim($mimeType);
     }
+}
+
+function getRelativeToDataPath(string $path): string
+{
+    // Resolve real paths
+    $realBase = realpath(ROOT.DS.'data');
+    $realPath = realpath($path);
+
+    if ($realBase === false || $realPath === false) {
+        throw new InvalidArgumentException("Invalid path or base directory: $path, ".ROOT.DS.'data');
+    }
+
+    $baseParts = explode(DIRECTORY_SEPARATOR, trim($realBase, DIRECTORY_SEPARATOR));
+    $pathParts = explode(DIRECTORY_SEPARATOR, trim($realPath, DIRECTORY_SEPARATOR));
+
+    // Find common path length
+    $i = 0;
+    while (isset($baseParts[$i], $pathParts[$i]) && $baseParts[$i] === $pathParts[$i]) {
+        $i++;
+    }
+
+    // How many directories to go up from base
+    $upDirs = count($baseParts) - $i;
+    $relativeParts = array_merge(array_fill(0, $upDirs, '..'), array_slice($pathParts, $i));
+
+    return implode('/', $relativeParts);
+}
+
+function serveFile($path){
+    $relativePath = getRelativeToDataPath($path);
+    //since x-accel-redirect does not support paths outside its root, we need to check if the path is relative or absolute
+    if(startsWith($relativePath,'..'))
+        readfile($path);
+    else
+        header('X-Accel-Redirect: '. $relativePath);
 }
