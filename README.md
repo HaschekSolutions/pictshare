@@ -15,9 +15,9 @@
   
 ![](https://img.shields.io/badge/php-8.2%2B-brightgreen.svg)
 [![](https://img.shields.io/docker/pulls/hascheksolutions/pictshare?color=brightgreen)](https://hub.docker.com/r/hascheksolutions/pictshare)
-![](https://github.com/hascheksolutions/pictshare/actions/workflows/build-docker.yml/badge.svg)]
+![](https://github.com/hascheksolutions/pictshare/actions/workflows/build-docker.yml/badge.svg)
 [![Apache License](https://img.shields.io/badge/license-Apache-brightgreen.svg?style=flat)](https://github.com/HaschekSolutions/pictshare/blob/master/LICENSE)
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fhascheksolutions%2Fpictshare&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
+![Hits](https://hits.deltapapa.io/github/HaschekSolutions/pictshare.svg)
 [![](https://img.shields.io/github/stars/HaschekSolutions/pictshare.svg?label=Stars&style=social)](https://github.com/HaschekSolutions/pictshare)
 
 #### Host your own `images` `gifs` `mp4s` `text bins` and stay in control
