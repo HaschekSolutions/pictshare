@@ -59,7 +59,7 @@
 
     <div class="footer">
         <div class="container text-center">
-            <p>created by <a href="https://haschek.solutions" target="_blank"><img height="30" src="/css/imgs/hs_logo.png" /></a></p>
+            <p>created by <a href="https://haschek.solutions" target="_blank"><img height="30" src="/css/imgs/hs_logo.png" /></a> - <a href="https://github.com/HaschekSolutions/pictshare" target="_blank">GitHub</a></p>
         </div>
     </div>
 
