@@ -1,0 +1,13 @@
+services:
+  pictshare:
+    build:
+      dockerfile: docker/Dockerfile
+      context: .
+    restart: unless-stopped
+    volumes:
+      - ./docker-compose-state:/var/www/data
+    ports:
+      - 8080:80
+    environment:
+      - ALLOWED_SUBNET=192.0.2.0/24,2001:db8::/64
+      - LOG_UPLOADER=true

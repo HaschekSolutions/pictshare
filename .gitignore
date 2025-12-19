@@ -2,3 +2,4 @@ test.php
 notice.txt
 lib/vendor
 .vscode
+docker-compose-state
