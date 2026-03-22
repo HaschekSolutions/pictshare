@@ -114,8 +114,10 @@ function architect($u)
                         return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs.html.php')]);
                 }
             case 'reports':
-                if(!$_SESSION['admin'])
+                if(!$_SESSION['admin']) {
                     header('Location: /admin');
+                    return;
+                }
                 if($u[2]=='delete'){
                     $hash = $u[3];
                     deleteHash($hash);
@@ -1307,7 +1309,7 @@ function serveFile($path){
 
 function getReports(){
     $reports = [];
-    $reportFile = ROOT.DS.'data'.DS.'reports.json';
+    $reportFile = getDataDir().DS.'reports.json';
     if(file_exists($reportFile)){
         $reports = json_decode(file_get_contents($reportFile), true);
     }
@@ -1326,6 +1328,6 @@ function addReport($hashes, $note){
     $report['status'] = 'open';
     $report['ip'] = getUserIP();
     $reports[] = $report;
-    file_put_contents(ROOT.DS.'data'.DS.'reports.json', json_encode($reports, JSON_PRETTY_PRINT));
+    file_put_contents(getDataDir().DS.'reports.json', json_encode($reports, JSON_PRETTY_PRINT));
     return $report['id'];
 }
