@@ -56,6 +56,7 @@
       <?php if(defined('LOG_VIEWS') && LOG_VIEWS==true): ?>
         <th scope="col">Views log</th>
       <?php endif; ?>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody
@@ -64,7 +65,7 @@
     hx-trigger="load"
     hx-swap="innerHTML"
   >
-    <tr><td colspan="<?=defined('LOG_VIEWS')&&LOG_VIEWS?8:7?>">Loading&hellip;</td></tr>
+    <tr><td colspan="<?=defined('LOG_VIEWS')&&LOG_VIEWS?9:8?>">Loading&hellip;</td></tr>
   </tbody>
 </table>
 </div>

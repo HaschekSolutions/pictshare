@@ -100,6 +100,13 @@ function architect($u)
                     header('Location: /admin');
                     return;
                 }
+                if(isset($u[2]) && $u[2] === 'delete' && isset($u[3])) {
+                    $hash = $u[3];
+                    deleteHash($hash);
+                    if(isset($GLOBALS['redis']) && $GLOBALS['redis'])
+                        $GLOBALS['redis']->hDel('stats:index', $hash);
+                    return; // empty response — HTMX removes the row
+                }
                 if(isset($u[2]) && $u[2] === 'data') {
                     // HTMX fragment — return bare tbody rows, no layout wrapper
                     $page   = max(1, (int)($_GET['page'] ?? 1));
