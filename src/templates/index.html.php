@@ -13,7 +13,6 @@
     <!-- PictShare overwrites -->
     <link href="/css/pictshare.css" rel="stylesheet">
     <link href="/css/dropzone.css" rel="stylesheet">
-    <link href="/css/bootstrap-table.min.css" rel="stylesheet">
     <link href="/css/hljs-dracula.css" rel="stylesheet">
 
 
@@ -59,14 +58,14 @@
 
     <div class="footer">
         <div class="container text-center">
-            <p>created by <a href="https://haschek.solutions" target="_blank"><img height="30" src="/css/imgs/hs_logo.png" /></a> - <a href="https://github.com/HaschekSolutions/pictshare" target="_blank">GitHub</a></p>
+            <p>created by <a href="https://haschek.solutions" target="_blank"><img height="30" src="/css/imgs/hs_logo.png" /></a> - <a href="https://github.com/HaschekSolutions/pictshare" target="_blank">GitHub</a> - <a href="/report">Report abuse</a></p>
         </div>
     </div>
 
 
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
     <script src="/js/dropzone.js"></script>
     <script src="/js/highlight.pack.js"></script>
     <script src="/js/pictshare.js"></script>
