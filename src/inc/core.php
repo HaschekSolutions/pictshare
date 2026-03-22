@@ -29,6 +29,58 @@ function architect($u)
         return renderTemplate('index.html.php',['main'=>renderTemplate('main.html.php',['forbidden'=>$forbidden])]);
     }
 
+    if($u[0] == 'report')
+    {
+        $reports = getReports();
+        $alreadyreported = [];
+        $o = [];
+        foreach($reports as $report)
+            $alreadyreported = array_merge($alreadyreported, $report['hashes']);
+        if(isset($_POST['urls']) && isset($_POST['note']))
+        {
+            $urls = $_POST['urls'];
+            $note = $_POST['note'];
+
+            $hashes = [];
+
+            foreach(explode("\n", $urls) as $url)
+            {
+                $url = trim($url);
+                if(!$url) continue;
+                if(!startsWith(strtolower($url), strtolower(URL))){
+                    $o[] = 'Skipped '.$url.', because it does not start with the base URL: '.URL;
+                    continue; // we only accept URLs that start with the base URL
+                }
+                $parts = explode('/', $url);
+                foreach($parts as $part)
+                {
+                    if(!mightBeAHash($part)) continue;
+                    if(!isExistingHash($part)) continue;
+                    else {
+                        $hash = $part;
+                        if(!in_array($hash, $alreadyreported))
+                            $hashes[] = $hash;
+                        else
+                            $o[] = 'Skipped '.$url.', because already reported';
+                        break;
+                    }
+                }
+            }
+
+            if(count($hashes) == 0)
+            {
+                return renderTemplate('index.html.php',['main'=>implode("<br/>",$o)."<div class='alert alert-danger'>No new URLs were reported</div>"]);
+            }
+
+            $id = addReport($hashes, $note);
+            return renderTemplate('index.html.php',['main'=>implode("<br/>",$o)."<div class='alert alert-success'><strong>Report ID: $id</strong><br>Your report contained ".count($hashes)." verified file(s) and has been submitted.</div>"]);
+        }
+        else
+        {
+            return renderTemplate('index.html.php',['main'=>renderTemplate('report.form.html.php')]);
+        }
+    }
+
     // admin logic
     if($u[0] == 'admin' && defined('ADMIN_PASSWORD') && ADMIN_PASSWORD != '')
     {
@@ -61,6 +113,14 @@ function architect($u)
                     default:
                         return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs.html.php')]);
                 }
+            case 'reports':
+                if(!$_SESSION['admin'])
+                    header('Location: /admin');
+                if($u[2]=='delete'){
+                    $hash = $u[3];
+                    deleteHash($hash);
+                }
+                return renderTemplate('index.html.php',['main'=>renderTemplate('admin.reports.html.php',['reports'=>getReports()])]);
             default:
                 if($_REQUEST['password'] && $_REQUEST['password']== ADMIN_PASSWORD)
                 {
@@ -76,8 +136,6 @@ function architect($u)
                 }
                 return renderTemplate('index.html.php',['main'=>renderTemplate('admin.html.php')]);
         }
-        
-        
     }
 
     //check cache
@@ -110,7 +168,7 @@ function architect($u)
         if($hash === false && mightBeAHash($el))
         {
             foreach($sc as $contr)
-            {                    
+            {
                 $c = new $contr();
 
                 if($c->isEnabled()===true && $c->hashExists($el))
@@ -1015,6 +1073,7 @@ function is_public_ipv6($ip=NULL)
 
 function getDataDir()
 {
+    if (defined('_TEST_DATA_OVERRIDE')) return _TEST_DATA_OVERRIDE;  // test isolation
     if(defined('SPLIT_DATA_DIR') && SPLIT_DATA_DIR===true && getDomain() && in_array(getDomain(),explode(',',ALLOWED_DOMAINS)))
     {
         $dir = ROOT.DS.'data'.DS.getDomain();
@@ -1244,4 +1303,29 @@ function serveFile($path){
         readfile($path);
     else
         header('X-Accel-Redirect: '. $relativePath);
+}
+
+function getReports(){
+    $reports = [];
+    $reportFile = ROOT.DS.'data'.DS.'reports.json';
+    if(file_exists($reportFile)){
+        $reports = json_decode(file_get_contents($reportFile), true);
+    }
+    return $reports;
+}
+
+function addReport($hashes, $note){
+    if(!$hashes || count($hashes)===0){
+        return false;
+    }
+    $reports = getReports();
+    $report['id'] = uniqid();
+    $report['timestamp'] = time();
+    $report['hashes'] = is_array($hashes) ? $hashes : [$hashes];
+    $report['note'] = $note;
+    $report['status'] = 'open';
+    $report['ip'] = getUserIP();
+    $reports[] = $report;
+    file_put_contents(ROOT.DS.'data'.DS.'reports.json', json_encode($reports, JSON_PRETTY_PRINT));
+    return $report['id'];
 }
