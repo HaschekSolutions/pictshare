@@ -218,6 +218,41 @@ class API
 
 
 
+    public function info()
+    {
+        $hash = $this->url[1] ?? '';
+
+        if (!$hash)
+            return ['status' => 'err', 'reason' => 'Missing hash'];
+
+        if (!isExistingHash($hash))
+            return ['status' => 'err', 'reason' => 'Hash not found'];
+
+        return getMetaData($hash);
+    }
+
+    public function delete()
+    {
+        // URL pattern: /api/delete/{code}/{hash}
+        $code = $this->url[1] ?? '';
+        $hash = $this->url[2] ?? '';
+
+        if (!$hash || !$code)
+            return ['status' => 'err', 'reason' => 'Missing code or hash'];
+
+        if (!isExistingHash($hash))
+            return ['status' => 'err', 'reason' => 'Hash not found'];
+
+        $correctCode = getDeleteCodeOfHash($hash);
+        $masterCode  = defined('MASTER_DELETE_CODE') ? MASTER_DELETE_CODE : null;
+
+        if ($correctCode !== $code && $masterCode !== $code)
+            return ['status' => 'err', 'reason' => 'Invalid delete code'];
+
+        deleteHash($hash);
+        return ['status' => 'ok', 'hash' => $hash];
+    }
+
     public function checkPermissions()
     {
         // check write permissions first
