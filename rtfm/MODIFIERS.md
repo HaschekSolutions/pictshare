@@ -26,6 +26,8 @@ width x height
 /mp4/d8c01b45a6.gif
 ```
 
+> **Note:** Filters, resize, and rotation also work on static (non-animated) GIFs.
+
 ### Filters
 ```
 /filter/d8c01b45a6.png

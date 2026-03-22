@@ -8,6 +8,9 @@ Click on the images to see them in full size
 | ---        | ---    | ---                                                                                                   |
 | pixelate   |  1-100 | [![](https://pictshare.net/pixelate/150/4qylps.jpg)](https://pictshare.net/pixelate/4qylps.jpg)       |
 | blur       |  1-6   | [![](https://pictshare.net/blur/150/4qylps.jpg)](https://pictshare.net/blur/4qylps.jpg)               |
+| brightness | -255 to 255 | eg: `brightness_80` — positive = brighter, negative = darker                                     |
+| contrast   | -100 to 100 | eg: `contrast_-30` — negative = more contrast, positive = less contrast                          |
+| colorize   | R_G_B (-255 to 255 each) | eg: `colorize_80_20_0` — adds a color tint (red, green, blue)                       |
 | sepia      |        | [![](https://pictshare.net/sepia/150/4qylps.jpg)](https://pictshare.net/sepia/4qylps.jpg)             |
 | sepia2     |        | [![](https://pictshare.net/sepia2/150/4qylps.jpg)](https://pictshare.net/sepia2/4qylps.jpg)           |
 | sharpen    |        | [![](https://pictshare.net/sharpen/150/4qylps.jpg)](https://pictshare.net/sharpen/4qylps.jpg)         |
