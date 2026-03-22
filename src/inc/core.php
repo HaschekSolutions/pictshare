@@ -499,6 +499,7 @@ function startsWith($haystack,$needle)
     return (substr($haystack,0,$length) === $needle);
 }
 function endswith($string, $test) {
+    if(!$string || !$test) return false;
     $strlen = strlen($string);
     $testlen = strlen($test);
     if ($testlen > $strlen) return false;
@@ -1135,22 +1136,108 @@ function addToLog($data,$logfile=ROOT.DS.'logs/app.log')
     fclose($fp);
 }
 
-function getStats(){
-    $stats = array();
-    $stats['total_files'] = 0;
-    $stats['total_size'] = 0;
-    $stats['total_files'] = count(glob(getDataDir().DS.'*', GLOB_ONLYDIR));
-    foreach (glob(getDataDir().DS.'*') as $dir) {
-        if (is_dir($dir)) {
-            $stats['hashes'][basename($dir)] = [
-                'size' => filesize($dir.DS.basename($dir)),
-                'files' => count(glob($dir.DS.'*')),
-                'views' => $GLOBALS['redis']->get('served:'.basename($dir)),
-                'metadata' => getMetadataOfHash(basename($dir)),
-            ];
+function isCacheStale(): bool
+{
+    if (!isset($GLOBALS['redis']) || !$GLOBALS['redis']) return true;
+    $builtAt = $GLOBALS['redis']->get('stats:built_at');
+    if (!$builtAt) return true;
+    return (time() - (int)$builtAt) > 300;
+}
+
+function rebuildStatsCache(): void
+{
+    if (!isset($GLOBALS['redis']) || !$GLOBALS['redis']) return;
+
+    $dirs = glob(getDataDir().DS.'*', GLOB_ONLYDIR);
+    if (empty($dirs)) {
+        $GLOBALS['redis']->del('stats:index');
+        $GLOBALS['redis']->set('stats:built_at', (string)time());
+        return;
+    }
+
+    $hashes = array_map('basename', $dirs);
+
+    // Batch-fetch all view counts in one MGET instead of N individual GETs
+    $viewKeys = array_map(fn($h) => 'served:'.$h, $hashes);
+    $viewValues = $GLOBALS['redis']->mget($viewKeys);
+    $views = array_combine($hashes, $viewValues);
+
+    // Write all entries through a pipeline to minimize round-trips
+    $GLOBALS['redis']->del('stats:index');
+    $pipe = $GLOBALS['redis']->pipeline();
+    foreach ($dirs as $dir) {
+        $hash = basename($dir);
+        $meta = getMetadataOfHash($hash);
+        $file = $dir.DS.$hash;
+        $pipe->hset('stats:index', $hash, json_encode([
+            'hash'              => $hash,
+            'views'             => (int)($views[$hash] ?? 0),
+            'mime'              => $meta['mime'] ?? '',
+            'ip'                => $meta['ip'] ?? '',
+            'uploaded'          => $meta['uploaded'] ?? 0,
+            'original_filename' => $meta['original_filename'] ?? '',
+            'size'              => file_exists($file) ? filesize($file) : 0,
+        ]));
+    }
+    $pipe->execute();
+
+    $GLOBALS['redis']->set('stats:built_at', (string)time());
+}
+
+function getStatsPage(int $page, string $sort, string $dir, string $q): array
+{
+    $allowedSorts = ['views', 'uploaded', 'mime', 'size', 'hash', 'original_filename', 'ip'];
+    if (!in_array($sort, $allowedSorts, true)) $sort = 'uploaded';
+    if (!in_array($dir, ['asc', 'desc'], true)) $dir = 'desc';
+    $page = max(1, $page);
+
+    $rows = [];
+    if (isset($GLOBALS['redis']) && $GLOBALS['redis']) {
+        $raw = $GLOBALS['redis']->hgetall('stats:index');
+        foreach ($raw as $hash => $json) {
+            $entry = json_decode($json, true);
+            if (!$entry) continue;
+            $entry['hash'] = $hash;
+            $rows[] = $entry;
         }
     }
-    return $stats;
+
+    // Filter
+    if ($q !== '') {
+        $q = strtolower($q);
+        $rows = array_values(array_filter($rows, function($r) use ($q) {
+            return str_contains(strtolower($r['hash'] ?? ''), $q)
+                || str_contains(strtolower($r['original_filename'] ?? ''), $q)
+                || str_contains(strtolower($r['ip'] ?? ''), $q)
+                || str_contains(strtolower($r['mime'] ?? ''), $q);
+        }));
+    }
+
+    // Sort
+    usort($rows, function($a, $b) use ($sort, $dir) {
+        $av = $a[$sort] ?? 0;
+        $bv = $b[$sort] ?? 0;
+        $cmp = is_numeric($av) && is_numeric($bv)
+            ? ($av <=> $bv)
+            : strcmp((string)$av, (string)$bv);
+        return $dir === 'asc' ? $cmp : -$cmp;
+    });
+
+    $total = count($rows);
+    $pageSize = 50;
+    $totalPages = $total > 0 ? (int)ceil($total / $pageSize) : 0;
+    $page = min($page, max(1, $totalPages));
+    $rows = array_slice($rows, ($page - 1) * $pageSize, $pageSize);
+
+    return [
+        'rows'        => $rows,
+        'total'       => $total,
+        'page'        => $page,
+        'total_pages' => $totalPages,
+        'sort'        => $sort,
+        'dir'         => $dir,
+        'q'           => $q,
+    ];
 }
 
 function getLogs($type='app',$filter=false)
