@@ -109,6 +109,7 @@ class ImageController implements ContentController
         include_once(dirname(__FILE__).DS.'conversion.php');
 
         //don't do this if it's a gif because PHP can't handle animated gifs
+        $modifiers = [];
         if($type!='gif')
         {
             $filters = getFilters();
@@ -124,8 +125,8 @@ class ImageController implements ContentController
                     {
                         if(startsWith($u,$filter) && ($u==$filter || startsWith($u,$filter.'_')))
                         {
-                            $a = explode('_',$u);
-                            $value = $a[1];
+                            $a = explode('_', $u);
+                            $value = $a[1] ?? null;
                             if(is_numeric($value))
                                 $modifiers['filters'][] = array('filter'=>$filter,'value'=>$value);
                             else
@@ -137,7 +138,7 @@ class ImageController implements ContentController
 
             if( (in_array('webp',$url) && $type!='webp') || ( $this->shouldAlwaysBeWebp() && ($type=='jpg' || $type=='png') ) )
                 $modifiers['webp'] = true;
-            if(in_array('forcesize',$url) && $modifiers['size'])
+            if(isset($modifiers['size']) && in_array('forcesize', $url))
                 $modifiers['forcesize'] = true;
         }
         else //gif
@@ -156,6 +157,7 @@ class ImageController implements ContentController
             $newpath = dirname($path).DS.$modhash.'_'.$hash;
             $im = $this->getObjOfImage($path);
             $f = new Filter();
+            $saved = true;
 
             if(!file_exists($newpath))
             {
@@ -167,7 +169,7 @@ class ImageController implements ContentController
                             foreach($val as $fd)
                             {
                                 $filter = $fd['filter'];
-                                $value = $fd['value'];
+                                $value = $fd['value'] ?? null;
                                 $im = $f->$filter($im,$value);
                             }
                         break;
@@ -228,13 +230,13 @@ class ImageController implements ContentController
                     }
                 }
 
-                $this->saveObjOfImage($im,$newpath,$type);
+                $saved = $this->saveObjOfImage($im,$newpath,$type);
             }
             else if($modifiers['webp'])
             {
                 $type = 'webp';
             }
-            $path = $newpath;
+            if ($saved !== false) $path = $newpath;
             
         }
         
@@ -309,11 +311,22 @@ class ImageController implements ContentController
                 imagepng($im,$tmppath,(defined('PNG_COMPRESSION')?PNG_COMPRESSION:6));
             break;
 
-            case 'webp': 
+            case 'webp':
                 imagepalettetotruecolor($im);
                 imagealphablending($im, true);
                 imagewebp($im,$tmppath,(defined('WEBP_COMPRESSION')?WEBP_COMPRESSION:80));
             break;
+
+            case 'gif':
+                imagegif($im, $tmppath);
+            break;
+
+            case 'bmp':
+                imagebmp($im, $tmppath);
+            break;
+
+            case 'ico':
+                return false;  // no native GD support
         }
 
         if(file_exists($tmppath) && filesize($tmppath)>0)
@@ -332,7 +345,7 @@ class ImageController implements ContentController
     function shouldAlwaysBeWebp()
     {
         //sanity check
-        if(!$_SERVER['HTTP_ACCEPT']) return false;
+        if(!isset($_SERVER['HTTP_ACCEPT']) || !$_SERVER['HTTP_ACCEPT']) return false;
 
         if(defined('ALWAYS_WEBP') && ALWAYS_WEBP && strpos( $_SERVER['HTTP_ACCEPT'], 'image/webp' ) !== false )
             return true;
