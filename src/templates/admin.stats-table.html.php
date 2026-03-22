@@ -8,7 +8,7 @@
   <td><?=htmlspecialchars($row['original_filename']??'')?></td>
   <td><?=htmlspecialchars($row['mime']??'')?></td>
   <td><?=$row['uploaded']?date('Y-m-d H:i',(int)$row['uploaded']):''?></td>
-  <td><?=number_format((int)($row['size']??0))?></td>
+  <td><?php $s=(int)($row['size']??0); echo $s>=1073741824?round($s/1073741824,1).' GB':($s>=1048576?round($s/1048576,1).' MB':($s>=1024?round($s/1024,1).' KB':$s.' B')); ?></td>
   <td><?=htmlspecialchars($row['ip']??'')?></td>
   <?php if(defined('LOG_VIEWS')&&LOG_VIEWS==true): ?>
     <td><a class="btn btn-secondary btn-sm" href="/admin/logs/views/<?=htmlspecialchars($row['hash'])?>">View logs</a></td>
