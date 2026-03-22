@@ -24,6 +24,10 @@ Backward compatibility is critical: existing URLs are embedded in thousands of e
 `$value = $a[1]` when a filter has no `_N` suffix (e.g. `sepia`) triggers E_NOTICE because index 1 doesn't exist.
 **Fix:** Change to `$value = $a[1] ?? null;`. Behavior is identical — `null` is not numeric, so the value-less branch is taken.
 
+### `$fd['value']` missing key guard
+In the `case 'filters':` dispatch loop, `$value = $fd['value']` triggers E_NOTICE for preset filters stored as `['filter' => 'sepia']` with no `'value'` key.
+**Fix:** Change to `$value = $fd['value'] ?? null;`. Behavior is identical — preset filter methods ignore `$val` anyway.
+
 ### `$modifiers['forcesize']` unguarded access
 Line: `if(in_array('forcesize',$url) && $modifiers['size'])` accesses `$modifiers['size']` without `isset`.
 **Fix:** Flip to `isset($modifiers['size']) && in_array('forcesize', $url)` — short-circuits before accessing the array key.
@@ -37,7 +41,9 @@ The method has no `case` for `gif`, `bmp`, or `ico`, so saving a modified image 
 **Fix:**
 - `gif` → `imagegif($im, $tmppath)`
 - `bmp` → `imagebmp($im, $tmppath)` (available in PHP 7.2+; present in this codebase's PHP 8.2 requirement)
-- `ico` → no native GD support; return `false` gracefully so the caller falls through to serving the original unmodified file
+- `ico` → no native GD support; return `false`
+
+**Caller fix:** `saveObjOfImage` returns `$im` (a GD resource) on success or `false` on failure. The call site has two places where `$path = $newpath` is assigned unconditionally — once inside the `if(!file_exists($newpath))` block and once in the `else if($modifiers['webp'])` branch below it. Both must be guarded: only assign `$path = $newpath` if `saveObjOfImage !== false`. If it returns `false`, keep the original `$path` and serve the unmodified file. Use `!== false` explicitly (not a truthiness check) to be clear about intent, even though a GD resource is always truthy.
 
 ---
 
@@ -49,8 +55,10 @@ The entire filter/resize/rotation pipeline is skipped for all GIFs with the comm
 ### Detection
 Detect animated GIFs by counting Graphic Control Extension blocks (`\x21\xF9\x04`) in the raw file bytes. One such block = static; more than one = animated.
 
+**Known limitation:** these three bytes can theoretically appear in pixel data or comment blocks of a single-frame GIF, producing a false positive (static GIF treated as animated). The consequence is that filters are silently skipped — not a crash or regression. This heuristic is accepted as good enough for this scope.
+
 ### Behavior
-- **Static GIF:** run the full filter/resize/rotation pipeline (same as JPG/PNG). `saveObjOfImage` now handles `gif` write-back via `imagegif`.
+- **Static GIF:** run the full filter/resize/rotation pipeline (same as JPG/PNG), **including WebP conversion**. `saveObjOfImage` now handles `gif` write-back via `imagegif`.
 - **Animated GIF:** keep existing behavior unchanged — skip all modifiers except MP4 conversion.
 - **Detection failure** (unreadable file): treat as animated, skip filters. Safe fallback, no regression.
 
@@ -79,9 +87,19 @@ Three new filter methods added to the `Filter` class:
 Out-of-range values are clamped silently to valid range.
 
 ### Parser change for `colorize`
-`colorize` requires three underscore-separated values (R, G, B). The existing filter parser splits on `_` and reads `$a[1]` as a single value. For `colorize`, the parser reads `$a[1]`, `$a[2]`, `$a[3]` and passes them to the filter method.
+`colorize` requires three underscore-separated values (R, G, B). The existing dispatch call is `$f->$filter($im, $value)` which passes a single value.
 
-This requires a small extension to the modifier parsing block: after matching a filter name, check if the filter is `colorize` and extract three values instead of one. All other filters use the existing single-value path.
+**Approach:** store R/G/B as a single array in the `$modifiers['filters']` entry:
+```php
+// stored as:
+['filter' => 'colorize', 'value' => [80, 20, 0]]
+
+// dispatched as:
+$im = $f->colorize($im, $value);  // $value is an array [R, G, B]
+```
+The `Filter::colorize` method signature stays `($im, $val)` — it receives the array as `$val` and unpacks it internally. The dispatch call in `handleHash` is unchanged.
+
+For parsing: after matching `colorize` as the filter name, extract `$a[1]`, `$a[2]`, `$a[3]` (defaulting missing values to 0) and store as array. All other filters continue to use the single scalar value path.
 
 ---
 
@@ -94,15 +112,17 @@ Request URL segments
       isSize()      → $modifiers['size']
       isRotation()  → $modifiers['rotation']
       isFilter()    → $modifiers['filters'][]  (with value(s))
-      'webp'        → $modifiers['webp']
-      'forcesize'   → $modifiers['forcesize'] (only if size also set)
+  → after loop (existing placement, unchanged):
+      'webp' in url → $modifiers['webp']
+      'forcesize' in url AND isset($modifiers['size']) → $modifiers['forcesize']
   → animated GIF check (if type == gif):
       animated → MP4-only branch (unchanged)
       static   → continue to modifier pipeline
   → if $modifiers not empty:
       compute modhash (unchanged — cache still valid)
       if cached variant exists: serve it
-      else: apply modifiers, saveObjOfImage, serve
+      else: apply modifiers, saveObjOfImage !== false → $path = $newpath, serve
+      if saveObjOfImage === false: serve original $path
 ```
 
 Cache behavior is unchanged. The modhash covers all modifier combinations, so new filters get their own cached variant automatically.
