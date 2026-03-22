@@ -26,10 +26,10 @@ class DeleteTest extends PictShareTestCase
      */
     public function testDeleteCodeIsPresent(): void
     {
-        $r = $this->uploadFixture('test.jpg');
-        $code = getDeleteCodeOfHash($r['hash']);
-        // Direct controller upload: no meta.json is written → delete_code is absent
-        $this->assertFalse($code);
+        $this->markTestIncomplete(
+            'delete_code is stored in meta.json via API::handleFile(), not by direct controller upload. ' .
+            'This test will be implemented as part of Task 14 (API endpoint tests).'
+        );
     }
 
     /**
@@ -39,11 +39,10 @@ class DeleteTest extends PictShareTestCase
      */
     public function testDeleteCodeIsUniquePerFile(): void
     {
-        $r1 = $this->uploadFixture('test.jpg');
-        $r2 = $this->uploadFixture('test.png');
-        // Both have no meta.json → both return false; uniqueness is not applicable here
-        $this->assertFalse(getDeleteCodeOfHash($r1['hash']));
-        $this->assertFalse(getDeleteCodeOfHash($r2['hash']));
+        $this->markTestIncomplete(
+            'delete_code uniqueness requires API::handleFile() to write meta.json. ' .
+            'This test will be implemented as part of Task 14 (API endpoint tests).'
+        );
     }
 
     /**
@@ -53,16 +52,10 @@ class DeleteTest extends PictShareTestCase
      */
     public function testCorrectCodePassesGuard(): void
     {
-        $r = $this->uploadFixture('test.jpg');
-        $hash = $r['hash'];
-        $code = getDeleteCodeOfHash($hash);
-
-        $isAuthorized = (
-            getDeleteCodeOfHash($hash) === $code ||
-            (defined('MASTER_DELETE_CODE') && MASTER_DELETE_CODE === $code)
+        $this->markTestIncomplete(
+            'Guard logic test requires a real delete code from API::handleFile(). ' .
+            'This test will be implemented as part of Task 14 (API endpoint tests).'
         );
-
-        $this->assertTrue($isAuthorized);
     }
 
     public function testWrongCodeFailsGuard(): void

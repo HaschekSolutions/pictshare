@@ -73,11 +73,10 @@ class UploadTest extends PictShareTestCase
      */
     public function testUploadedFileHasMetadata(): void
     {
-        $result = $this->uploadFixture('test.jpg');
-        $meta = getMetadataOfHash($result['hash']);
-        // Direct controller upload: meta.json is not written — expect empty array
-        $this->assertIsArray($meta);
-        $this->assertEmpty($meta);
+        $this->markTestIncomplete(
+            'meta.json is written by API::handleFile(), not by direct controller upload. ' .
+            'This test will be implemented as part of Task 14 (API endpoint tests).'
+        );
     }
 
     /**
@@ -86,10 +85,10 @@ class UploadTest extends PictShareTestCase
      */
     public function testUploadedFileHasDeleteCode(): void
     {
-        $result = $this->uploadFixture('test.jpg');
-        $code = getDeleteCodeOfHash($result['hash']);
-        // Direct controller upload: no meta.json → returns false
-        $this->assertFalse($code);
+        $this->markTestIncomplete(
+            'delete_code is stored in meta.json via API::handleFile(), not by direct controller upload. ' .
+            'This test will be implemented as part of Task 14 (API endpoint tests).'
+        );
     }
 
     /**
