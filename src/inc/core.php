@@ -96,9 +96,25 @@ function architect($u)
                     header('Location: /admin');
                 return renderTemplate('index.html.php',['main'=>'<code><pre>'.rebuildMeta().'</pre></code>']);
             case 'stats':
-                if(!$_SESSION['admin'])
+                if(!$_SESSION['admin']) {
                     header('Location: /admin');
-                return renderTemplate('index.html.php',['main'=>renderTemplate('admin.stats.html.php',['stats'=>getStats()])]);
+                    return;
+                }
+                if(isset($u[2]) && $u[2] === 'data') {
+                    // HTMX fragment — return bare tbody rows, no layout wrapper
+                    $page   = max(1, (int)($_GET['page'] ?? 1));
+                    $sort   = $_GET['sort'] ?? 'uploaded';
+                    $dir    = $_GET['dir']  ?? 'desc';
+                    $q      = $_GET['q']    ?? '';
+                    if(isCacheStale()) rebuildStatsCache();
+                    $result = getStatsPage($page, $sort, $dir, $q);
+                    return renderTemplate('admin.stats-table.html.php', $result);
+                }
+                if(isCacheStale()) rebuildStatsCache();
+                $builtAt = isset($GLOBALS['redis']) && $GLOBALS['redis']
+                    ? (int)$GLOBALS['redis']->get('stats:built_at')
+                    : 0;
+                return renderTemplate('index.html.php',['main'=>renderTemplate('admin.stats.html.php',['built_at'=>$builtAt])]);
             case 'logs':
                 if(!$_SESSION['admin'])
                     header('Location: /admin');
