@@ -1,0 +1,36 @@
+# .gitea/workflows/test.yml
+name: tests
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -f docker/Dockerfile -t pictshare-test .
+
+      - name: Install dev dependencies (PHPUnit)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/app/public" \
+            pictshare-test \
+            bash -c "cd /app/public/src/lib && composer install --no-interaction"
+
+      - name: Run PHPUnit
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/app/public" \
+            pictshare-test \
+            php /app/public/src/lib/vendor/bin/phpunit \
+              --configuration /app/public/phpunit.xml \
+              --colors=never
