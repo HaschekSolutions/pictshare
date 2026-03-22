@@ -108,9 +108,11 @@ class ImageController implements ContentController
         include_once(dirname(__FILE__).DS.'filters.php');
         include_once(dirname(__FILE__).DS.'conversion.php');
 
-        //don't do this if it's a gif because PHP can't handle animated gifs
+        //don't do this if it's an animated gif because PHP can't handle animated gifs
         $modifiers = [];
-        if($type!='gif')
+        $isAnimatedGif = ($type === 'gif' && $this->isAnimatedGif($path));
+
+        if (!$isAnimatedGif)
         {
             $filters = getFilters();
             foreach($url as $u)
@@ -141,7 +143,7 @@ class ImageController implements ContentController
             if(isset($modifiers['size']) && in_array('forcesize', $url))
                 $modifiers['forcesize'] = true;
         }
-        else //gif
+        else // animated gif: MP4 conversion only
         {
             if(in_array('mp4',$url))
                 $modifiers['mp4']=true;
@@ -340,6 +342,13 @@ class ImageController implements ContentController
         }
 
         
+    }
+
+    private function isAnimatedGif(string $path): bool
+    {
+        $contents = @file_get_contents($path);
+        if ($contents === false) return true; // safe fallback
+        return substr_count($contents, "\x21\xF9\x04") > 1;
     }
 
     function shouldAlwaysBeWebp()
