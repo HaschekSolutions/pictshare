@@ -43,7 +43,7 @@ The method has no `case` for `gif`, `bmp`, or `ico`, so saving a modified image 
 - `bmp` → `imagebmp($im, $tmppath)` (available in PHP 7.2+; present in this codebase's PHP 8.2 requirement)
 - `ico` → no native GD support; return `false`
 
-**Caller fix:** `saveObjOfImage` returns `$im` (a GD resource) on success or `false` on failure. The call site has two places where `$path = $newpath` is assigned unconditionally — once inside the `if(!file_exists($newpath))` block and once in the `else if($modifiers['webp'])` branch below it. Both must be guarded: only assign `$path = $newpath` if `saveObjOfImage !== false`. If it returns `false`, keep the original `$path` and serve the unmodified file. Use `!== false` explicitly (not a truthiness check) to be clear about intent, even though a GD resource is always truthy.
+**Caller fix:** `saveObjOfImage` returns `$im` (a GD resource) on success or `false` on failure. In the current source, `$this->saveObjOfImage($im, $newpath, $type)` is called and its return value is discarded. Immediately after the enclosing `if/else if` block, there is a single unconditional `$path = $newpath` assignment. Fix: capture the return value (`$saved = $this->saveObjOfImage(...)`) and guard the single `$path = $newpath` assignment so it only executes when `$saved !== false`. If it returns `false`, keep the original `$path` and serve the unmodified file. Use `!== false` explicitly (not a truthiness check) to be clear about intent, even though a GD resource is always truthy.
 
 ---
 
@@ -58,7 +58,7 @@ Detect animated GIFs by counting Graphic Control Extension blocks (`\x21\xF9\x04
 **Known limitation:** these three bytes can theoretically appear in pixel data or comment blocks of a single-frame GIF, producing a false positive (static GIF treated as animated). The consequence is that filters are silently skipped — not a crash or regression. This heuristic is accepted as good enough for this scope.
 
 ### Behavior
-- **Static GIF:** run the full filter/resize/rotation pipeline (same as JPG/PNG), **including WebP conversion**. `saveObjOfImage` now handles `gif` write-back via `imagegif`.
+- **Static GIF:** run the full filter/resize/rotation pipeline (same as JPG/PNG), **including WebP conversion**. Static GIFs flow through the existing `shouldAlwaysBeWebp()` call without any structural change to that check — the restructuring of the GIF branch simply moves static GIFs into the same code path as JPG/PNG. `saveObjOfImage` now handles `gif` write-back via `imagegif`.
 - **Animated GIF:** keep existing behavior unchanged — skip all modifiers except MP4 conversion.
 - **Detection failure** (unreadable file): treat as animated, skip filters. Safe fallback, no regression.
 
@@ -99,7 +99,25 @@ $im = $f->colorize($im, $value);  // $value is an array [R, G, B]
 ```
 The `Filter::colorize` method signature stays `($im, $val)` — it receives the array as `$val` and unpacks it internally. The dispatch call in `handleHash` is unchanged.
 
-For parsing: after matching `colorize` as the filter name, extract `$a[1]`, `$a[2]`, `$a[3]` (defaulting missing values to 0) and store as array. All other filters continue to use the single scalar value path.
+For parsing: the `colorize` branch must be checked **before** the `is_numeric($value)` guard, because `$a[1]` for `colorize_80_20_0` is `'80'` which is numeric and would otherwise be dispatched as a scalar-value filter (silently ignoring G and B). The control flow is:
+
+```php
+$a = explode('_', $u);
+$value = $a[1] ?? null;
+
+if ($filter === 'colorize') {
+    $r = (int)($a[1] ?? 0);
+    $g = (int)($a[2] ?? 0);
+    $b = (int)($a[3] ?? 0);
+    $modifiers['filters'][] = ['filter' => 'colorize', 'value' => [$r, $g, $b]];
+} elseif (is_numeric($value)) {
+    $modifiers['filters'][] = ['filter' => $filter, 'value' => $value];
+} else {
+    $modifiers['filters'][] = ['filter' => $filter];
+}
+```
+
+All other filters continue to use the existing single scalar value path unchanged.
 
 ---
 
