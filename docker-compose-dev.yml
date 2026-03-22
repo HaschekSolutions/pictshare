@@ -53,6 +53,8 @@ services:
         - ./web:/app/public/web
         - ./tmp:/app/public/tmp
         - ./tmp/redis:/var/lib/redis
+        - ./tests:/app/public/tests
+        - ./phpunit.xml:/app/public/phpunit.xml
 
   # Run tests (uses the pictshare service image):
   # docker compose -f docker-compose-dev.yml run --rm pictshare \
