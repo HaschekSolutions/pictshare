@@ -8,6 +8,7 @@
   <td><?=htmlspecialchars($row['original_filename']??'')?></td>
   <td><?=htmlspecialchars($row['mime']??'')?></td>
   <td><?=$row['uploaded']?date('Y-m-d H:i',(int)$row['uploaded']):''?></td>
+  <td><?=number_format((int)($row['size']??0))?></td>
   <td><?=htmlspecialchars($row['ip']??'')?></td>
   <?php if(defined('LOG_VIEWS')&&LOG_VIEWS==true): ?>
     <td><a class="btn btn-secondary btn-sm" href="/admin/logs/views/<?=htmlspecialchars($row['hash'])?>">View logs</a></td>
