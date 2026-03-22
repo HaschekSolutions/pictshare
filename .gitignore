@@ -1,2 +1,5 @@
 notice.txt
 .vscode
+.phpunit.result.cache
+docs/
+.claude

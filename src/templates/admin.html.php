@@ -20,6 +20,9 @@
         <li class="nav-item">
             <a class="nav-link" href="/admin/logs">Logs</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/admin/reports">Reports</a>
+        </li>
     </ul>
 
 <?php } ?>
