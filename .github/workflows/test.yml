@@ -1,4 +1,4 @@
-# .gitea/workflows/test.yml
+# .github/workflows/test.yml
 name: tests
 
 on:
