@@ -3,7 +3,10 @@
          xsi:noNamespaceSchemaLocation="src/lib/vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
          colors="true"
-         beStrictAboutOutputDuringTests="false">
+         beStrictAboutOutputDuringTests="false"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerNotices="true">
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
