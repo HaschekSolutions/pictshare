@@ -3,3 +3,6 @@ notice.txt
 .phpunit.result.cache
 docs/
 .claude
+logs
+data
+tmp
