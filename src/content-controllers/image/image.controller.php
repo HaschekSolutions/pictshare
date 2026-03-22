@@ -128,11 +128,24 @@ class ImageController implements ContentController
                         if(startsWith($u,$filter) && ($u==$filter || startsWith($u,$filter.'_')))
                         {
                             $a = explode('_', $u);
-                            $value = $a[1] ?? null;
-                            if(is_numeric($value))
-                                $modifiers['filters'][] = array('filter'=>$filter,'value'=>$value);
-                            else
-                                $modifiers['filters'][] = array('filter'=>$filter);
+
+                            if ($filter === 'colorize') {
+                                // colorize takes up to 3 values: R_G_B; missing channels default to 0
+                                $modifiers['filters'][] = [
+                                    'filter' => 'colorize',
+                                    'value'  => [
+                                        (int)($a[1] ?? 0),
+                                        (int)($a[2] ?? 0),
+                                        (int)($a[3] ?? 0),
+                                    ],
+                                ];
+                            } else {
+                                $value = $a[1] ?? null;
+                                if(is_numeric($value))
+                                    $modifiers['filters'][] = array('filter'=>$filter,'value'=>$value);
+                                else
+                                    $modifiers['filters'][] = array('filter'=>$filter);
+                            }
                         }
                     }
                 }

@@ -221,6 +221,39 @@ class Filter {
 		return $im;
 	}
 
+	public function brightness($im, $val)
+	{
+		$val = max(-255, min(255, (int)$val));
+		imagefilter($im, IMG_FILTER_BRIGHTNESS, $val);
+		return $im;
+	}
+
+	public function contrast($im, $val)
+	{
+		$val = max(-100, min(100, (int)$val));
+		imagefilter($im, IMG_FILTER_CONTRAST, $val);
+		return $im;
+	}
+
+	public function colorize($im, $val)
+	{
+		// $val is [R, G, B] array or a single R value
+		if (is_array($val)) {
+			$r = (int)($val[0] ?? 0);
+			$g = (int)($val[1] ?? 0);
+			$b = (int)($val[2] ?? 0);
+		} else {
+			$r = (int)$val;
+			$g = 0;
+			$b = 0;
+		}
+		$r = max(-255, min(255, $r));
+		$g = max(-255, min(255, $g));
+		$b = max(-255, min(255, $b));
+		imagefilter($im, IMG_FILTER_COLORIZE, $r, $g, $b);
+		return $im;
+	}
+
 	public function blur($im,$blurFactor)
 	{
 		if(!$blurFactor)
