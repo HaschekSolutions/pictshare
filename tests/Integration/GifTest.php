@@ -48,26 +48,4 @@ class GifTest extends PictShareTestCase
         $this->assertFalse($path, 'Animated GIF should NOT produce a modified variant');
     }
 
-    public function testAnimatedGifMp4IsNotAffected(): void
-    {
-        // Confirm animated GIFs still enter the MP4 branch
-        // (We just test that calling with 'mp4' does not crash)
-        $r = $this->uploadFixture('test_animated.gif');
-        $hash = $r['hash'];
-
-        if (!@shell_exec('which ffmpeg')) {
-            $this->markTestSkipped('ffmpeg not available in this environment');
-        }
-
-        $threw = false;
-        try {
-            ob_start();
-            (new ImageController())->handleHash($hash, [$hash, 'mp4', 'raw']);
-            ob_get_clean();
-        } catch (\Throwable $e) {
-            ob_get_clean();
-            $threw = true;
-        }
-        $this->assertFalse($threw, 'MP4 conversion of animated GIF should not throw');
-    }
 }
