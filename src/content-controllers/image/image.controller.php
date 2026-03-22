@@ -175,7 +175,7 @@ class ImageController implements ContentController
                         break;
 
                         case 'size':
-                            ($modifiers['forcesize']?forceResize($im,$val):resize($im,$val));
+                            (($modifiers['forcesize'] ?? false) ? forceResize($im, $val) : resize($im, $val));
                         break;
 
                         case 'rotation':
@@ -232,7 +232,7 @@ class ImageController implements ContentController
 
                 $saved = $this->saveObjOfImage($im,$newpath,$type);
             }
-            else if($modifiers['webp'])
+            else if ($modifiers['webp'] ?? false)
             {
                 $type = 'webp';
             }
