@@ -1180,7 +1180,7 @@ function rebuildStatsCache(): void
 
     // Write all entries through a pipeline to minimize round-trips
     $GLOBALS['redis']->del('stats:index');
-    $pipe = $GLOBALS['redis']->pipeline();
+    $pipe = $GLOBALS['redis']->multi(Redis::PIPELINE);
     foreach ($dirs as $dir) {
         $hash = basename($dir);
         $meta = getMetadataOfHash($hash);
@@ -1195,7 +1195,7 @@ function rebuildStatsCache(): void
             'size'              => file_exists($file) ? filesize($file) : 0,
         ]));
     }
-    $pipe->execute();
+    $pipe->exec();
 
     $GLOBALS['redis']->set('stats:built_at', (string)time());
 }

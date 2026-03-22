@@ -41,8 +41,8 @@ class FakeRedis
         return array_map(fn($k) => $this->strings[$k] ?? null, $keys);
     }
 
-    /** Minimal pipeline: collect hset calls and flush on execute(). */
-    public function pipeline(): FakeRedisPipeline
+    /** Minimal pipeline: collect hset calls and flush on exec(). Mirrors phpredis multi(Redis::PIPELINE). */
+    public function multi(int $mode = 0): FakeRedisPipeline
     {
         return new FakeRedisPipeline($this);
     }
@@ -60,7 +60,7 @@ class FakeRedisPipeline
         $this->ops[] = [$key, $field, $value];
     }
 
-    public function execute(): void
+    public function exec(): void
     {
         foreach ($this->ops as [$key, $field, $value]) {
             $this->redis->hset($key, $field, $value);
