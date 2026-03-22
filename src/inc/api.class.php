@@ -228,7 +228,7 @@ class API
         if (!isExistingHash($hash))
             return ['status' => 'err', 'reason' => 'Hash not found'];
 
-        return getMetaData($hash);
+        return getMetadataOfHash($hash);
     }
 
     public function delete()
