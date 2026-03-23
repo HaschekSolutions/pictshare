@@ -36,8 +36,19 @@ class TextController implements ContentController
                 exit;
             }
         }
-        else
-            return renderTemplate('text.html.php',array('hash'=>$hash,'content'=>htmlentities(file_get_contents($path))));
+        else {
+            $fileSize = filesize($path);
+            $memLimit = ini_get('memory_limit');
+            $memBytes = (int)$memLimit;
+            if (str_ends_with($memLimit, 'G')) $memBytes = (int)$memLimit * 1073741824;
+            elseif (str_ends_with($memLimit, 'M')) $memBytes = (int)$memLimit * 1048576;
+            elseif (str_ends_with($memLimit, 'K')) $memBytes = (int)$memLimit * 1024;
+
+            if ($memBytes > 0 && $fileSize > $memBytes / 4)
+                return renderTemplate('text.html.php', ['hash' => $hash, 'content' => null, 'filesize' => $fileSize]);
+
+            return renderTemplate('text.html.php', ['hash' => $hash, 'content' => htmlentities(file_get_contents($path)), 'filesize' => $fileSize]);
+        }
     }
 
     public function handleUpload($tmpfile,$hash=false,$passthrough=false)
