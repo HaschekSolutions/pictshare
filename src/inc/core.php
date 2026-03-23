@@ -1164,7 +1164,7 @@ function isCacheStale(): bool
     if (!isset($GLOBALS['redis']) || !$GLOBALS['redis']) return true;
     $builtAt = $GLOBALS['redis']->get('stats:built_at');
     if (!$builtAt) return true;
-    return (time() - (int)$builtAt) > 300;
+    return (time() - (int)$builtAt) > 1800;
 }
 
 function rebuildStatsCache(): void

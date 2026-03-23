@@ -8,7 +8,7 @@
 <h1>Stats</h1>
 
 <?php if($built_at > 0): ?>
-  <?php $secsLeft = max(0, 300 - (time() - $built_at)); ?>
+  <?php $secsLeft = max(0, 1800 - (time() - $built_at)); ?>
   <p class="text-muted small">Next refresh in: <?=$secsLeft >= 60 ? round($secsLeft/60).' minute(s)' : $secsLeft.' second(s)'?></p>
 <?php else: ?>
   <div class="alert alert-warning">Redis unavailable — stats may load slowly.</div>
