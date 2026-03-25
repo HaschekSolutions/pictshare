@@ -37,9 +37,10 @@
     </head>
     <body id="body">
 
+        <?php $safeUrl = htmlspecialchars(URL.$url, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>
         <div id="container">
-            <video id="video" poster="<?= URL.$url.'/preview/'.$hash; ?>" preload="auto" autoplay="autoplay" controls muted="muted" loop="loop" webkit-playsinline>   
-                <source src="<?= URL.$url.'/raw' ?>" type="video/mp4">
+            <video id="video" poster="<?= $safeUrl.'/preview/'.htmlspecialchars($hash, ENT_QUOTES, 'UTF-8'); ?>" preload="auto" autoplay="autoplay" controls muted="muted" loop="loop" webkit-playsinline>
+                <source src="<?= $safeUrl.'/raw' ?>" type="video/mp4">
                 <?php
                     if(file_exists(getDataDir().DS.$hash.DS.'webm_1.'.$hash)):?>
                         <source src="<?= URL.'raw/webm/'.$hash ?>" type="video/webm">
@@ -50,7 +51,7 @@
                 ?>
             </video>
         </div>
-            <small><?= $filesize; ?> <a href="<?= URL.$url.'/raw' ?>">Raw</a> <a href="<?= URL.$url.'/download' ?>">Download</a></a></small>
+            <small><?= $filesize; ?> <a href="<?= $safeUrl.'/raw' ?>">Raw</a> <a href="<?= $safeUrl.'/download' ?>">Download</a></a></small>
             
             <script>
                 var hadToResizeW = false;

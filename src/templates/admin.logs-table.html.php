@@ -9,7 +9,7 @@
 <h1><?= ucfirst($type) ?></h1>
 
 <pre>
-    <code><?php foreach($logs as $log): 
-    echo $log;
+    <code><?php foreach($logs as $log):
+    echo htmlspecialchars($log, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         endforeach; ?></code>
 </pre>

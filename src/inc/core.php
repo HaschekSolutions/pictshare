@@ -92,8 +92,10 @@ function architect($u)
         session_start();
         switch($u[1]){
             case 'rebuild-meta':
-                if(!$_SESSION['admin'])
+                if(!$_SESSION['admin']) {
                     header('Location: /admin');
+                    return;
+                }
                 return renderTemplate('index.html.php',['main'=>'<code><pre>'.rebuildMeta().'</pre></code>']);
             case 'stats':
                 if(!$_SESSION['admin']) {
@@ -123,8 +125,10 @@ function architect($u)
                     : 0;
                 return renderTemplate('index.html.php',['main'=>renderTemplate('admin.stats.html.php',['built_at'=>$builtAt])]);
             case 'logs':
-                if(!$_SESSION['admin'])
+                if(!$_SESSION['admin']) {
                     header('Location: /admin');
+                    return;
+                }
                 switch($u[2])
                 {
                     case 'app':
