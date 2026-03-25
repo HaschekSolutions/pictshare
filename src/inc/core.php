@@ -92,16 +92,10 @@ function architect($u)
         session_start();
         switch($u[1]){
             case 'rebuild-meta':
-                if(!$_SESSION['admin']) {
-                    header('Location: /admin');
-                    return;
-                }
+                requireAdmin();
                 return renderTemplate('index.html.php',['main'=>'<code><pre>'.rebuildMeta().'</pre></code>']);
             case 'stats':
-                if(!$_SESSION['admin']) {
-                    header('Location: /admin');
-                    return;
-                }
+                requireAdmin();
                 if(isset($u[2]) && $u[2] === 'delete' && isset($u[3])) {
                     $hash = $u[3];
                     deleteHash($hash);
@@ -125,10 +119,7 @@ function architect($u)
                     : 0;
                 return renderTemplate('index.html.php',['main'=>renderTemplate('admin.stats.html.php',['built_at'=>$builtAt])]);
             case 'logs':
-                if(!$_SESSION['admin']) {
-                    header('Location: /admin');
-                    return;
-                }
+                requireAdmin();
                 if(in_array($u[2], ['app','error','views'])) {
                     $type    = $u[2];
                     $filter  = $u[3] ?? false;
@@ -151,10 +142,7 @@ function architect($u)
                 }
                 return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs.html.php')]);
             case 'reports':
-                if(!$_SESSION['admin']) {
-                    header('Location: /admin');
-                    return;
-                }
+                requireAdmin();
                 if($u[2]=='delete'){
                     $hash = $u[3];
                     deleteHash($hash);
@@ -185,7 +173,7 @@ function architect($u)
         {
             list($cc, $hash) = explode(';', $cache_data);
             if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                addToLog(getUserIP()."\tviewed\t$hash\tFrom cache. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
+                addToLog(getUserIP()."\tviewed\t$hash\tFrom cache. Agent:\t".sanitizeLogField($_SERVER['HTTP_USER_AGENT'] ?? '')."\tref:\t".sanitizeLogField($_SERVER['HTTP_REFERER'] ?? ''), ROOT.DS.'logs/views.log');
             $GLOBALS['redis']->incr("served:$hash");
             return (new $cc())->handleHash($hash,$u);
         }
@@ -200,7 +188,7 @@ function architect($u)
         {
             $hash = $el;
             if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                addToLog(getUserIP()."\tviewed\t$hash\tIt was locally found. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
+                addToLog(getUserIP()."\tviewed\t$hash\tIt was locally found. Agent:\t".sanitizeLogField($_SERVER['HTTP_USER_AGENT'] ?? '')."\tref:\t".sanitizeLogField($_SERVER['HTTP_REFERER'] ?? ''), ROOT.DS.'logs/views.log');
             break;
         }
         // if we don't have a hash yet but the element looks like it could be a hash
@@ -218,7 +206,7 @@ function architect($u)
                     storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
 
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                        addToLog(getUserIP()."\tviewed\t$hash\tIt was found in Storage Controller $contr. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
+                        addToLog(getUserIP()."\tviewed\t$hash\tIt was found in Storage Controller $contr. Agent:\t".sanitizeLogField($_SERVER['HTTP_USER_AGENT'] ?? '')."\tref:\t".sanitizeLogField($_SERVER['HTTP_REFERER'] ?? ''), ROOT.DS.'logs/views.log');
                     
                     break; // we break here because we already have the file. no need to check other storage controllers
                 }
@@ -235,7 +223,7 @@ function architect($u)
                     unlink(ROOT.DS.'tmp'.DS.$el.'.enc');
 
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                        addToLog(getUserIP()."\tviewed\t$hash\tIt was found encrypted in Storage Controller $contr. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
+                        addToLog(getUserIP()."\tviewed\t$hash\tIt was found encrypted in Storage Controller $contr. Agent:\t".sanitizeLogField($_SERVER['HTTP_USER_AGENT'] ?? '')."\tref:\t".sanitizeLogField($_SERVER['HTTP_REFERER'] ?? ''), ROOT.DS.'logs/views.log');
 
                     break; // we break here because we already have the file. no need to check other storage controllers
                 }
@@ -250,7 +238,7 @@ function architect($u)
                 if((new $cc)::ctype=='dynamic' &&  in_array((new $cc)->getRegisteredExtensions()[0],$u) )
                 {
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
-                        addToLog(getUserIP()." requested ".implode("/",$u)."\tIt's a dynamic image handled by  $cc. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
+                        addToLog(getUserIP()." requested ".implode("/",$u)."\tIt's a dynamic image handled by  $cc. Agent:\t".sanitizeLogField($_SERVER['HTTP_USER_AGENT'] ?? '')."\tref:\t".sanitizeLogField($_SERVER['HTTP_REFERER'] ?? ''), ROOT.DS.'logs/views.log');
                     $hash = true;
                     break;
                 }
@@ -278,7 +266,7 @@ function architect($u)
                 //@todo: allow MASTER_DELETE_IP to be CIDR range or coma separated
                 if(getDeleteCodeOfHash($hash)==$code || (defined('MASTER_DELETE_CODE') && MASTER_DELETE_CODE==$code ) || (defined('MASTER_DELETE_IP') && MASTER_DELETE_IP==getUserIP()) )
                 {
-                    addToLog(getUserIP()." deleted $hash\tIt was deleted by the user\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/deletes.log');
+                    addToLog(getUserIP()." deleted $hash\tIt was deleted by the user\t".sanitizeLogField($_SERVER['HTTP_USER_AGENT'] ?? ''), ROOT.DS.'logs/deletes.log');
                     deleteHash($hash);
                     if(isset($GLOBALS['redis']))
                     {
@@ -321,6 +309,21 @@ function architect($u)
     }
 
     //var_dump($u);
+}
+
+function requireAdmin()
+{
+    if (empty($_SESSION['admin'])) {
+        header('Location: /admin');
+        exit;
+    }
+}
+
+function sanitizeLogField($value)
+{
+    $value = (string)($value ?? '');
+    $value = str_replace(["\r", "\n"], ' ', $value);
+    return preg_replace('/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]/', '', $value);
 }
 
 function storageControllerUpload($hash)
