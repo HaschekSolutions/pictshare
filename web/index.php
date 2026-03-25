@@ -28,7 +28,7 @@ if(!defined('REDIS_CACHING') || REDIS_CACHING == true)
 
 
 //parse the URL to an array and filter it
-$url = array_filter(explode('/',ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH),'/')));
+$url = array_filter(explode('/',ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '','/')));
 
 if($url[0] == 'api')
 {

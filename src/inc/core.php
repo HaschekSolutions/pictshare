@@ -1423,12 +1423,17 @@ function getRelativeToDataPath(string $path): string
 }
 
 function serveFile($path){
-    $relativePath = getRelativeToDataPath($path);
-    //since x-accel-redirect does not support paths outside its root, we need to check if the path is relative or absolute
-    if(startsWith($relativePath,'..'))
+    try {
+        $relativePath = getRelativeToDataPath($path);
+        //since x-accel-redirect does not support paths outside its root, we need to check if the path is relative or absolute
+        if(startsWith($relativePath,'..'))
+            readfile($path);
+        else
+            header('X-Accel-Redirect: '. $relativePath);
+    } catch (InvalidArgumentException) {
+        // realpath() failed (file may not exist or path is unresolvable); serve directly
         readfile($path);
-    else
-        header('X-Accel-Redirect: '. $relativePath);
+    }
 }
 
 function getReports(){
