@@ -129,17 +129,27 @@ function architect($u)
                     header('Location: /admin');
                     return;
                 }
-                switch($u[2])
-                {
-                    case 'app':
-                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',['type'=>'app','logs'=>getLogs('app',$u[3])])]);
-                    case 'error':
-                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',['type'=>'error','logs'=>getLogs('error',$u[3])])]);
-                    case 'views':
-                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',['type'=>'views','logs'=>getLogs('views',$u[3])])]);
-                    default:
-                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs.html.php')]);
+                if(in_array($u[2], ['app','error','views'])) {
+                    $type    = $u[2];
+                    $filter  = $u[3] ?? false;
+                    $perPage = 200;
+                    $page    = max(1, (int)($_GET['page'] ?? 1));
+                    $allLogs = array_reverse(getLogs($type, $filter));
+                    $total   = count($allLogs);
+                    $total_pages = max(1, (int)ceil($total / $perPage));
+                    $page    = min($page, $total_pages);
+                    $logs    = array_slice($allLogs, ($page - 1) * $perPage, $perPage);
+                    return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',[
+                        'type'        => $type,
+                        'filter'      => $filter,
+                        'logs'        => $logs,
+                        'page'        => $page,
+                        'total_pages' => $total_pages,
+                        'total'       => $total,
+                        'perPage'     => $perPage,
+                    ])]);
                 }
+                return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs.html.php')]);
             case 'reports':
                 if(!$_SESSION['admin']) {
                     header('Location: /admin');
