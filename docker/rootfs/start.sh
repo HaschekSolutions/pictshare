@@ -19,6 +19,8 @@ _maxUploadSize() {
 
 _filePermissions() {
     echo "[i] Setting file permissions"
+    mkdir -p /app/public/tmp
+    chmod -R 755 /app/public/tmp
 }
 
 _buildConfig() {
