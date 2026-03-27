@@ -2,11 +2,11 @@
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
     <li class="breadcrumb-item"><a href="/admin/logs">Logs</a></li>
-    <li class="breadcrumb-item active" aria-current="page"><?=$type?></li>
+    <li class="breadcrumb-item active" aria-current="page"><?=htmlspecialchars($type, ENT_QUOTES, 'UTF-8')?></li>
   </ol>
 </nav>
 
-<h1><?= ucfirst($type) ?></h1>
+<h1><?= htmlspecialchars(ucfirst($type), ENT_QUOTES, 'UTF-8') ?></h1>
 
 <?php
   $baseUrl = '/admin/logs/' . $type . ($filter ? '/' . htmlspecialchars($filter, ENT_QUOTES, 'UTF-8') : '');
