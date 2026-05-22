@@ -59,6 +59,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
             } else {
                 if (response.status == 'ok') {
+                    if (window.PictShareUploads) {
+                        window.PictShareUploads.add({
+                            hash:        response.hash,
+                            url:         response.url,
+                            delete_code: response.delete_code,
+                            delete_url:  response.delete_url,
+                            kind:        'file',
+                            filetype:    response.filetype,
+                            name:        file.name,
+                            size:        file.size
+                        });
+                        if (typeof refreshMyUploads === 'function') refreshMyUploads();
+                    }
                     uploadInfo.insertAdjacentHTML("beforeend",
                         renderMessage(file.name + " uploaded as <a target='_blank' href='/" + response.hash + "'>" + response.hash + "</a>", "URL: <a target='_blank' href='" + response.url + "'>" + response.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + response.url + "\");'>Copy URL</button>", "success")
                     );
@@ -118,7 +131,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     
                     var uploadInfo = document.getElementById("uploadinfo");
                     if (data.status == 'ok') {
-                        // If user wanted MD but got TXT (or vice versa), we might want to rename it, 
+                        if (window.PictShareUploads) {
+                            window.PictShareUploads.add({
+                                hash:        data.hash,
+                                url:         data.url,
+                                delete_code: data.delete_code,
+                                delete_url:  data.delete_url,
+                                kind:        'file',
+                                filetype:    data.filetype,
+                                name:        data.hash,
+                                size:        text.length
+                            });
+                            if (typeof refreshMyUploads === 'function') refreshMyUploads();
+                        }
+                        // If user wanted MD but got TXT (or vice versa), we might want to rename it,
                         // but the current API logic determines type by content.
                         // For text/markdown, we might need to adjust src/api/upload.php
                         uploadInfo.insertAdjacentHTML("beforeend",
