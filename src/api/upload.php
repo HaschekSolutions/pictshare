@@ -32,26 +32,37 @@ else
     $hash = false;
 
 // check for POST upload
-if ($_FILES['file']["error"] == UPLOAD_ERR_OK)
+if ($_FILES['file']["error"] == UPLOAD_ERR_OK || isset($_REQUEST['base64']))
 {
+    if (isset($_REQUEST['base64'])) {
+        $tmpfile = ROOT . DS . 'tmp' . DS . md5(rand(0, 10000) . time()) . time();
+        $data = explode(',', $_REQUEST['base64']);
+        $data = $data[1] ?? $data[0];
+        $data = str_replace(' ', '+', $data);
+        file_put_contents($tmpfile, base64_decode($data));
+    } else {
+        $tmpfile = $_FILES['file']["tmp_name"];
+    }
+
     //get the file type
-    $type = getTypeOfFile($_FILES['file']["tmp_name"]);
+    $type = getTypeOfFile($tmpfile);
+    if (isset($_REQUEST['format']) && $_REQUEST['format'] == 'md') {
+        $type = 'markdown';
+    }
 
     //check for duplicates
-    $sha1 = sha1_file($_FILES['file']["tmp_name"]);
+    $sha1 = sha1_file($tmpfile);
     $ehash = sha1Exists($sha1);
     if($ehash && file_exists(getDataDir().DS.$ehash.DS.$ehash))
-        exit(json_encode(array('status'=>'ok','hash'=>$ehash,'filetype'=>$type,'url'=>getURL().$ehash)));
+        exit(json_encode(array('status'=>'ok','hash'=>$ehash,'filetype'=>$type,'url'=>getURL().$ehash,'duplicate'=>true)));
 
     //cross check filetype for controllers
-    //
-    //image?
-
     foreach($allowedcontentcontrollers as $cc)
     {
-        if(in_array($type,(new $cc)->getRegisteredExtensions()))
+        $instance = new $cc();
+        if(in_array($type, $instance->getRegisteredExtensions()))
         {
-            $answer = (new $cc())->handleUpload($_FILES['file']['tmp_name'],$hash);
+            $answer = $instance->handleUpload($tmpfile,$hash);
             break;
         }
     }

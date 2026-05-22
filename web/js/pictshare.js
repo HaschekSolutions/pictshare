@@ -83,6 +83,62 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         };
+
+        var submitPasteBtn = document.getElementById("submitPaste");
+        if (submitPasteBtn) {
+            submitPasteBtn.addEventListener("click", function () {
+                var text = document.getElementById("pasteText").value;
+                var type = document.getElementById("pasteType").value;
+                var uploadCode = document.getElementById("uploadcode") ? document.getElementById("uploadcode").value : "";
+
+                if (!text) {
+                    alert("Please paste some text first");
+                    return;
+                }
+
+                submitPasteBtn.disabled = true;
+                submitPasteBtn.innerText = "Uploading...";
+
+                var formData = new FormData();
+                // Base64 encode the text to use the existing base64 upload API
+                // We use a helper to handle UTF-8 correctly
+                var base64data = "data:text/plain;base64," + btoa(unescape(encodeURIComponent(text)));
+                formData.append("base64", base64data);
+                formData.append("uploadcode", uploadCode);
+                formData.append("format", type);
+                
+                fetch("/api/upload", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    submitPasteBtn.disabled = false;
+                    submitPasteBtn.innerText = "Upload Paste";
+                    
+                    var uploadInfo = document.getElementById("uploadinfo");
+                    if (data.status == 'ok') {
+                        // If user wanted MD but got TXT (or vice versa), we might want to rename it, 
+                        // but the current API logic determines type by content.
+                        // For text/markdown, we might need to adjust src/api/upload.php
+                        uploadInfo.insertAdjacentHTML("beforeend",
+                            renderMessage("Paste uploaded as <a target='_blank' href='/" + data.hash + "'>" + data.hash + "</a>", "URL: <a target='_blank' href='" + data.url + "'>" + data.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + data.url + "\");'>Copy URL</button>", "success")
+                        );
+                        document.getElementById("pasteText").value = "";
+                    } else {
+                        uploadInfo.insertAdjacentHTML("beforeend",
+                            renderMessage("Error uploading paste", data.reason || "Unknown error", "danger")
+                        );
+                    }
+                })
+                .catch(error => {
+                    submitPasteBtn.disabled = false;
+                    submitPasteBtn.innerText = "Upload Paste";
+                    console.error("Error:", error);
+                    alert("An error occurred during upload");
+                });
+            });
+        }
     }
 });
 

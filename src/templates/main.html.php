@@ -19,11 +19,43 @@ if (file_exists(ROOT . DS . 'notice.txt'))
                 <br>Upload Code: <input type="password" id="uploadcode" />
             <?php endif; ?>
         </p>
-        <form class="dropzone well" id="dropzone" method="post" action="/api/upload" enctype="multipart/form-data">
-            <div class="fallback">
-                <input name="file" type="file" multiple />
+
+        <ul class="nav nav-tabs" id="uploadTabs" role="tablist" style="margin-bottom: 15px;">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-pane" type="button" role="tab" aria-controls="file-pane" aria-selected="true">File Upload</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="paste-tab" data-bs-toggle="tab" data-bs-target="#paste-pane" type="button" role="tab" aria-controls="paste-pane" aria-selected="false">Paste Text/Markdown</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="uploadTabsContent">
+            <div class="tab-pane fade show active" id="file-pane" role="tabpanel" aria-labelledby="file-tab" tabindex="0">
+                <form class="dropzone well" id="dropzone" method="post" action="/api/upload" enctype="multipart/form-data">
+                    <div class="fallback">
+                        <input name="file" type="file" multiple />
+                    </div>
+                </form>
             </div>
-        </form>
+            <div class="tab-pane fade" id="paste-pane" role="tabpanel" aria-labelledby="paste-tab" tabindex="0">
+                <div class="well">
+                    <div class="mb-3">
+                        <textarea class="form-control" id="pasteText" rows="10" placeholder="Paste your text or Markdown here..."></textarea>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <select class="form-select" id="pasteType">
+                                <option value="txt">Plain Text (.txt)</option>
+                                <option value="md">Markdown (.md)</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-primary" id="submitPaste">Upload Paste</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     <?php } ?>
 </div>
 
