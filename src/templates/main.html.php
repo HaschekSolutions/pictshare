@@ -27,6 +27,9 @@ if (file_exists(ROOT . DS . 'notice.txt'))
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="paste-tab" data-bs-toggle="tab" data-bs-target="#paste-pane" type="button" role="tab" aria-controls="paste-pane" aria-selected="false">Paste Text/Markdown</button>
             </li>
+            <li class="nav-item" role="presentation" id="my-uploads-tab-item" style="display:none;">
+                <button class="nav-link" id="my-uploads-tab" data-bs-toggle="tab" data-bs-target="#my-uploads-pane" type="button" role="tab" aria-controls="my-uploads-pane" aria-selected="false">My Uploads <span class="badge bg-secondary" id="my-uploads-count">0</span></button>
+            </li>
         </ul>
 
         <div class="tab-content" id="uploadTabsContent">
@@ -53,6 +56,16 @@ if (file_exists(ROOT . DS . 'notice.txt'))
                             <button type="button" class="btn btn-primary" id="submitPaste">Upload Paste</button>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="my-uploads-pane" role="tabpanel" aria-labelledby="my-uploads-tab" tabindex="0">
+                <div class="well">
+                    <div id="my-uploads-stats" class="mb-3 text-muted small"></div>
+                    <div id="my-uploads-actions" class="mb-3" style="display:none;">
+                        <button type="button" class="btn btn-primary btn-sm" id="my-uploads-make-album" disabled>Create Album from Selected</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" id="my-uploads-clear">Clear All</button>
+                    </div>
+                    <div id="my-uploads-list"></div>
                 </div>
             </div>
         </div>
