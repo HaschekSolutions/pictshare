@@ -50,9 +50,12 @@ class AlbumApiTest extends PictShareTestCase
     public function testCreateAlbumWithInvalidHashReturnsErr(): void
     {
         $_REQUEST['hashes'] = ['doesnotexist.jpg'];
-        $api    = new API(['album']);
-        $result = $api->act();
-        unset($_REQUEST['hashes']);
+        try {
+            $api    = new API(['album']);
+            $result = $api->act();
+        } finally {
+            unset($_REQUEST['hashes']);
+        }
         $this->assertEquals('err', $result['status']);
     }
 
@@ -62,9 +65,12 @@ class AlbumApiTest extends PictShareTestCase
         $r2 = $this->apiUpload('test.png');
 
         $_REQUEST['hashes'] = [$r1['hash'], $r2['hash']];
-        $api    = new API(['album']);
-        $result = $api->act();
-        unset($_REQUEST['hashes']);
+        try {
+            $api    = new API(['album']);
+            $result = $api->act();
+        } finally {
+            unset($_REQUEST['hashes']);
+        }
 
         $this->assertEquals('ok', $result['status']);
         $this->assertStringEndsWith('.album', $result['hash']);
@@ -78,9 +84,12 @@ class AlbumApiTest extends PictShareTestCase
         $r1 = $this->apiUpload('test.jpg');
 
         $_REQUEST['hashes'] = [$r1['hash']];
-        $api    = new API(['album']);
-        $result = $api->act();
-        unset($_REQUEST['hashes']);
+        try {
+            $api    = new API(['album']);
+            $result = $api->act();
+        } finally {
+            unset($_REQUEST['hashes']);
+        }
 
         $this->assertEquals('ok', $result['status']);
         $albumHash = $result['hash'];
@@ -88,5 +97,7 @@ class AlbumApiTest extends PictShareTestCase
 
         $meta = getMetadataOfHash($albumHash);
         $this->assertContains($r1['hash'], $meta['hashes']);
+        $this->assertArrayHasKey('delete_code', $result);
+        $this->assertArrayHasKey('delete_url', $result);
     }
 }

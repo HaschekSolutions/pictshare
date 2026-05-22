@@ -268,33 +268,44 @@ class API
 
         $validHashes = [];
         foreach ($hashes as $h) {
-            $h = trim($h);
+            if (!is_string($h))
+                return ['status' => 'err', 'reason' => 'Invalid hash value'];
+            $h = sanatizeString(trim($h));
+            if (!$h)
+                return ['status' => 'err', 'reason' => 'Invalid hash value'];
             if (!isExistingHash($h))
                 return ['status' => 'err', 'reason' => "Hash not found: $h"];
             $validHashes[] = $h;
         }
 
+        $validHashes = array_values(array_unique($validHashes));
+
         $albumHash = getNewHash('album', 8);
         $albumDir  = getDataDir() . DS . $albumHash;
 
-        mkdir($albumDir, 0755);
+        if (!mkdir($albumDir, 0755) && !is_dir($albumDir))
+            return ['status' => 'err', 'reason' => 'Failed to create album directory'];
 
         $meta = [
-            'type'      => 'album',
-            'hashes'    => $validHashes,
-            'created'   => time(),
-            'ip'        => getUserIP(),
-            'useragent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+            'type'        => 'album',
+            'hashes'      => $validHashes,
+            'created'     => time(),
+            'ip'          => getUserIP(),
+            'useragent'   => $_SERVER['HTTP_USER_AGENT'] ?? '',
+            'delete_code' => $delcode = getRandomString(32),
+            'delete_url'  => getURL() . 'delete_' . $delcode . '/' . $albumHash,
         ];
 
         updateMetaData($albumHash, $meta);
         addToLog(getUserIP() . " created album $albumHash with " . count($validHashes) . " file(s)");
 
         return [
-            'status' => 'ok',
-            'hash'   => $albumHash,
-            'url'    => getURL() . $albumHash,
-            'count'  => count($validHashes),
+            'status'      => 'ok',
+            'hash'        => $albumHash,
+            'url'         => getURL() . $albumHash,
+            'count'       => count($validHashes),
+            'delete_code' => $delcode,
+            'delete_url'  => getURL() . 'delete_' . $delcode . '/' . $albumHash,
         ];
     }
 
