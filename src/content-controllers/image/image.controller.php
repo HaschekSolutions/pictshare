@@ -314,7 +314,7 @@ class ImageController implements ContentController
 
     function saveObjOfImage($im,$path,$type)
     {
-        $tmppath = '/tmp/'.getNewHash($type,12);
+        $tmppath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . getNewHash($type,12);
         switch($type)
         {
             case 'jpeg':

@@ -3,3 +3,4 @@ notice.txt
 .phpunit.result.cache
 docs/
 .claude
+.antigravity*

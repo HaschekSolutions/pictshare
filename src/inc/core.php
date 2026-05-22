@@ -350,10 +350,15 @@ function storageControllerUpload($hash)
 
 function stringInFile($string,$file)
 {
-    $handle = fopen($file, 'r');
+    if (!file_exists($file)) return false;
+    $handle = @fopen($file, 'r');
+    if (!$handle) return false;
     while (($line = fgets($handle)) !== false) {
         $line=trim($line);
-        if($line==$string) return true;  
+        if($line==$string) {
+            fclose($handle);
+            return true;  
+        }
     }
     fclose($handle);
     return false;
@@ -463,18 +468,24 @@ function renderSize($byte)
 
 function getTypeOfFile($url)
 {
-    // on linux use the "file" command or it will handle everything as octet-stream
-	if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
-	{
-		$content_type = exec("file -bi " . escapeshellarg($url));
-		if($content_type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
-			$type = $content_type;
+    $type = false;
+    try {
+        if (class_exists('finfo')) {
+            $finfo = new finfo(FILEINFO_MIME);
+            $type = $finfo->file($url);
+        }
+    } catch (\Throwable $t) {
+        // ignore
     }
-    else
-    {
-        //for windows we'll use mime_content_type. Make sure you have enabled the "exif" extension in php.ini
-        $type = mime_content_type($url);
+
+    if (!$type && function_exists('mime_content_type')) {
+        $type = @mime_content_type($url);
     }
+
+    if (!$type && strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+        $type = @exec("file -bi " . escapeshellarg($url));
+    }
+
     if(!$type) return false;
     if(startsWith($type,'text')) return 'text';
 	$arr = explode(';', trim($type));
@@ -1366,13 +1377,22 @@ function rebuildMeta(){
 function getFileMimeType($file)
 {
     try {
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        return $finfo->file($file);
-    } catch (Exception $e) {
-        //fallback to shell command if finfo is not available
-        $mimeType = shell_exec('file --mime-type -b ' . escapeshellarg($file));
-        return trim($mimeType);
+        if (class_exists('finfo')) {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            return $finfo->file($file);
+        }
+    } catch (\Throwable $e) {
+        // ignore
     }
+
+    if (function_exists('mime_content_type')) {
+        $mime = @mime_content_type($file);
+        if ($mime) return $mime;
+    }
+
+    //fallback to shell command if finfo and mime_content_type are not available
+    $mimeType = shell_exec('file --mime-type -b ' . escapeshellarg($file));
+    return trim($mimeType);
 }
 
 function getRelativeToDataPath(string $path): string
