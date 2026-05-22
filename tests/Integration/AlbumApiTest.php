@@ -38,4 +38,55 @@ class AlbumApiTest extends PictShareTestCase
         $cc = new AlbumController();
         $this->assertContains('album', $cc->getRegisteredExtensions());
     }
+
+    public function testCreateAlbumReturnsMissingHashes(): void
+    {
+        $api    = new API(['album']);
+        $result = $api->act();
+        $this->assertEquals('err', $result['status']);
+        $this->assertStringContainsString('hashes', $result['reason']);
+    }
+
+    public function testCreateAlbumWithInvalidHashReturnsErr(): void
+    {
+        $_REQUEST['hashes'] = ['doesnotexist.jpg'];
+        $api    = new API(['album']);
+        $result = $api->act();
+        unset($_REQUEST['hashes']);
+        $this->assertEquals('err', $result['status']);
+    }
+
+    public function testCreateAlbumWithValidHashesReturnsOk(): void
+    {
+        $r1 = $this->apiUpload('test.jpg');
+        $r2 = $this->apiUpload('test.png');
+
+        $_REQUEST['hashes'] = [$r1['hash'], $r2['hash']];
+        $api    = new API(['album']);
+        $result = $api->act();
+        unset($_REQUEST['hashes']);
+
+        $this->assertEquals('ok', $result['status']);
+        $this->assertStringEndsWith('.album', $result['hash']);
+        $this->assertArrayHasKey('url', $result);
+
+        $this->uploadedHashes[] = $result['hash'];
+    }
+
+    public function testCreateAlbumMetaJsonContainsHashes(): void
+    {
+        $r1 = $this->apiUpload('test.jpg');
+
+        $_REQUEST['hashes'] = [$r1['hash']];
+        $api    = new API(['album']);
+        $result = $api->act();
+        unset($_REQUEST['hashes']);
+
+        $this->assertEquals('ok', $result['status']);
+        $albumHash = $result['hash'];
+        $this->uploadedHashes[] = $albumHash;
+
+        $meta = getMetadataOfHash($albumHash);
+        $this->assertContains($r1['hash'], $meta['hashes']);
+    }
 }

@@ -20,6 +20,7 @@ class API
             'passthrough' => $this->passthrough(),
             'upload' => $this->upload(),
             'delete' => $this->delete(),
+            'album' => $this->createAlbum(),
             'info' => $this->info(),
             'debug' => $this->debug(),
             default => array('status' => 'err', 'reason' => 'Unknown API call', 'hint' => 'Check https://github.com/HaschekSolutions/pictshare/blob/master/rtfm/API.md for more information'),
@@ -251,6 +252,50 @@ class API
 
         deleteHash($hash);
         return ['status' => 'ok', 'hash' => $hash];
+    }
+
+    public function createAlbum(): array
+    {
+        try {
+            $this->checkUploaderPermissions();
+        } catch (Exception $e) {
+            return ['status' => 'err', 'reason' => $e->getMessage()];
+        }
+
+        $hashes = $_REQUEST['hashes'] ?? null;
+        if (!$hashes || !is_array($hashes) || count($hashes) === 0)
+            return ['status' => 'err', 'reason' => 'Missing or empty hashes array'];
+
+        $validHashes = [];
+        foreach ($hashes as $h) {
+            $h = trim($h);
+            if (!isExistingHash($h))
+                return ['status' => 'err', 'reason' => "Hash not found: $h"];
+            $validHashes[] = $h;
+        }
+
+        $albumHash = getNewHash('album', 8);
+        $albumDir  = getDataDir() . DS . $albumHash;
+
+        mkdir($albumDir, 0755);
+
+        $meta = [
+            'type'      => 'album',
+            'hashes'    => $validHashes,
+            'created'   => time(),
+            'ip'        => getUserIP(),
+            'useragent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+        ];
+
+        updateMetaData($albumHash, $meta);
+        addToLog(getUserIP() . " created album $albumHash with " . count($validHashes) . " file(s)");
+
+        return [
+            'status' => 'ok',
+            'hash'   => $albumHash,
+            'url'    => getURL() . $albumHash,
+            'count'  => count($validHashes),
+        ];
     }
 
     public function checkPermissions()
