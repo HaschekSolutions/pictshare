@@ -200,6 +200,76 @@
         refresh();
     }
 
+    function bindSelectionHandlers(listEl) {
+        var albumBtn = document.getElementById('my-uploads-make-album');
+        if (!albumBtn) return;
+        function updateBtn() {
+            var n = listEl.querySelectorAll('.uploads-select:checked').length;
+            albumBtn.disabled = n < 2;
+            albumBtn.textContent = n < 2
+                ? 'Create Album from Selected'
+                : 'Create Album from ' + n + ' Selected';
+        }
+        if (!listEl.dataset.selBound) {
+            listEl.dataset.selBound = '1';
+            listEl.addEventListener('change', function (e) {
+                if (e.target && e.target.classList && e.target.classList.contains('uploads-select')) updateBtn();
+            });
+        }
+        if (!albumBtn.dataset.bound) {
+            albumBtn.dataset.bound = '1';
+            albumBtn.addEventListener('click', function () { handleCreateAlbum(listEl); });
+        }
+        updateBtn();
+    }
+
+    function handleCreateAlbum(listEl) {
+        var checked = Array.prototype.slice.call(listEl.querySelectorAll('.uploads-select:checked'));
+        var hashes  = checked.map(function (cb) { return cb.getAttribute('data-hash'); }).filter(Boolean);
+        var items   = list();
+        var fileHashes = hashes.filter(function (h) {
+            var it = items.find(function (i) { return i.hash === h; });
+            return it && it.kind === 'file';
+        });
+        if (fileHashes.length < 2) {
+            alert('Select at least 2 files (not albums) to create an album.');
+            return;
+        }
+        var fd = new FormData();
+        fileHashes.forEach(function (h) { fd.append('hashes[]', h); });
+        var code = getUploadCode();
+        if (code) fd.append('uploadcode', code);
+        var btn = document.getElementById('my-uploads-make-album');
+        if (btn) { btn.disabled = true; btn.textContent = 'Creating...'; }
+        fetch('/api/album', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.status === 'ok') {
+                    add({
+                        hash:        data.hash,
+                        url:         data.url,
+                        delete_code: data.delete_code,
+                        delete_url:  data.delete_url,
+                        kind:        'album',
+                        filetype:    null,
+                        name:        'Album of ' + fileHashes.length,
+                        size:        null,
+                        members:     fileHashes
+                    });
+                    refresh();
+                    alert('Album created: ' + data.url);
+                } else {
+                    alert('Failed to create album: ' + (data.reason || 'unknown error'));
+                    refresh();
+                }
+            })
+            .catch(function (e) {
+                console.warn('album create failed', e);
+                alert('Network error creating album.');
+                refresh();
+            });
+    }
+
     function refresh() {
         var tabItem    = document.getElementById('my-uploads-tab-item');
         var countBadge = document.getElementById('my-uploads-count');
@@ -220,6 +290,7 @@
         if (statsEl)    renderStats(statsEl, items);
         renderList(listEl, items);
         bindListHandlers(listEl);
+        bindSelectionHandlers(listEl);
         if (clearBtn && !clearBtn.dataset.bound) {
             clearBtn.dataset.bound = '1';
             clearBtn.addEventListener('click', handleClearAll);
