@@ -22,15 +22,17 @@ jobs:
       - name: Install dev dependencies (PHPUnit)
         run: |
           docker run --rm \
+            --entrypoint bash \
             -v "${{ github.workspace }}:/app/public" \
             pictshare-test \
-            bash -c "cd /app/public/src/lib && composer install --no-interaction"
+            -c "cd /app/public/src/lib && composer install --no-interaction"
 
       - name: Run PHPUnit
         run: |
           docker run --rm \
+            --entrypoint php \
             -v "${{ github.workspace }}:/app/public" \
             pictshare-test \
-            php /app/public/src/lib/vendor/bin/phpunit \
+            /app/public/src/lib/vendor/bin/phpunit \
               --configuration /app/public/phpunit.xml \
               --colors=never

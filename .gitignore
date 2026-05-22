@@ -4,3 +4,6 @@ notice.txt
 docs/
 .claude
 .antigravity*
+logs
+data
+tmp

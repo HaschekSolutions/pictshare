@@ -93,9 +93,9 @@ class StatsCacheTest extends TestCase
         $this->assertTrue(isCacheStale());
     }
 
-    public function testIsCacheStaleReturnsTrueWhenOlderThan5Minutes(): void
+    public function testIsCacheStaleReturnsTrueWhenOlderThan30Minutes(): void
     {
-        $this->redis->set('stats:built_at', (string)(time() - 301));
+        $this->redis->set('stats:built_at', (string)(time() - 1801));
         $this->assertTrue(isCacheStale());
     }
 

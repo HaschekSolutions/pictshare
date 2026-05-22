@@ -92,13 +92,22 @@ function architect($u)
         session_start();
         switch($u[1]){
             case 'rebuild-meta':
-                if(!$_SESSION['admin'])
+                if(!$_SESSION['admin']) {
                     header('Location: /admin');
+                    return;
+                }
                 return renderTemplate('index.html.php',['main'=>'<code><pre>'.rebuildMeta().'</pre></code>']);
             case 'stats':
                 if(!$_SESSION['admin']) {
                     header('Location: /admin');
                     return;
+                }
+                if(isset($u[2]) && $u[2] === 'delete' && isset($u[3])) {
+                    $hash = $u[3];
+                    deleteHash($hash);
+                    if(isset($GLOBALS['redis']) && $GLOBALS['redis'])
+                        $GLOBALS['redis']->hDel('stats:index', $hash);
+                    return; // empty response — HTMX removes the row
                 }
                 if(isset($u[2]) && $u[2] === 'data') {
                     // HTMX fragment — return bare tbody rows, no layout wrapper
@@ -116,19 +125,31 @@ function architect($u)
                     : 0;
                 return renderTemplate('index.html.php',['main'=>renderTemplate('admin.stats.html.php',['built_at'=>$builtAt])]);
             case 'logs':
-                if(!$_SESSION['admin'])
+                if(!$_SESSION['admin']) {
                     header('Location: /admin');
-                switch($u[2])
-                {
-                    case 'app':
-                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',['type'=>'app','logs'=>getLogs('app',$u[3])])]);
-                    case 'error':
-                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',['type'=>'error','logs'=>getLogs('error',$u[3])])]);
-                    case 'views':
-                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',['type'=>'views','logs'=>getLogs('views',$u[3])])]);
-                    default:
-                        return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs.html.php')]);
+                    return;
                 }
+                if(in_array($u[2], ['app','error','views'])) {
+                    $type    = $u[2];
+                    $filter  = $u[3] ?? false;
+                    $perPage = 200;
+                    $page    = max(1, (int)($_GET['page'] ?? 1));
+                    $allLogs = array_reverse(getLogs($type, $filter));
+                    $total   = count($allLogs);
+                    $total_pages = max(1, (int)ceil($total / $perPage));
+                    $page    = min($page, $total_pages);
+                    $logs    = array_slice($allLogs, ($page - 1) * $perPage, $perPage);
+                    return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs-table.html.php',[
+                        'type'        => $type,
+                        'filter'      => $filter,
+                        'logs'        => $logs,
+                        'page'        => $page,
+                        'total_pages' => $total_pages,
+                        'total'       => $total,
+                        'perPage'     => $perPage,
+                    ])]);
+                }
+                return renderTemplate('index.html.php',['main'=>renderTemplate('admin.logs.html.php')]);
             case 'reports':
                 if(!$_SESSION['admin']) {
                     header('Location: /admin');
@@ -1168,7 +1189,7 @@ function isCacheStale(): bool
     if (!isset($GLOBALS['redis']) || !$GLOBALS['redis']) return true;
     $builtAt = $GLOBALS['redis']->get('stats:built_at');
     if (!$builtAt) return true;
-    return (time() - (int)$builtAt) > 300;
+    return (time() - (int)$builtAt) > 1800;
 }
 
 function rebuildStatsCache(): void
@@ -1422,12 +1443,17 @@ function getRelativeToDataPath(string $path): string
 }
 
 function serveFile($path){
-    $relativePath = getRelativeToDataPath($path);
-    //since x-accel-redirect does not support paths outside its root, we need to check if the path is relative or absolute
-    if(startsWith($relativePath,'..'))
+    try {
+        $relativePath = getRelativeToDataPath($path);
+        //since x-accel-redirect does not support paths outside its root, we need to check if the path is relative or absolute
+        if(startsWith($relativePath,'..'))
+            readfile($path);
+        else
+            header('X-Accel-Redirect: '. $relativePath);
+    } catch (InvalidArgumentException) {
+        // realpath() failed (file may not exist or path is unresolvable); serve directly
         readfile($path);
-    else
-        header('X-Accel-Redirect: '. $relativePath);
+    }
 }
 
 function getReports(){

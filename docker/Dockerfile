@@ -30,6 +30,9 @@ WORKDIR /app/public/
 VOLUME /app/public/data
 VOLUME /app/public/logs
 
+ARG PICTSHARE_VERSION=git
+ENV PICTSHARE_VERSION=${PICTSHARE_VERSION}
+
 EXPOSE 80
 
 ENTRYPOINT ["/etc/start.sh"]

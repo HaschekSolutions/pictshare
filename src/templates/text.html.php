@@ -37,10 +37,17 @@
                     <a href="/"><img src="/css/imgs/logo/horizontal3.png" /></a>
                     <h4><?php echo $slogan; ?></h4>
                     <div class="well">
-                            <a class="btn btn-primary" href="/raw/<?php echo $hash?>">Raw</a> 
+                            <a class="btn btn-primary" href="/raw/<?php echo $hash?>">Raw</a>
                             <a class="btn btn-primary" href="/download/<?php echo $hash?>">Download</a>
+                    <?php if($content === null): ?>
+                        <div class="alert alert-warning" style="margin-top:1em">
+                            This file is too large to display in the browser
+                            (<?php $s=$filesize; echo $s>=1073741824?round($s/1073741824,1).' GB':($s>=1048576?round($s/1048576,1).' MB':round($s/1024,1).' KB'); ?>).
+                            Use the Download button above.
+                        </div>
+                    <?php else: ?>
                     <pre><code><?php echo $content?></code></pre>
-                        
+                    <?php endif; ?>
             </div>
             
             <footer>(c)<?php echo date("y");?> by<br/><a href="https://haschek.solutions" target="_blank"><img height="30" src="/css/imgs/hs_logo.png" /></a></footer>

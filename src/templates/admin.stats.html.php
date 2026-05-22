@@ -8,7 +8,8 @@
 <h1>Stats</h1>
 
 <?php if($built_at > 0): ?>
-  <p class="text-muted small">Last updated: <?=round((time()-$built_at)/60)?> minute(s) ago</p>
+  <?php $secsLeft = max(0, 1800 - (time() - $built_at)); ?>
+  <p class="text-muted small">Next refresh in: <?=$secsLeft >= 60 ? round($secsLeft/60).' minute(s)' : $secsLeft.' second(s)'?></p>
 <?php else: ?>
   <div class="alert alert-warning">Redis unavailable — stats may load slowly.</div>
 <?php endif; ?>
@@ -56,6 +57,7 @@
       <?php if(defined('LOG_VIEWS') && LOG_VIEWS==true): ?>
         <th scope="col">Views log</th>
       <?php endif; ?>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody
@@ -64,7 +66,7 @@
     hx-trigger="load"
     hx-swap="innerHTML"
   >
-    <tr><td colspan="<?=defined('LOG_VIEWS')&&LOG_VIEWS?8:7?>">Loading&hellip;</td></tr>
+    <tr><td colspan="<?=defined('LOG_VIEWS')&&LOG_VIEWS?9:8?>">Loading&hellip;</td></tr>
   </tbody>
 </table>
 </div>

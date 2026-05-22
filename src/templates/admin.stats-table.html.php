@@ -1,5 +1,5 @@
 <?php if(empty($rows)): ?>
-<tr><td colspan="<?=defined('LOG_VIEWS')&&LOG_VIEWS?8:7?>">No uploads found.</td></tr>
+<tr><td colspan="<?=defined('LOG_VIEWS')&&LOG_VIEWS?9:8?>">No uploads found.</td></tr>
 <?php else: ?>
 <?php foreach($rows as $row): ?>
 <tr>
@@ -8,16 +8,24 @@
   <td><?=htmlspecialchars($row['original_filename']??'')?></td>
   <td><?=htmlspecialchars($row['mime']??'')?></td>
   <td><?=$row['uploaded']?date('Y-m-d H:i',(int)$row['uploaded']):''?></td>
+  <td><?php $s=(int)($row['size']??0); echo $s>=1073741824?round($s/1073741824,1).' GB':($s>=1048576?round($s/1048576,1).' MB':($s>=1024?round($s/1024,1).' KB':$s.' B')); ?></td>
   <td><?=htmlspecialchars($row['ip']??'')?></td>
   <?php if(defined('LOG_VIEWS')&&LOG_VIEWS==true): ?>
     <td><a class="btn btn-secondary btn-sm" href="/admin/logs/views/<?=htmlspecialchars($row['hash'])?>">View logs</a></td>
   <?php endif; ?>
+  <td>
+    <a class="btn btn-danger btn-sm"
+       hx-get="/admin/stats/delete/<?=htmlspecialchars($row['hash'])?>"
+       hx-target="closest tr"
+       hx-swap="outerHTML"
+       hx-confirm="Delete <?=htmlspecialchars($row['hash'])?>? This cannot be undone.">Delete</a>
+  </td>
 </tr>
 <?php endforeach; ?>
 <?php endif; ?>
 <?php
   // Pagination row — all current params carried through so state is preserved
-  $cols = defined('LOG_VIEWS')&&LOG_VIEWS ? 8 : 7;
+  $cols = defined('LOG_VIEWS')&&LOG_VIEWS ? 9 : 8;
   $base = '/admin/stats/data?sort='.urlencode($sort).'&dir='.urlencode($dir).'&q='.urlencode($q);
 ?>
 <tr>
