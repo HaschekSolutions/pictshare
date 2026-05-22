@@ -524,7 +524,7 @@ function isFolderWritable($dir){return is_writable($dir);}
 function getRandomString($length=32, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyz')
 {
     $str = '';
-    $max = mb_strlen($keyspace, '8bit') - 1;
+    $max = (function_exists('mb_strlen') ? mb_strlen($keyspace, '8bit') : strlen($keyspace)) - 1;
     for ($i = 0; $i < $length; ++$i) {
         $str .= $keyspace[rand(0, $max)];
     }

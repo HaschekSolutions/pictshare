@@ -76,6 +76,8 @@ The API has been moved to a more consistant and RESTful design. The API document
 - Added support for external storage
 - [Encryption of files in external storage](/rtfm/ENCRYPTION.md)
 - Added text hosting (like pastebin)
+- Added Markdown rendering (converts .md files to HTML)
+- Added Audio support (mp3, wav, ogg, flac, m4a with player)
 - Added URL shortening
 - Added WebP to images (and automatic conversion from jpg, png to webp if the requesting browser supports it)
 - Massive code rework. Actually we designed it from the ground up to be more modular and easier to debug
