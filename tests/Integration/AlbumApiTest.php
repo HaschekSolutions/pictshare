@@ -100,4 +100,24 @@ class AlbumApiTest extends PictShareTestCase
         $this->assertArrayHasKey('delete_code', $result);
         $this->assertArrayHasKey('delete_url', $result);
     }
+
+    public function testAlbumHandleHashRendersGallery(): void
+    {
+        $r1 = $this->apiUpload('test.jpg');
+
+        $_REQUEST['hashes'] = [$r1['hash']];
+        $api    = new API(['album']);
+        $result = $api->act();
+        unset($_REQUEST['hashes']);
+
+        $albumHash = $result['hash'];
+        $this->uploadedHashes[] = $albumHash;
+
+        $cc   = new AlbumController();
+        $html = $cc->handleHash($albumHash, [$albumHash]);
+
+        $this->assertNotEmpty($html);
+        $this->assertStringContainsString($r1['hash'], $html);
+        $this->assertStringContainsString('<img', $html);
+    }
 }
