@@ -126,4 +126,53 @@ class AlbumApiTest extends PictShareTestCase
         $this->assertStringContainsString($r1['hash'], $html);
         $this->assertStringContainsString('<img', $html);
     }
+
+    public function testAlbumRoutedThroughArchitect(): void
+    {
+        $r1 = $this->apiUpload('test.jpg');
+
+        $_REQUEST['hashes'] = [$r1['hash']];
+        try {
+            $api    = new API(['album']);
+            $result = $api->act();
+        } finally {
+            unset($_REQUEST['hashes']);
+        }
+
+        $this->assertEquals('ok', $result['status']);
+        $albumHash = $result['hash'];
+        $this->uploadedHashes[] = $albumHash;
+
+        // Simulate architect() routing with just the album hash as the URL segment
+        $output = architect([$albumHash]);
+        $this->assertNotEmpty($output);
+        $this->assertStringContainsString($r1['hash'], $output);
+    }
+
+    public function testAlbumDeletionCodeWorks(): void
+    {
+        $r1 = $this->apiUpload('test.jpg');
+
+        $_REQUEST['hashes'] = [$r1['hash']];
+        try {
+            $api    = new API(['album']);
+            $result = $api->act();
+        } finally {
+            unset($_REQUEST['hashes']);
+        }
+
+        $this->assertEquals('ok', $result['status']);
+        $albumHash  = $result['hash'];
+        $deleteCode = $result['delete_code'];
+
+        // Verify delete code is stored in meta and matches response
+        $meta = getMetadataOfHash($albumHash);
+        $this->assertEquals($deleteCode, $meta['delete_code']);
+        $this->assertEquals($deleteCode, getDeleteCodeOfHash($albumHash));
+
+        // Delete and verify gone
+        deleteHash($albumHash);
+        $this->assertFalse(isExistingHash($albumHash));
+        // Already deleted — don't add to uploadedHashes
+    }
 }

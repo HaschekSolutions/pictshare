@@ -266,6 +266,9 @@ class API
         if (!$hashes || !is_array($hashes) || count($hashes) === 0)
             return ['status' => 'err', 'reason' => 'Missing or empty hashes array'];
 
+        if (count($hashes) > 200)
+            return ['status' => 'err', 'reason' => 'Too many hashes. Maximum 200 per album'];
+
         $validHashes = [];
         foreach ($hashes as $h) {
             if (!is_string($h))
@@ -273,6 +276,8 @@ class API
             $h = sanatizeString(trim($h));
             if (!$h)
                 return ['status' => 'err', 'reason' => 'Invalid hash value'];
+            if (!mightBeAHash($h))
+                return ['status' => 'err', 'reason' => "Invalid hash value: $h"];
             if (!isExistingHash($h))
                 return ['status' => 'err', 'reason' => "Hash not found: $h"];
             $validHashes[] = $h;

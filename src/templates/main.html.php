@@ -230,9 +230,7 @@ If the status code is "200", it will return the modified image directly.
   "<?= getURL() ?>api/album"</code></pre>
 
         <?php if (defined('UPLOAD_CODE') && UPLOAD_CODE != ''): ?>
-        <p><small>This server requires an upload code. Add <code>-d "uploadcode=<?= htmlspecialchars(UPLOAD_CODE, ENT_QUOTES, 'UTF-8') ?>"</code> to your request.</small></p>
-        <?php else: ?>
-        <p><small>If your server requires an upload code, add <code>-d "uploadcode=&lt;your_code&gt;"</code> to your request.</small></p>
+        <p><small>This server requires an upload code. Add <code>-d "uploadcode=&lt;your_code&gt;"</code> to your request.</small></p>
         <?php endif; ?>
 
         Output
