@@ -106,9 +106,15 @@ class AlbumApiTest extends PictShareTestCase
         $r1 = $this->apiUpload('test.jpg');
 
         $_REQUEST['hashes'] = [$r1['hash']];
-        $api    = new API(['album']);
-        $result = $api->act();
-        unset($_REQUEST['hashes']);
+        try {
+            $api    = new API(['album']);
+            $result = $api->act();
+        } finally {
+            unset($_REQUEST['hashes']);
+        }
+
+        $this->assertEquals('ok', $result['status']);
+        $this->assertArrayHasKey('hash', $result);
 
         $albumHash = $result['hash'];
         $this->uploadedHashes[] = $albumHash;
