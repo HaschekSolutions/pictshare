@@ -210,4 +210,35 @@ if (file_exists(ROOT . DS . 'notice.txt'))
 If the status code is "200", it will return the modified image directly.
     </div>
 
+    <div class="w-100">
+        <hr />
+    </div>
+
+    <div class="col-6">
+        <h2>Creating an Album</h2>
+        <p>Upload files first, then combine their hashes into an immutable gallery album.</p>
+
+        API call
+        <pre><code class="url">/album</code></pre>
+
+        <p>POST the <span class="badge text-bg-secondary">hashes[]</span> array (one entry per file). All hashes must already exist on this server.</p>
+
+        CURL example
+        <pre><code class="bash">curl -s -X POST \
+  -d "hashes[]=7eli4d.jpg" \
+  -d "hashes[]=5e6alk.jpg" \
+  "<?= getURL() ?>api/album"</code></pre>
+
+        Output
+        <pre><code class="json">
+{
+  "status": "ok",
+  "hash": "a3f8c1d2.album",
+  "url": "<?= getURL() ?>a3f8c1d2.album",
+  "count": 2,
+  "delete_code": "jxgat3wze8lmn9sqwxy4x32p2xm7211g",
+  "delete_url": "<?= getURL() ?>delete_jxgat3wze8lmn9sqwxy4x32p2xm7211g/a3f8c1d2.album"
+}</code></pre>
+    </div>
+
 </div>
