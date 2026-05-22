@@ -145,12 +145,68 @@
         container.innerHTML = html;
     }
 
+    function bindListHandlers(listEl) {
+        if (listEl.dataset.bound) return;
+        listEl.dataset.bound = '1';
+        listEl.addEventListener('click', function (e) {
+            var del = e.target.closest && e.target.closest('.uploads-delete');
+            if (del) { handleDelete(del.getAttribute('data-hash')); return; }
+            var copy = e.target.closest && e.target.closest('.uploads-copy');
+            if (copy) { handleCopy(copy.getAttribute('data-url')); return; }
+        });
+    }
+
+    function getUploadCode() {
+        var el = document.getElementById('uploadcode');
+        return el ? el.value : '';
+    }
+
+    function handleDelete(hash) {
+        var items = list();
+        var item = items.find(function (i) { return i.hash === hash; });
+        if (!item) return;
+        if (!window.confirm('Delete ' + hash + ' from the server? This cannot be undone.')) return;
+        var url = '/api/delete/' + encodeURIComponent(item.delete_code) + '/' + encodeURIComponent(item.hash);
+        fetch(url, { method: 'POST' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.status === 'ok') {
+                    remove(hash);
+                    refresh();
+                    return;
+                }
+                if (window.confirm('Server returned: ' + (data.reason || 'unknown error') + '. Remove from this list anyway?')) {
+                    remove(hash);
+                    refresh();
+                }
+            })
+            .catch(function (e) {
+                console.warn('delete failed', e);
+                if (window.confirm('Network error contacting server. Remove from this list anyway?')) {
+                    remove(hash);
+                    refresh();
+                }
+            });
+    }
+
+    function handleCopy(url) {
+        if (!navigator.clipboard) { window.prompt('Copy URL:', url); return; }
+        navigator.clipboard.writeText(url);
+    }
+
+    function handleClearAll() {
+        if (!window.confirm('Clear all tracked uploads from this browser? This does NOT delete files from the server.')) return;
+        clear();
+        refresh();
+    }
+
     function refresh() {
         var tabItem    = document.getElementById('my-uploads-tab-item');
         var countBadge = document.getElementById('my-uploads-count');
         var statsEl    = document.getElementById('my-uploads-stats');
         var listEl     = document.getElementById('my-uploads-list');
         var actionsEl  = document.getElementById('my-uploads-actions');
+        var clearBtn   = document.getElementById('my-uploads-clear');
         if (!tabItem || !listEl) return;
         var items = list();
         if (items.length === 0) {
@@ -163,6 +219,11 @@
         if (countBadge) countBadge.textContent = items.length;
         if (statsEl)    renderStats(statsEl, items);
         renderList(listEl, items);
+        bindListHandlers(listEl);
+        if (clearBtn && !clearBtn.dataset.bound) {
+            clearBtn.dataset.bound = '1';
+            clearBtn.addEventListener('click', handleClearAll);
+        }
     }
 
     window.refreshMyUploads = refresh;
