@@ -68,6 +68,7 @@
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
     <script src="/js/dropzone.js"></script>
     <script src="/js/highlight.pack.js"></script>
+    <script src="/js/uploads-store.js"></script>
     <script src="/js/pictshare.js"></script>
 </BODY>
 
