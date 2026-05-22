@@ -11,7 +11,7 @@ class AlbumController implements ContentController
         return ['album'];
     }
 
-    public function handleHash($hash, $url, $path = false): void
+    public function handleHash($hash, $url, $path = false)
     {
         $meta = getMetadataOfHash($hash);
         $hashes = $meta['hashes'] ?? [];
@@ -24,7 +24,7 @@ class AlbumController implements ContentController
             $items[] = ['hash' => $h, 'mime' => $mime, 'url' => getURL() . $h];
         }
 
-        echo renderTemplate('album.html.php', [
+        return renderTemplate('album.html.php', [
             'album_hash' => $hash,
             'items'      => $items,
             'created'    => $meta['created'] ?? null,
