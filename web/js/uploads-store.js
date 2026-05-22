@@ -45,8 +45,7 @@
         };
         if (item.kind === 'album' && Array.isArray(item.members)) entry.members = item.members;
         store.items.push(entry);
-        writeStore(store);
-        return true;
+        return writeStore(store);
     }
 
     function list() { return readStore().items.slice(); }
@@ -56,8 +55,7 @@
         var before = store.items.length;
         store.items = store.items.filter(function (i) { return i.hash !== hash; });
         if (store.items.length === before) return false;
-        writeStore(store);
-        return true;
+        return writeStore(store);
     }
 
     function clear() { writeStore({ version: STORAGE_VERSION, items: [] }); }
