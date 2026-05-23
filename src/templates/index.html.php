@@ -8,17 +8,17 @@
     <title>PictShare - the smart CDN</title>
 
     <!-- Bootstrap -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= assetUrl('/css/bootstrap.min.css') ?>" rel="stylesheet">
 
     <!-- PictShare overwrites -->
-    <link href="/css/pictshare.css" rel="stylesheet">
-    <link href="/css/dropzone.css" rel="stylesheet">
-    <link href="/css/hljs-dracula.css" rel="stylesheet">
+    <link href="<?= assetUrl('/css/pictshare.css') ?>" rel="stylesheet">
+    <link href="<?= assetUrl('/css/dropzone.css') ?>" rel="stylesheet">
+    <link href="<?= assetUrl('/css/hljs-dracula.css') ?>" rel="stylesheet">
 
 
     <!-- github-fork-ribbon-css
 	     https://simonwhitaker.github.io/github-fork-ribbon-css/ -->
-    <link href="/css/gh-fork-ribbon.min.css" rel="stylesheet">
+    <link href="<?= assetUrl('/css/gh-fork-ribbon.min.css') ?>" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -63,13 +63,13 @@
     </div>
 
 
-    <script src="/js/jquery.min.js"></script>
-    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= assetUrl('/js/jquery.min.js') ?>"></script>
+    <script src="<?= assetUrl('/js/bootstrap.bundle.min.js') ?>"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
-    <script src="/js/dropzone.js"></script>
-    <script src="/js/highlight.pack.js"></script>
-    <script src="/js/uploads-store.js"></script>
-    <script src="/js/pictshare.js"></script>
+    <script src="<?= assetUrl('/js/dropzone.js') ?>"></script>
+    <script src="<?= assetUrl('/js/highlight.pack.js') ?>"></script>
+    <script src="<?= assetUrl('/js/uploads-store.js') ?>"></script>
+    <script src="<?= assetUrl('/js/pictshare.js') ?>"></script>
 </BODY>
 
 </HTML>

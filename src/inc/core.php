@@ -1113,6 +1113,13 @@ function is_public_ipv6($ip=NULL)
     ) === $ip ? TRUE : FALSE;
 }
 
+function assetUrl($path)
+{
+    $file = ROOT . DS . 'web' . $path;
+    $v = @filemtime($file);
+    return $path . ($v ? '?v=' . $v : '');
+}
+
 function getDataDir()
 {
     if (defined('_TEST_DATA_OVERRIDE')) return _TEST_DATA_OVERRIDE;  // test isolation
