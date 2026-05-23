@@ -55,8 +55,9 @@ abstract class PictShareTestCase extends TestCase
             $cc = new $ccName();
             if (in_array($ext, $cc->getRegisteredExtensions())) {
                 ob_start();
-                $cc->handleHash($hash, $urlParts);
-                return ob_get_clean();
+                $returned = $cc->handleHash($hash, $urlParts);
+                $echoed   = ob_get_clean();
+                return ($echoed ?? '') . (is_string($returned) ? $returned : '');
             }
         }
         return '';

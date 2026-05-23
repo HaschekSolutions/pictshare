@@ -64,13 +64,13 @@ class API
     public function debug()
     {
         $data = array(
-            'server_name' => $_SERVER['SERVER_NAME'],
-            'server_addr' => $_SERVER['SERVER_ADDR'],
-            'remote_addr' => $_SERVER['REMOTE_ADDR'],
-            'remote_port' => $_SERVER['REMOTE_PORT'],
-            'HTTP_CF_CONNECTING_IP' => $_SERVER['HTTP_CF_CONNECTING_IP'],
-            'HTTP_CLIENT_IP' => $_SERVER['HTTP_CLIENT_IP'],
-            'HTTP_X_FORWARDED_FOR' => $_SERVER['HTTP_X_FORWARDED_FOR'],
+            'server_name' => $_SERVER['SERVER_NAME'] ?? null,
+            'server_addr' => $_SERVER['SERVER_ADDR'] ?? null,
+            'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? null,
+            'remote_port' => $_SERVER['REMOTE_PORT'] ?? null,
+            'HTTP_CF_CONNECTING_IP' => $_SERVER['HTTP_CF_CONNECTING_IP'] ?? null,
+            'HTTP_CLIENT_IP' => $_SERVER['HTTP_CLIENT_IP'] ?? null,
+            'HTTP_X_FORWARDED_FOR' => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null,
         );
 
         return $data;
@@ -92,7 +92,7 @@ class API
 
 
         //check if we should get a file from a remote URL
-        if ($_REQUEST['url']) {
+        if (!empty($_REQUEST['url'])) {
             $url = trim(rawurldecode($_REQUEST['url']));
             if (checkURLForPrivateIPRange($url)) {
                 addToLog(getUserIP() . " tried to get us to download a file from: " . $url . " but it is in a private IP range");
@@ -123,7 +123,7 @@ class API
         }
         else if (isset($_REQUEST['base64'])) {
             $data = $_REQUEST['base64'];
-            $format = $_REQUEST['format'];
+            $format = $_REQUEST['format'] ?? null;
 
             $tmpfile = ROOT . DS . 'tmp' . DS . md5(rand(0, 10000) . time()) . time();
 
@@ -192,7 +192,7 @@ class API
                 'useragent' => $_SERVER['HTTP_USER_AGENT'],
                 'delete_code' => $delcode,
                 'delete_url' => getURL() . 'delete_' . $delcode . '/' . $answer['hash'],
-                'remote_port' => $_SERVER['REMOTE_PORT'],
+                'remote_port' => $_SERVER['REMOTE_PORT'] ?? null,
             ];
 
             addToLog(getUserIP() . " uploaded " . $answer['hash'] . " (" . $type . ")");

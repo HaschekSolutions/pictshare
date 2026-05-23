@@ -4,6 +4,8 @@ class PlaceholderController implements ContentController
 {
     public const ctype = 'dynamic';
 
+    public $mimes = [];
+
     //returns all extensions registered by this type of content
     public function getRegisteredExtensions(){return array('placeholder');}
 

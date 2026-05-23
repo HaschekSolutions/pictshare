@@ -545,7 +545,7 @@ function endswith($string, $test) {
 
 function getUserIP()
 {
-    if(isCloudflare() || $_SERVER['HTTP_CF_CONNECTING_IP'])
+    if(isCloudflare() || !empty($_SERVER['HTTP_CF_CONNECTING_IP']))
         return $_SERVER['HTTP_CF_CONNECTING_IP'];
 	$client  = @$_SERVER['HTTP_CLIENT_IP'];
 	$forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
@@ -784,7 +784,9 @@ function color_name_to_hex($color_name)
 function getStorageControllers()
 {
     $controllers = array();
-    if ($handle = opendir(ROOT.DS.'storage-controllers')) {
+    $dir = ROOT.DS.'storage-controllers';
+    if (!is_dir($dir)) return $controllers;
+    if ($handle = opendir($dir)) {
         while (false !== ($entry = readdir($handle))) {
             if ($entry != "." && $entry != "..") {
                 if(endswith($entry,'.controller.php'))
