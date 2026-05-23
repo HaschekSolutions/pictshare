@@ -79,6 +79,8 @@ The API has been moved to a more consistant and RESTful design. The API document
 - Added Markdown rendering (converts .md files to HTML)
 - Added Audio support (mp3, wav, ogg, flac, m4a with player)
 - Added URL shortening
+- Added [Albums](/rtfm/API.md#album): combine multiple uploads into a single immutable gallery URL
+- Added "My Uploads" browser tab: localStorage-tracked list of files you uploaded from this browser, with per-item delete, copy URL, and bulk album creation
 - Added WebP to images (and automatic conversion from jpg, png to webp if the requesting browser supports it)
 - Massive code rework. Actually we designed it from the ground up to be more modular and easier to debug
 
@@ -97,6 +99,8 @@ The API has been moved to a more consistant and RESTful design. The API document
 - Duplicates don't take up space. If the exact same file is uploaded twice, the second upload will link to the first
 - Many [configuration options](/rtfm/CONFIG.md)
 - Full control over your data. Delete images with individual and global delete codes
+- Group files into immutable [albums](/rtfm/API.md#album) — share a single gallery URL instead of N individual links
+- Browser-side "My Uploads" tab tracks what you uploaded (localStorage) so you can re-find, delete, or bundle into an album later
 
 
 ---

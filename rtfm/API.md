@@ -203,3 +203,46 @@ Upload local image "test.jpg" to pictshare
   "delete_url": "https://dev.pictshare.net/delete_z0e1mdo8szxnauspxp2f080e4wd4ycf2/lpl119.jpg"
 }
 ```
+
+# album
+
+Create an immutable album (gallery) from a list of already-uploaded file hashes. The returned `.album` URL renders a thumbnail grid of all member files.
+
+- URL: `https://pictshare.net/api/album`
+- Method: POST
+- Body var: `hashes[]` (array, one per file). All hashes must already exist on the server. Maximum 200 per album.
+- Auth: same as upload (`uploadcode` required when `UPLOAD_CODE` is configured)
+- Answer: JSON
+
+Albums are immutable. To change contents, create a new album. Files are content-addressed — the album only stores hash references, not duplicates.
+
+## Example
+
+```
+curl -s -X POST \
+  -d "hashes[]=7eli4d.jpg" \
+  -d "hashes[]=5e6alk.jpg" \
+  https://pictshare.net/api/album
+```
+
+Answer from the server:
+
+```json
+{
+  "status": "ok",
+  "hash": "a3f8c1d2.album",
+  "url": "https://pictshare.net/a3f8c1d2.album",
+  "count": 2,
+  "delete_code": "jxgat3wze8lmn9sqwxy4x32p2xm7211g",
+  "delete_url": "https://pictshare.net/delete_jxgat3wze8lmn9sqwxy4x32p2xm7211g/a3f8c1d2.album"
+}
+```
+
+Common errors:
+
+- `Missing or empty hashes array` — no `hashes[]` provided
+- `Too many hashes. Maximum 200 per album` — array exceeds cap
+- `Invalid hash value` — non-string or sanitization-rejected entry
+- `Hash not found: <h>` — one of the referenced hashes does not exist on this server
+
+Visit the returned `url` to view the gallery. Visit the `delete_url` to delete the album (member files remain).
