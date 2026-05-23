@@ -1,6 +1,6 @@
 <?php 
 
-class FTPStorage implements StorageController
+class FtpStorage implements StorageController
 {
     private $connection;
     private $login;

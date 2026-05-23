@@ -784,7 +784,7 @@ function color_name_to_hex($color_name)
 function getStorageControllers()
 {
     $controllers = array();
-    $dir = ROOT.DS.'storage-controllers';
+    $dir = ROOT.DS.'src'.DS.'storage-controllers';
     if (!is_dir($dir)) return $controllers;
     if ($handle = opendir($dir)) {
         while (false !== ($entry = readdir($handle))) {
@@ -792,7 +792,7 @@ function getStorageControllers()
                 if(endswith($entry,'.controller.php'))
                 {
                     $controllers[] = ucfirst(substr($entry,0,-15)).'Storage';
-                    include_once(ROOT.DS.'storage-controllers'.DS.$entry);
+                    include_once($dir.DS.$entry);
                 }
             }
         }
