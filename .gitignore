@@ -3,6 +3,7 @@ notice.txt
 .phpunit.result.cache
 docs/
 .claude
+.antigravity*
 logs
 data
 tmp

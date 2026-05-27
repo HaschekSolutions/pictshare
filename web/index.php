@@ -22,13 +22,21 @@ if(file_exists(ROOT.'/src/lib/vendor/autoload.php'))
 // redis
 if(!defined('REDIS_CACHING') || REDIS_CACHING == true)
 {
-	$GLOBALS['redis'] = new Redis();
-	$GLOBALS['redis']->connect((!defined('REDIS_SERVER'))?'localhost':REDIS_SERVER, (!defined('REDIS_PORT'))?6379:REDIS_PORT);
+	try {
+		$GLOBALS['redis'] = new Redis();
+		$redis_host = (!defined('REDIS_SERVER')) ? 'localhost' : REDIS_SERVER;
+		$redis_port = (!defined('REDIS_PORT')) ? 6379 : REDIS_PORT;
+		// connect with 1.0 second timeout to prevent locking up PHP workers if Redis is down
+		@$GLOBALS['redis']->connect($redis_host, $redis_port, 1.0);
+	} catch (\Throwable $e) {
+		$GLOBALS['redis'] = null;
+		error_log("Failed to connect to Redis: " . $e->getMessage());
+	}
 }
 
 
-//parse the URL to an array and filter it
-$url = array_filter(explode('/',ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '','/')));
+//parse the URL to an array and filter it, keeping '0' values
+$url = array_filter(explode('/',ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '','/')), 'strlen');
 
 if($url[0] == 'api')
 {
