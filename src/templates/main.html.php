@@ -73,9 +73,9 @@ if (file_exists(ROOT . DS . 'notice.txt'))
 </div>
 
 
-<h2 id="api" class="section-heading">Using PictShare</h2>
+<h2 id="web" class="section-heading">Using PictShare <button type="button" data-bs-target="#using-web-documentation" class="btn btn-outline-primary" data-bs-toggle="collapse">Show user documentation</button> </h2>
 
-<div class="row">
+<div id="using-web-documentation" class="row collapse">
     <div class="col-6">
         <h3>Basics</h3>
         <p>
@@ -97,8 +97,9 @@ if (file_exists(ROOT . DS . 'notice.txt'))
 
 <hr class="no-print border border-primary border-2 opacity-50">
 
-<h2 id="api" class="section-heading">Using the API</h2>
-<div class="row">
+<h2 id="api" class="section-heading">Using the API <button type="button" data-bs-target="#using-api-documentation" class="btn btn-outline-primary" data-bs-toggle="collapse">Show API documentation</button> </h2>
+
+<div id="using-api-documentation" class="row collapse">
     <div class="col-6">
         <h2>Basics</h2>
 
