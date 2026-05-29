@@ -70,6 +70,7 @@
     <script src="<?= assetUrl('/js/highlight.pack.js') ?>"></script>
     <script src="<?= assetUrl('/js/uploads-store.js') ?>"></script>
     <script src="<?= assetUrl('/js/pictshare.js') ?>"></script>
+    <script src="<?= assetUrl('/js/qrcode.min.js') ?>"></script>
 </BODY>
 
 </HTML>
