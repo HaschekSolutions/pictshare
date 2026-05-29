@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (typeof refreshMyUploads === 'function') refreshMyUploads();
                     }
                     uploadInfo.insertAdjacentHTML("beforeend",
-                        renderMessage(file.name + " uploaded as <a target='_blank' href='/" + response.hash + "'>" + response.hash + "</a>", "URL: <a target='_blank' href='" + response.url + "'>" + response.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + response.url + "\");'>Copy URL</button>", "success")
+                        renderMessage(file.name + " uploaded as <a target='_blank' href='/" + response.hash + "'>" + response.hash + "</a>", "URL: <a target='_blank' href='" + response.url + "'>" + response.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + response.url + "\");'>Copy URL</button> <button id='showqrdtn-" + response.hash + "' class='btn btn-primary btn-sm' onClick='showQrcode(\"" + response.hash + "\", \""+ response.url + "\");'>Show QRCode</button><div id='" + response.hash + "' class='p-1'></div>", "success")
                     );
                 } else if (response.status == 'err') {
                     uploadInfo.insertAdjacentHTML("beforeend",
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         // but the current API logic determines type by content.
                         // For text/markdown, we might need to adjust src/api/upload.php
                         uploadInfo.insertAdjacentHTML("beforeend",
-                            renderMessage("Paste uploaded as <a target='_blank' href='/" + data.hash + "'>" + data.hash + "</a>", "URL: <a target='_blank' href='" + data.url + "'>" + data.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + data.url + "\");'>Copy URL</button>", "success")
+                            renderMessage("Paste uploaded as <a target='_blank' href='/" + data.hash + "'>" + data.hash + "</a>", "URL: <a target='_blank' href='" + data.url + "'>" + data.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + data.url + "\");'>Copy URL</button> <button id='showqrdtn-" + data.hash + "' class='btn btn-primary btn-sm' onClick='showQrcode(\"" + data.hash + "\", \""+ data.url + "\");'>Show QRCode</button><div id='" + data.hash + "' class='p-1'></div>", "success")
                         );
                         document.getElementById("pasteText").value = "";
                     } else {
@@ -167,6 +167,19 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 });
+
+function showQrcode(hash, url) {
+    showqrbtn = document.getElementById('showqrdtn-' + hash);
+    targetDiv = document.getElementById(hash);
+
+    if (targetDiv.hasChildNodes()) {
+        targetDiv.innerHTML = '';
+        showqrbtn.textContent = "Show QRCode";
+    } else {
+        new QRCode(targetDiv, url);
+        showqrbtn.textContent = "Hide QRCode";
+    }
+}
 
 function renderMessage(title, message, type) {
     if (!type)
