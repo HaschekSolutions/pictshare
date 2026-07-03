@@ -3,11 +3,15 @@ hljs.initHighlightingOnLoad();
 
 document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById("dropzone") != null) {
-        var myDropzone = new Dropzone("#dropzone");
+        // options must be set at construction time so the hidden file input
+        // Dropzone creates gets the accept attribute (native picker filtering)
+        var dropzoneOptions = { timeout: 0 };
         if (typeof maxUploadFileSize !== "undefined")
-            myDropzone.options.maxFilesize = maxUploadFileSize;
-
-        myDropzone.options.timeout = 0;
+            dropzoneOptions.maxFilesize = maxUploadFileSize;
+        var fallbackInput = document.querySelector("#dropzone .fallback input[type=file]");
+        if (fallbackInput && fallbackInput.getAttribute("accept"))
+            dropzoneOptions.acceptedFiles = fallbackInput.getAttribute("accept");
+        var myDropzone = new Dropzone("#dropzone", dropzoneOptions);
 
         myDropzone.on("sending", function (file, xhr, formData) {
             var uploadCodeElem = document.getElementById("uploadcode");

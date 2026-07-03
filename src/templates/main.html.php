@@ -13,7 +13,7 @@ if (file_exists(ROOT . DS . 'notice.txt'))
         <div id="uploadinfo"></div>
         <p>
             Max Upload size: <?= (int)(ini_get('upload_max_filesize')) ?>MB / File<br />
-            Allowed file types: <?= implode(', ', getAllContentFiletypes()) ?>
+            Allowed file types: <?= htmlspecialchars(implode(', ', getUploadFiletypes())) ?>
             <?php
             if (defined('UPLOAD_CODE') && UPLOAD_CODE != ''): ?>
                 <br>Upload Code: <input type="password" id="uploadcode" />
@@ -36,7 +36,7 @@ if (file_exists(ROOT . DS . 'notice.txt'))
             <div class="tab-pane fade show active" id="file-pane" role="tabpanel" aria-labelledby="file-tab" tabindex="0">
                 <form class="dropzone well" id="dropzone" method="post" action="/api/upload" enctype="multipart/form-data">
                     <div class="fallback">
-                        <input name="file" type="file" multiple />
+                        <input name="file" type="file" multiple accept="<?= htmlspecialchars(getUploadAcceptString()) ?>" />
                     </div>
                 </form>
             </div>

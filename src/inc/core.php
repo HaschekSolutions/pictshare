@@ -804,6 +804,10 @@ function getStorageControllers()
 
 function loadAllContentControllers($all=false)
 {
+    static $cache = array();
+    $cachekey = $all === true ? 'all' : 'allowed';
+    if (isset($cache[$cachekey])) return $cache[$cachekey];
+
     $allowedcontrollers = false;
     if(defined('CONTENTCONTROLLERS') && CONTENTCONTROLLERS != '' && $all!==true)
     {
@@ -830,21 +834,59 @@ function loadAllContentControllers($all=false)
         closedir($handle);
     }
 
-    return $controllers;
+    return $cache[$cachekey] = $controllers;
 }
 
 function getAllContentFiletypes()
 {
+    static $types = null;
+    if ($types !== null) return $types;
+
     $types = array();
     $controllers = loadAllContentControllers();
     foreach($controllers as $c)
     {
         $instance = new $c;
         if($instance::ctype=='static')
-            $types = array_merge($types,(new $instance)->getRegisteredExtensions());
+            $types = array_merge($types,$instance->getRegisteredExtensions());
     }
 
     return $types;
+}
+
+//extensions of controllers that actually accept file uploads (mime-based ones like image/video/text, not virtual types like url/album)
+function getUploadFiletypes()
+{
+    static $types = null;
+    if ($types !== null) return $types;
+
+    $types = array();
+    foreach(loadAllContentControllers() as $c)
+    {
+        $instance = new $c;
+        if($instance::ctype=='static' && !empty($instance->mimes ?? null))
+            $types = array_merge($types,$instance->getRegisteredExtensions());
+    }
+
+    return $types = array_values(array_unique($types));
+}
+
+//value for <input accept> / Dropzone acceptedFiles: mime types plus dotted extensions.
+//mime entries matter because the server accepts by file content, so valid files with odd or missing extensions must not be blocked client-side
+function getUploadAcceptString()
+{
+    static $accept = null;
+    if ($accept !== null) return $accept;
+
+    $entries = array();
+    foreach(loadAllContentControllers() as $c)
+    {
+        $instance = new $c;
+        if($instance::ctype=='static' && !empty($instance->mimes ?? null))
+            $entries = array_merge($entries,$instance->mimes,array_map(fn($e) => '.'.$e, $instance->getRegisteredExtensions()));
+    }
+
+    return $accept = implode(',', array_unique($entries));
 }
 
 function rrmdir($dir) { 

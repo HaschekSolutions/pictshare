@@ -28,7 +28,7 @@
         <![endif]-->
 
     <script>
-        var maxUploadFileSize = <?php echo (int)(ini_get('upload_max_filesize')); ?>
+        var maxUploadFileSize = <?php echo (int)(ini_get('upload_max_filesize')); ?>;
     </script>
 
     <meta name="description" content="Free image sharing, linking and tracking">
