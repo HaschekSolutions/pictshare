@@ -1,5 +1,6 @@
 # Integrating PictShare in other programs
 
+- [MCP server](/rtfm/MCP.md) — connect LLM agents like Claude Code / Claude Desktop
 - [Pastebinit](/rtfm/PASTEBINIT.md)
 - Chrome Browser extension: https://chrome.google.com/webstore/detail/pictshare-1-click-imagesc/mgomffcdpnohakmlhhjmiemlolonpafc
   - Source: https://github.com/hascheksolutions/PictShare-Chrome-extension

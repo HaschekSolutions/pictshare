@@ -101,7 +101,7 @@ The API has been moved to a more consistant and RESTful design. The API document
 - Full control over your data. Delete images with individual and global delete codes
 - Group files into immutable [albums](/rtfm/API.md#album) — share a single gallery URL instead of N individual links
 - Browser-side "My Uploads" tab tracks what you uploaded (localStorage) so you can re-find, delete, or bundle into an album later
-- Built-in MCP server so LLM agents can upload and manage files (see [MCP server](#mcp-server))
+- Built-in [MCP server](/rtfm/MCP.md) so LLM agents can upload and manage files
 
 
 ---
@@ -128,6 +128,8 @@ Available tools:
 | `delete_file` | Delete a file using its delete code |
 | `create_album` | Combine hashes into an album |
 | `transform_image` | Build a resized/filtered/rotated image URL |
+
+Full client setup and tool reference: [rtfm/MCP.md](/rtfm/MCP.md)
 
 ---
 

@@ -41,6 +41,7 @@ docker run -p 8080:80 ghcr.io/hascheksolutions/pictshare
 1. **`web/index.php`** — Entry point. Loads config, boots Redis, includes all controllers, calls `architect($url)`.
 2. **`src/inc/core.php`** — Central routing (`architect()` function). Parses URL segments, dispatches to content controllers, manages Redis caching, handles deletion logic.
 3. **`src/inc/api.class.php`** — REST API handler for `/api/*` routes (upload, delete, info, passthrough, debug).
+4. **`src/inc/mcp.class.php`** — MCP server for the `/mcp` route (official `mcp/sdk`, Streamable HTTP). Tools delegate to the `API` class; auth is `Authorization: Bearer <UPLOAD_CODE>` when set. Usage docs: `rtfm/MCP.md`.
 
 ### Plugin Architectures
 
@@ -75,6 +76,7 @@ Redis stores `cache:byurl:<url>` (URL → controller+hash mapping) and `served:<
 | POST | `/api/passthrough/image` | Process image with modifiers, return directly |
 | GET | `/api/info` | File metadata |
 | GET | `/api/debug` | Server diagnostics |
+| POST | `/mcp` | MCP server (JSON-RPC, tools: upload_from_url, upload_base64, get_file_info, delete_file, create_album, transform_image) |
 
 ### Adding a New Content Type
 
