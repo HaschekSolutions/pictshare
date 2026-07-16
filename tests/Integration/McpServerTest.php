@@ -182,6 +182,34 @@ class McpServerTest extends PictShareTestCase
         $this->uploadedHashes[] = $res['data']['hash'];
     }
 
+    public function testTransformImage(): void
+    {
+        [$hash] = $this->apiUploadFixture();
+        $res = $this->toolResult($this->callTool('transform_image', [
+            'hash' => $hash, 'size' => '100x50', 'filter' => 'sepia', 'rotate' => 'left', 'forcesize' => true,
+        ]));
+        $this->assertFalse($res['isError'], json_encode($res['data']));
+        $this->assertSame(getURL() . "100x50/sepia/left/forcesize/$hash", $res['data']['url']);
+    }
+
+    public function testTransformImageRejectsUnknownFilter(): void
+    {
+        [$hash] = $this->apiUploadFixture();
+        $res = $this->toolResult($this->callTool('transform_image', ['hash' => $hash, 'filter' => 'unicornify']));
+        $this->assertTrue($res['isError']);
+        $this->assertStringContainsStringIgnoringCase('filter', json_encode($res['data']));
+    }
+
+    public function testTransformImageRejectsBadSizeAndUnknownHash(): void
+    {
+        [$hash] = $this->apiUploadFixture();
+        $res = $this->toolResult($this->callTool('transform_image', ['hash' => $hash, 'size' => 'bogus']));
+        $this->assertTrue($res['isError']);
+
+        $res = $this->toolResult($this->callTool('transform_image', ['hash' => 'nope123.png', 'size' => '100']));
+        $this->assertTrue($res['isError']);
+    }
+
     public function testInitializeHandshake(): void
     {
         $resp = $this->mcpRequest([

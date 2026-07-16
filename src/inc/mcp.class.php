@@ -76,6 +76,48 @@ class PictShareMcp
                 name: 'create_album',
                 description: 'Create an album from existing file hashes (max 200). Returns the album hash and url.'
             )
+            ->addTool(
+                handler: function (string $hash, ?string $size = null, ?string $filter = null,
+                                   ?string $rotate = null, bool $forcesize = false, bool $webp = false): array {
+                    $hash = sanatizeString(trim($hash));
+                    if (!isExistingHash($hash))
+                        throw new ToolCallException("Hash not found: $hash");
+
+                    $mods = [];
+                    if ($size !== null) {
+                        if (!isSize($size))
+                            throw new ToolCallException("Invalid size '$size'. Use WIDTHxHEIGHT (e.g. 300x200) or a single number for proportional scaling");
+                        $mods[] = $size;
+                    }
+                    if ($filter !== null) {
+                        $base = explode('_', $filter)[0];
+                        if (!in_array($base, getFilters()))
+                            throw new ToolCallException("Unknown filter '$filter'. Available: ".implode(', ', getFilters()));
+                        $mods[] = $filter;
+                    }
+                    if ($rotate !== null) {
+                        if (!isRotation($rotate))
+                            throw new ToolCallException("Invalid rotation '$rotate'. Allowed: left, right, upside");
+                        $mods[] = $rotate;
+                    }
+                    if ($forcesize) {
+                        if ($size === null)
+                            throw new ToolCallException('forcesize requires a size');
+                        $mods[] = 'forcesize';
+                    }
+                    if ($webp)
+                        $mods[] = 'webp';
+                    if (!$mods)
+                        throw new ToolCallException('No modifiers given. Provide at least one of: size, filter, rotate, webp');
+
+                    return ['url' => getURL().implode('/', $mods).'/'.$hash];
+                },
+                name: 'transform_image',
+                description: 'Build a URL that serves a transformed version of an uploaded image. '
+                    .'Modifiers: size ("300x200" or "300"), filter (e.g. sepia, blur_5, pixelate_10), '
+                    .'rotate (left/right/upside), forcesize (crop to exact size), webp (convert format). '
+                    .'PictShare renders the derived image lazily on first request of the URL.'
+            )
             ->build();
     }
 
