@@ -96,6 +96,34 @@ class McpServerTest extends PictShareTestCase
         $this->assertFalse(PictShareMcp::checkAuth('', 'sekrit'));
     }
 
+    public function testToolsListContainsUploadTools(): void
+    {
+        $sid = $this->initSession();
+        $resp = $this->mcpRequest(['jsonrpc' => '2.0', 'id' => 2, 'method' => 'tools/list', 'params' => (object)[]], $sid);
+        $decoded = $this->decodeResponse($resp);
+        $names = array_column($decoded['result']['tools'] ?? [], 'name');
+        $this->assertContains('upload_from_url', $names);
+        $this->assertContains('upload_base64', $names);
+    }
+
+    public function testUploadBase64(): void
+    {
+        $data = base64_encode(file_get_contents(__DIR__ . '/../fixtures/test.png'));
+        $res = $this->toolResult($this->callTool('upload_base64', ['data' => $data]));
+        $this->assertFalse($res['isError'], 'tool errored: ' . json_encode($res['data']));
+        $this->assertSame('ok', $res['data']['status']);
+        $this->assertNotEmpty($res['data']['hash']);
+        $this->assertNotEmpty($res['data']['url']);
+        $this->uploadedHashes[] = $res['data']['hash'];
+    }
+
+    public function testUploadFromUrlRejectsInvalidUrl(): void
+    {
+        $res = $this->toolResult($this->callTool('upload_from_url', ['url' => 'ftp://example.com/x.png']));
+        $this->assertTrue($res['isError']);
+        $this->assertStringContainsStringIgnoringCase('invalid url', json_encode($res['data']));
+    }
+
     public function testInitializeHandshake(): void
     {
         $resp = $this->mcpRequest([

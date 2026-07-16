@@ -5,6 +5,7 @@
  * All tools delegate to the existing API class — no duplicated business logic.
  */
 
+use Mcp\Exception\ToolCallException;
 use Mcp\Server;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StreamableHttpTransport;
@@ -36,7 +37,49 @@ class PictShareMcp
             ->setInstructions('Self-hosted media hosting. Upload files by URL or base64, '
                 .'then use the returned hash with the info/transform/album/delete tools.')
             ->setSession(new FileSessionStore($sessionDir))
+            ->addTool(
+                handler: function (string $url): array {
+                    return PictShareMcp::callApi(['upload'], ['url' => trim($url)]);
+                },
+                name: 'upload_from_url',
+                description: 'Download a file from a public http(s) URL and store it on this '
+                    .'PictShare instance (max 20 MB). Returns hash, public url and delete_code.'
+            )
+            ->addTool(
+                handler: function (string $data): array {
+                    if (!str_contains($data, ','))
+                        $data = 'base64,'.$data; // API::base64ToFile expects a "prefix," part
+                    return PictShareMcp::callApi(['upload'], ['base64' => $data]);
+                },
+                name: 'upload_base64',
+                description: 'Upload a base64-encoded file (raw base64 or data-URI). The file type '
+                    .'is detected from content. Returns hash, public url and delete_code.'
+            )
             ->build();
+    }
+
+    /**
+     * Run an existing API action with the given request vars.
+     * MCP auth already validated the upload code, so it is forwarded automatically.
+     * @throws ToolCallException on API-level errors (surfaced as MCP tool errors)
+     */
+    public static function callApi(array $urlSegments, array $requestVars = []): array
+    {
+        if (defined('UPLOAD_CODE') && UPLOAD_CODE != '')
+            $requestVars['uploadcode'] = UPLOAD_CODE;
+
+        foreach ($requestVars as $k => $v)
+            $_REQUEST[$k] = $v;
+        try {
+            $result = (new API($urlSegments))->act();
+        } finally {
+            foreach (array_keys($requestVars) as $k)
+                unset($_REQUEST[$k]);
+        }
+
+        if (($result['status'] ?? 'ok') === 'err')
+            throw new ToolCallException($result['reason'] ?? 'Unknown API error');
+        return $result;
     }
 
     public static function handle(ServerRequestInterface $request, ?string $sessionDir = null): ResponseInterface
