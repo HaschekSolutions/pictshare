@@ -30,6 +30,13 @@ if(!defined('REDIS_CACHING') || REDIS_CACHING == true)
 //parse the URL to an array and filter it
 $url = array_filter(explode('/',ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '','/')));
 
+if($url[0] == 'mcp')
+{
+	require_once(ROOT.DS.'src'.DS.'inc'.DS.'mcp.class.php');
+	PictShareMcp::serve();
+	exit();
+}
+
 if($url[0] == 'api')
 {
 	array_shift($url); //remove "api" form the URL

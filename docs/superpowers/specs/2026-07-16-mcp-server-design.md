@@ -28,7 +28,7 @@ The MCP server is **built into PictShare itself** — no separate process or pac
 | Tool | Wraps | Parameters | Returns |
 |------|-------|------------|---------|
 | `upload_from_url` | `/api/geturl` logic | `url` (string, required) | hash, public URL, delete code |
-| `upload_base64` | `/api/base64` logic | `data` (base64 string, required), `filename` (string, optional — used for extension detection) | hash, public URL, delete code |
+| `upload_base64` | `/api/base64` logic | `data` (base64 string, required) — no filename parameter; the file type is detected from content | hash, public URL, delete code |
 | `get_file_info` | `/api/info` logic | `hash` (string, required) | mime type, size, sha1, view count, upload timestamp |
 | `delete_file` | `/api/delete` logic | `hash` (string, required), `delete_code` (string, required) | success or error message |
 | `create_album` | `Api::createAlbum` | `hashes` (string array, required) | album hash, album URL |
@@ -41,9 +41,11 @@ Parameters:
 - `hash` (string, required)
 - `size` (string, optional) — `WxH` format, e.g. `300x200`
 - `filter` (string, optional) — one of the filters supported by the image controller (`negative`, `grayscale`, `sepia`, etc.)
-- `rotate` (string/int, optional) — supported rotation values
-- `forcesize` (bool, optional)
-- `format` (string, optional, video hashes) — `mp4` or `webm` conversion, plus size variants supported by the video controller
+- `rotate` (string, optional) — `left`, `right`, or `upside`
+- `forcesize` (bool, optional) — requires `size`
+- `webp` (bool, optional) — convert output to WebP
+
+(Implementation delta: no video `format` parameter — the video controller has no WebM conversion, and GIF→MP4 remains a plain URL modifier outside this tool's scope.)
 
 Behavior: validates each modifier against the known modifier list of the relevant content controller. Unknown or malformed modifiers are rejected with a descriptive error. On success, returns the composed URL (e.g. `https://host/300x200/negative/abc.jpg`). PictShare renders the derived file lazily on first fetch, as it already does today — the tool never triggers rendering itself.
 

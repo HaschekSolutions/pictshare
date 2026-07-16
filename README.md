@@ -101,7 +101,33 @@ The API has been moved to a more consistant and RESTful design. The API document
 - Full control over your data. Delete images with individual and global delete codes
 - Group files into immutable [albums](/rtfm/API.md#album) — share a single gallery URL instead of N individual links
 - Browser-side "My Uploads" tab tracks what you uploaded (localStorage) so you can re-find, delete, or bundle into an album later
+- Built-in MCP server so LLM agents can upload and manage files (see [MCP server](#mcp-server))
 
+
+---
+
+## MCP server
+
+PictShare has a built-in [Model Context Protocol](https://modelcontextprotocol.io) endpoint at `POST /mcp` (Streamable HTTP), so LLM agents can upload and manage files directly.
+
+Register in Claude Code:
+
+```bash
+claude mcp add --transport http pictshare https://your.pictshare.host/mcp
+```
+
+If your instance sets `UPLOAD_CODE`, clients must send it as a bearer token: `Authorization: Bearer <upload code>`.
+
+Available tools:
+
+| Tool | Purpose |
+|------|---------|
+| `upload_from_url` | Download a remote URL and store it |
+| `upload_base64` | Upload base64-encoded content |
+| `get_file_info` | File metadata (mime, size, sha1, upload time) |
+| `delete_file` | Delete a file using its delete code |
+| `create_album` | Combine hashes into an album |
+| `transform_image` | Build a resized/filtered/rotated image URL |
 
 ---
 
