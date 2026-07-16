@@ -55,6 +55,27 @@ class PictShareMcp
                 description: 'Upload a base64-encoded file (raw base64 or data-URI). The file type '
                     .'is detected from content. Returns hash, public url and delete_code.'
             )
+            ->addTool(
+                handler: function (string $hash): array {
+                    return PictShareMcp::callApi(['info', sanatizeString(trim($hash))]);
+                },
+                name: 'get_file_info',
+                description: 'Get metadata of an uploaded file by hash: mime type, size, sha1, upload time.'
+            )
+            ->addTool(
+                handler: function (string $hash, string $delete_code): array {
+                    return PictShareMcp::callApi(['delete', sanatizeString(trim($delete_code)), sanatizeString(trim($hash))]);
+                },
+                name: 'delete_file',
+                description: 'Permanently delete an uploaded file. Requires the delete_code returned at upload time.'
+            )
+            ->addTool(
+                handler: function (array $hashes): array {
+                    return PictShareMcp::callApi(['album'], ['hashes' => $hashes]);
+                },
+                name: 'create_album',
+                description: 'Create an album from existing file hashes (max 200). Returns the album hash and url.'
+            )
             ->build();
     }
 

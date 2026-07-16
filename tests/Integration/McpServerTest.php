@@ -80,6 +80,22 @@ class McpServerTest extends PictShareTestCase
         return ['isError' => (bool)($result['isError'] ?? false), 'data' => $json ?? $text];
     }
 
+    /** Upload a fixture via the API directly; returns [hash, delete_code] */
+    private function apiUploadFixture(string $fixture = 'test.png'): array
+    {
+        $tmp = ROOT . DS . 'tmp' . DS . 'mcp_' . uniqid() . '_' . $fixture;
+        copy(__DIR__ . '/../fixtures/' . $fixture, $tmp);
+        $_FILES['file'] = ['tmp_name' => $tmp, 'name' => $fixture, 'error' => UPLOAD_ERR_OK, 'size' => filesize($tmp)];
+        try {
+            $result = (new API(['upload']))->act();
+        } finally {
+            unset($_FILES['file']);
+        }
+        $this->assertSame('ok', $result['status'] ?? null, json_encode($result));
+        $this->uploadedHashes[] = $result['hash'];
+        return [$result['hash'], $result['delete_code'] ?? ''];
+    }
+
     // ---------- tests ----------
 
     public function testCheckAuth(): void
@@ -122,6 +138,48 @@ class McpServerTest extends PictShareTestCase
         $res = $this->toolResult($this->callTool('upload_from_url', ['url' => 'ftp://example.com/x.png']));
         $this->assertTrue($res['isError']);
         $this->assertStringContainsStringIgnoringCase('invalid url', json_encode($res['data']));
+    }
+
+    public function testGetFileInfo(): void
+    {
+        [$hash] = $this->apiUploadFixture();
+        $res = $this->toolResult($this->callTool('get_file_info', ['hash' => $hash]));
+        $this->assertFalse($res['isError'], json_encode($res['data']));
+        $this->assertSame($hash, $res['data']['hash']);
+        $this->assertNotEmpty($res['data']['mime']);
+    }
+
+    public function testGetFileInfoUnknownHash(): void
+    {
+        $res = $this->toolResult($this->callTool('get_file_info', ['hash' => 'nope123.png']));
+        $this->assertTrue($res['isError']);
+    }
+
+    public function testDeleteFile(): void
+    {
+        [$hash, $code] = $this->apiUploadFixture('test.jpg');
+        $res = $this->toolResult($this->callTool('delete_file', ['hash' => $hash, 'delete_code' => $code]));
+        $this->assertFalse($res['isError'], json_encode($res['data']));
+        $this->assertFalse(isExistingHash($hash));
+    }
+
+    public function testDeleteFileWrongCode(): void
+    {
+        [$hash] = $this->apiUploadFixture('test.webp');
+        $res = $this->toolResult($this->callTool('delete_file', ['hash' => $hash, 'delete_code' => 'wrong']));
+        $this->assertTrue($res['isError']);
+        $this->assertTrue(isExistingHash($hash));
+    }
+
+    public function testCreateAlbum(): void
+    {
+        [$h1] = $this->apiUploadFixture('test.png');
+        [$h2] = $this->apiUploadFixture('test.gif');
+        $res = $this->toolResult($this->callTool('create_album', ['hashes' => [$h1, $h2]]));
+        $this->assertFalse($res['isError'], json_encode($res['data']));
+        $this->assertSame(2, $res['data']['count']);
+        $this->assertNotEmpty($res['data']['hash']);
+        $this->uploadedHashes[] = $res['data']['hash'];
     }
 
     public function testInitializeHandshake(): void
