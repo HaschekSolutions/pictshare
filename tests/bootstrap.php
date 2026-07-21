@@ -26,6 +26,12 @@ $_SERVER += [
 ];
 
 require_once __DIR__ . '/testconfig.php';
+
+// must come before controllers are required - some controllers implement vendor
+// interfaces at class-declaration time (mirrors load order in web/index.php)
+if (file_exists(ROOT . '/src/lib/vendor/autoload.php'))
+    require_once ROOT . '/src/lib/vendor/autoload.php';
+
 require_once ROOT . DS . 'src' . DS . 'inc' . DS . 'core.php';
 
 // resize.php and filters.php define functions used in unit tests
@@ -34,8 +40,5 @@ require_once ROOT . DS . 'src' . DS . 'content-controllers' . DS . 'image' . DS 
 
 require_once ROOT . DS . 'src' . DS . 'inc' . DS . 'api.class.php';
 loadAllContentControllers();
-
-if (file_exists(ROOT . '/src/lib/vendor/autoload.php'))
-    require_once ROOT . '/src/lib/vendor/autoload.php';
 
 // Redis disabled — GLOBALS['redis'] stays null (REDIS_CACHING=false skips init in index.php)

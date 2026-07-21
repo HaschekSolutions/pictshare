@@ -10,14 +10,15 @@ if(!file_exists(ROOT.DS.'src'.DS.'inc'.DS.'config.inc.php'))
 	exit('Rename /src/inc/example.config.inc.php to /src/inc/config.inc.php first!');
 require_once(ROOT.DS.'src'.DS.'inc'.DS.'config.inc.php');
 
+//load external things if existing (must come before controllers are required -
+//some controllers implement vendor interfaces at class-declaration time)
+if(file_exists(ROOT.'/src/lib/vendor/autoload.php'))
+	require_once(ROOT.'/src/lib/vendor/autoload.php');
+
 //loading core and controllers
 require_once(ROOT.DS.'src'.DS.'inc'.DS.'core.php');
 require_once(ROOT.DS.'src'.DS.'inc'.DS.'api.class.php');
 loadAllContentControllers();
-
-//load external things if existing
-if(file_exists(ROOT.'/src/lib/vendor/autoload.php'))
-	require_once(ROOT.'/src/lib/vendor/autoload.php');
 
 // redis
 if(!defined('REDIS_CACHING') || REDIS_CACHING == true)
