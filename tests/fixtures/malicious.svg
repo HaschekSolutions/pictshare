@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="100" onload="alert(document.cookie)">
+  <script>alert(document.cookie);</script>
+  <rect width="50" height="50" onclick="alert(1)"/>
+  <a xlink:href="javascript:alert(1)"><text x="10" y="10">click</text></a>
+  <image xlink:href="https://evil.example.com/tracker.png" width="1" height="1"/>
+  <foreignObject width="100" height="100">
+    <body xmlns="http://www.w3.org/1999/xhtml">
+      <script>alert('xss')</script>
+    </body>
+  </foreignObject>
+</svg>

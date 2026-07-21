@@ -39,6 +39,7 @@ By default all of these are enabled but if you only need one or more, you can wh
 Available values for the `CONTENTCONTROLLERS` setting are:
 
 - IMAGE
+- SVG
 - TEXT
 - VIDEO
 - URL
