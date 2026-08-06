@@ -41,10 +41,28 @@ function getInfoAboutHash($hash)
         return array('status'=>'err','reason'=>'File not found');
     $size = filesize($file);
     $size_hr = renderSize($size);
-    $content_type = exec("file -bi " . escapeshellarg($file));
+    
+    $content_type = false;
+    try {
+        if (class_exists('finfo')) {
+            $finfo = new finfo(FILEINFO_MIME);
+            $content_type = $finfo->file($file);
+        }
+    } catch (\Throwable $t) {
+        // ignore
+    }
+
+    if (!$content_type && function_exists('mime_content_type')) {
+        $content_type = @mime_content_type($file);
+    }
+
+    if (!$content_type && strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+        $content_type = @exec("file -bi " . escapeshellarg($file));
+    }
+
+    $type = $content_type;
     if($content_type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
     {
-        $type = $content_type;
         $c = explode(';',$type);
         $type = $c[0];
     }
