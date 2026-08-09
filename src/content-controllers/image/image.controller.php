@@ -270,24 +270,26 @@ class ImageController implements ContentController
         switch($type)
         {
             case 'jpeg':
-            case 'jpg': 
+            case 'jpg':
                 header ("Content-type: image/jpeg");
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
+                header('Vary: Accept');
                 serveFile($path);
             break;
 
-            case 'png': 
+            case 'png':
                 header ("Content-type: image/png");
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
+                header('Vary: Accept');
                 serveFile($path);
 
             break;
 
-            case 'gif': 
+            case 'gif':
                 header ("Content-type: image/gif");
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
@@ -300,6 +302,7 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
+                header('Vary: Accept');
                 serveFile($path);
             break;
 
@@ -308,6 +311,7 @@ class ImageController implements ContentController
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
+                header('Vary: Accept');
                 serveFile($path);
             break;
         }
