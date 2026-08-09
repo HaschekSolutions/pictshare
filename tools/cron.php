@@ -9,11 +9,7 @@ define('ROOT', dirname(__FILE__).DS.'..');
 include_once(ROOT.DS.'src'.DS.'inc/config.inc.php');
 include_once(ROOT.DS.'src'.DS.'inc/core.php');
 
-if(!defined('REDIS_CACHING') || REDIS_CACHING == true)
-{
-    $GLOBALS['redis'] = new Redis();
-    $GLOBALS['redis']->connect((!defined('REDIS_SERVER'))?'localhost':REDIS_SERVER, (!defined('REDIS_PORT'))?6379:REDIS_PORT);
-}
+connectRedis();
 
 switch($argv[1])
 {

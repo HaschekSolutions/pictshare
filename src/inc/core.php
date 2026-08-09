@@ -1404,6 +1404,19 @@ function flushViews(): array
     return $result;
 }
 
+function connectRedis(): void
+{
+    if (!defined('REDIS_CACHING') || REDIS_CACHING == true)
+    {
+        $server = (!defined('REDIS_SERVER')) ? 'localhost' : REDIS_SERVER;
+        // Unix socket paths and a nonzero port together throw RedisException
+        // under phpredis — port must be 0 for a socket path.
+        $port = (str_starts_with($server, '/')) ? 0 : ((!defined('REDIS_PORT')) ? 6379 : REDIS_PORT);
+        $GLOBALS['redis'] = new Redis();
+        $GLOBALS['redis']->connect($server, $port);
+    }
+}
+
 function updateMetaData($hash, $meta)
 {
     $metaFile = getDataDir() . DS . $hash . DS . 'meta.json';

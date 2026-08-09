@@ -21,11 +21,7 @@ require_once(ROOT.DS.'src'.DS.'inc'.DS.'api.class.php');
 loadAllContentControllers();
 
 // redis
-if(!defined('REDIS_CACHING') || REDIS_CACHING == true)
-{
-	$GLOBALS['redis'] = new Redis();
-	$GLOBALS['redis']->connect((!defined('REDIS_SERVER'))?'localhost':REDIS_SERVER, (!defined('REDIS_PORT'))?6379:REDIS_PORT);
-}
+connectRedis();
 
 
 //parse the URL to an array and filter it
