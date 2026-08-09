@@ -1134,26 +1134,49 @@ function checkURLForPrivateIPRange($url)
 /**
  * Safely fetches a remote URL for the "upload from URL" feature.
  *
- * Resolves the hostname exactly once and connects directly to that
- * resolved IP (with the original Host header / TLS SNI preserved).
+ * Resolves the hostname exactly once per hop and connects directly to
+ * that resolved IP (with the original Host header / TLS SNI preserved).
  * This closes the DNS-rebinding TOCTOU window that exists when a
  * private-IP check and the actual fetch perform independent DNS
  * lookups: an attacker's DNS could answer public for the check and
  * internal for the fetch. Also enforces $maxBytes while streaming,
  * so no separate (and equally rebindable) size-probe request is needed.
  *
+ * Redirects are not auto-followed by the stream itself (that would let
+ * a redirect target a private IP) — instead each hop's target is
+ * re-validated through the same public-IP pinning as the original URL,
+ * up to $maxRedirects times, so real CDN redirects work without
+ * reopening the SSRF hole.
+ *
  * @return array{ok:bool,error:?string,body:?string}
  */
-function fetchPublicUrl($url, $maxBytes = 20971520)
+function fetchPublicUrl($url, $maxBytes = 20971520, $maxRedirects = 5)
+{
+    for($hop = 0; $hop <= $maxRedirects; $hop++)
+    {
+        $result = fetchPublicUrlSingleHop($url, $maxBytes);
+        if(!$result['ok'] || $result['location'] === null)
+            return array('ok'=>$result['ok'], 'error'=>$result['error'], 'body'=>$result['body']);
+
+        $url = $result['location'];
+    }
+
+    return array('ok'=>false, 'error'=>'Too many redirects', 'body'=>null);
+}
+
+/**
+ * @return array{ok:bool,error:?string,body:?string,location:?string}
+ */
+function fetchPublicUrlSingleHop($url, $maxBytes)
 {
     $parts = parse_url(trim($url));
     if(!$parts || empty($parts['host']) || empty($parts['scheme']) || !in_array(strtolower($parts['scheme']), array('http','https')))
-        return array('ok'=>false, 'error'=>'Invalid URL', 'body'=>null);
+        return array('ok'=>false, 'error'=>'Invalid URL', 'body'=>null, 'location'=>null);
 
     $host = $parts['host'];
     $ip = gethostbyname($host);
     if(!is_public_ipv4($ip) && !is_public_ipv6($ip))
-        return array('ok'=>false, 'error'=>'Private IP range', 'body'=>null);
+        return array('ok'=>false, 'error'=>'Private IP range', 'body'=>null, 'location'=>null);
 
     $scheme = strtolower($parts['scheme']);
     $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
@@ -1177,7 +1200,26 @@ function fetchPublicUrl($url, $maxBytes = 20971520)
 
     $fp = @fopen($pinnedUrl, 'rb', false, $context);
     if(!$fp)
-        return array('ok'=>false, 'error'=>'Could not fetch URL', 'body'=>null);
+        return array('ok'=>false, 'error'=>'Could not fetch URL', 'body'=>null, 'location'=>null);
+
+    $statusCode = null;
+    $location = null;
+    foreach($http_response_header ?? array() as $headerLine)
+    {
+        if(preg_match('#^HTTP/\S+\s+(\d{3})#', $headerLine, $m))
+            $statusCode = (int)$m[1];
+        else if(stripos($headerLine, 'Location:') === 0)
+            $location = trim(substr($headerLine, 9));
+    }
+
+    if(in_array($statusCode, array(301, 302, 303, 307, 308), true) && $location)
+    {
+        fclose($fp);
+        $resolvedLocation = resolveUrl($url, $location);
+        if(!$resolvedLocation)
+            return array('ok'=>false, 'error'=>'Invalid redirect URL', 'body'=>null, 'location'=>null);
+        return array('ok'=>true, 'error'=>null, 'body'=>null, 'location'=>$resolvedLocation);
+    }
 
     $body = '';
     while(!feof($fp))
@@ -1188,12 +1230,37 @@ function fetchPublicUrl($url, $maxBytes = 20971520)
         if(strlen($body) > $maxBytes)
         {
             fclose($fp);
-            return array('ok'=>false, 'error'=>'File too big. 20MB max', 'body'=>null);
+            return array('ok'=>false, 'error'=>'File too big. 20MB max', 'body'=>null, 'location'=>null);
         }
     }
     fclose($fp);
 
-    return array('ok'=>true, 'error'=>null, 'body'=>$body);
+    return array('ok'=>true, 'error'=>null, 'body'=>$body, 'location'=>null);
+}
+
+/**
+ * Resolves a (possibly relative) redirect target against the URL it came from.
+ */
+function resolveUrl($baseUrl, $location)
+{
+    if(parse_url($location, PHP_URL_SCHEME))
+        return $location;
+
+    $base = parse_url($baseUrl);
+    if(!$base || empty($base['host']))
+        return false;
+
+    $scheme = $base['scheme'] ?? 'http';
+    $port = isset($base['port']) ? ':' . $base['port'] : '';
+    $authority = $scheme . '://' . $base['host'] . $port;
+
+    if(strpos($location, '//') === 0)
+        return $scheme . ':' . $location;
+    if(strpos($location, '/') === 0)
+        return $authority . $location;
+
+    $basePath = isset($base['path']) ? preg_replace('#/[^/]*$#', '/', $base['path']) : '/';
+    return $authority . $basePath . $location;
 }
 
 function getHost($url){ 
