@@ -1369,6 +1369,41 @@ function recordView($hash)
     $GLOBALS['redis']->set("lastaccessed:$hash", time());
 }
 
+function redisScanKeys(string $pattern): array
+{
+    if (!isset($GLOBALS['redis']) || !$GLOBALS['redis']) return [];
+    $keys = [];
+    $it = null;
+    while (($batch = $GLOBALS['redis']->scan($it, $pattern)) !== false) {
+        $keys = array_merge($keys, $batch);
+    }
+    return $keys;
+}
+
+function flushViews(): array
+{
+    $result = ['flushed' => [], 'skipped' => []];
+    if (!isset($GLOBALS['redis']) || !$GLOBALS['redis']) return $result;
+
+    foreach (redisScanKeys('lastaccessed:*') as $key) {
+        $hash = substr($key, strlen('lastaccessed:'));
+
+        if (!isExistingHash($hash)) {
+            addToLog("flushViews: skipping $hash, hash directory no longer exists");
+            $result['skipped'][] = $hash;
+            continue;
+        }
+
+        $ts = (int)$GLOBALS['redis']->get($key);
+        $views = (int)$GLOBALS['redis']->get("served:$hash");
+        updateMetaData($hash, ['last_accessed' => $ts, 'views' => $views]);
+        $GLOBALS['redis']->del($key);
+        $result['flushed'][] = $hash;
+    }
+
+    return $result;
+}
+
 function updateMetaData($hash, $meta)
 {
     $metaFile = getDataDir() . DS . $hash . DS . 'meta.json';

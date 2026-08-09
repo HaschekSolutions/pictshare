@@ -6,16 +6,26 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 ini_set('memory_limit', -1);
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', dirname(__FILE__).DS.'..');
-include_once(ROOT.DS.'inc/config.inc.php');
-include_once(ROOT.DS.'inc/core.php');
+include_once(ROOT.DS.'src'.DS.'inc/config.inc.php');
+include_once(ROOT.DS.'src'.DS.'inc/core.php');
+
+if(!defined('REDIS_CACHING') || REDIS_CACHING == true)
+{
+    $GLOBALS['redis'] = new Redis();
+    $GLOBALS['redis']->connect((!defined('REDIS_SERVER'))?'localhost':REDIS_SERVER, (!defined('REDIS_PORT'))?6379:REDIS_PORT);
+}
 
 switch($argv[1])
 {
     case 'uploadqueue':
         uploadqueue();
     break;
+    case 'flushviews':
+        $result = flushViews();
+        echo "[i] Flushed " . count($result['flushed']) . " hash(es), skipped " . count($result['skipped']) . "\n";
+    break;
     default:
-        exit("[ERR] Command not found. Available commands are: uploadqueue");
+        exit("[ERR] Command not found. Available commands are: uploadqueue, flushviews");
 }
 
 function uploadqueue()

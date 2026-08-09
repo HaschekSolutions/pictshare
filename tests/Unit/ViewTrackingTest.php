@@ -75,4 +75,101 @@ class ViewTrackingTest extends TestCase
         $this->assertNull($this->redis->get('lastaccessed:1'),
             'Dynamic controller cache hit should not create lastaccessed:1');
     }
+
+    // --- redisScanKeys() ---
+
+    public function testRedisScanKeysReturnsMatchingKeys(): void
+    {
+        $this->redis->set('lastaccessed:aaa', '1000');
+        $this->redis->set('lastaccessed:bbb', '2000');
+        $this->redis->set('served:aaa', '5'); // must NOT match the pattern
+
+        $keys = redisScanKeys('lastaccessed:*');
+        sort($keys);
+
+        $this->assertEquals(['lastaccessed:aaa', 'lastaccessed:bbb'], $keys);
+    }
+
+    public function testRedisScanKeysReturnsEmptyWithoutRedis(): void
+    {
+        $GLOBALS['redis'] = null;
+        $this->assertEquals([], redisScanKeys('lastaccessed:*'));
+    }
+
+    // --- flushViews() ---
+
+    private function makeTestHash(string $hash): void
+    {
+        $dir = TEST_DATA_DIR . DS . $hash;
+        if (!is_dir($dir)) mkdir($dir, 0777, true);
+        file_put_contents($dir . DS . $hash, 'x');
+        file_put_contents($dir . DS . 'meta.json', json_encode(['mime' => 'image/jpeg']));
+    }
+
+    private function removeTestHash(string $hash): void
+    {
+        $dir = TEST_DATA_DIR . DS . $hash;
+        if (is_dir($dir)) {
+            array_map('unlink', glob($dir . DS . '*'));
+            rmdir($dir);
+        }
+    }
+
+    public function testFlushViewsMergesIntoMetaJsonAndClearsRedisKey(): void
+    {
+        $this->makeTestHash('flush001');
+        $this->redis->set('lastaccessed:flush001', '1712345678');
+        $this->redis->set('served:flush001', '7');
+
+        $result = flushViews();
+
+        $this->assertEquals(['flush001'], $result['flushed']);
+        $this->assertEquals([], $result['skipped']);
+
+        $meta = getMetadataOfHash('flush001');
+        $this->assertEquals(1712345678, $meta['last_accessed']);
+        $this->assertEquals(7, $meta['views']);
+        $this->assertEquals('image/jpeg', $meta['mime']); // pre-existing field preserved
+
+        $this->assertNull($this->redis->get('lastaccessed:flush001'));
+
+        $this->removeTestHash('flush001');
+    }
+
+    public function testFlushViewsSkipsDeletedHash(): void
+    {
+        // No makeTestHash() call — directory never existed
+        $this->redis->set('lastaccessed:ghost002', '1712345678');
+
+        $result = flushViews();
+
+        $this->assertEquals([], $result['flushed']);
+        $this->assertEquals(['ghost002'], $result['skipped']);
+        // Key is left in place for a future pass, per the design doc
+        $this->assertEquals('1712345678', $this->redis->get('lastaccessed:ghost002'));
+    }
+
+    public function testFlushViewsDefaultsMissingViewCountToZero(): void
+    {
+        $this->makeTestHash('flush003');
+        $this->redis->set('lastaccessed:flush003', '1712345678');
+        // No served:flush003 key set at all
+
+        flushViews();
+
+        $meta = getMetadataOfHash('flush003');
+        $this->assertEquals(0, $meta['views']);
+
+        $this->removeTestHash('flush003');
+    }
+
+    public function testFlushViewsNoOpsWithoutRedis(): void
+    {
+        $this->redis->set('lastaccessed:flush004', '1712345678');
+        $GLOBALS['redis'] = null;
+
+        $result = flushViews();
+
+        $this->assertEquals(['flushed' => [], 'skipped' => []], $result);
+    }
 }
