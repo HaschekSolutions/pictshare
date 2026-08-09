@@ -186,7 +186,8 @@ function architect($u)
             list($cc, $hash) = explode(';', $cache_data);
             if(defined('LOG_VIEWS') && LOG_VIEWS===true)
                 addToLog(getUserIP()."\tviewed\t$hash\tFrom cache. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
-            recordView($hash);
+            if($hash !== '1')
+                recordView($hash);
             return (new $cc())->handleHash($hash,$u);
         }
     }
