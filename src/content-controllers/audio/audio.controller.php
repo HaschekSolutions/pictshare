@@ -80,8 +80,8 @@ class AudioController implements ContentController
         {
             if(!endswith($hash,'.'.$extension))
                 $hash.='.'.$extension;
-                
-            if(isExistingHash($hash))
+
+            if(isHashTaken($hash))
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 

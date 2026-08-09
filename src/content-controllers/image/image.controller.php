@@ -89,7 +89,7 @@ class ImageController implements ContentController
         {
             if(!endswith($hash,'.'.$ext))
                 $hash.='.'.$ext;
-            if(isExistingHash($hash))
+            if(isHashTaken($hash))
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 

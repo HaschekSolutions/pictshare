@@ -66,7 +66,7 @@ class SvgController implements ContentController
         {
             if(!endswith($hash,'.svg'))
                 $hash.='.svg';
-            if(isExistingHash($hash))
+            if(isHashTaken($hash))
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 

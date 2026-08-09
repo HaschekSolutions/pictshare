@@ -61,7 +61,7 @@ class TextController implements ContentController
         {
             if(!endswith($hash,'.txt'))
                 $hash.='.txt';
-            if(isExistingHash($hash))
+            if(isHashTaken($hash))
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 

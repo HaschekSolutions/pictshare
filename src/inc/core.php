@@ -385,7 +385,7 @@ function getNewHash($type,$length=10)
 	while(1)
 	{
 		$hash = getRandomString($length).'.'.$type;
-        if(!isExistingHash($hash)) return $hash;
+        if(!isHashTaken($hash)) return $hash;
         $length++;
 	}
 }
@@ -394,6 +394,30 @@ function isExistingHash($hash)
 {
     if(!trim($hash)) return false;
     return is_dir(getDataDir().DS.$hash);
+}
+
+/**
+ * Like isExistingHash(), but also asks every enabled storage controller.
+ *
+ * isExistingHash() only checks the local data dir, which is correct for
+ * routing/serving (a hash pulled from a storage controller gets synced
+ * locally before it's used there). But that means it's blind to a hash
+ * that only exists in a storage controller (e.g. uploaded via a different
+ * node in a scaled deployment) — so a newly generated or custom hash could
+ * collide with, and overwrite, someone else's file that simply hasn't been
+ * pulled to this node yet. Use this wherever a hash is about to be claimed
+ * for a new upload.
+ */
+function isHashTaken($hash)
+{
+    if(isExistingHash($hash)) return true;
+
+    foreach(getStorageControllers() as $contr)
+    {
+        $c = new $contr();
+        if($c->isEnabled()===true && $c->hashExists($hash)) return true;
+    }
+    return false;
 }
 
 function mightBeAHash($string)

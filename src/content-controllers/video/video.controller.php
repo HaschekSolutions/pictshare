@@ -77,7 +77,7 @@ class VideoController implements ContentController
         else
         {
             $hash.='.mp4';
-            if(isExistingHash($hash))
+            if(isHashTaken($hash))
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 

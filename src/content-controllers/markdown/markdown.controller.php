@@ -61,7 +61,7 @@ class MarkdownController implements ContentController
         {
             if(!endswith($hash,'.md'))
                 $hash.='.md';
-            if(isExistingHash($hash))
+            if(isHashTaken($hash))
                 return array('status'=>'err','hash'=>$hash,'reason'=>'Custom hash already exists');
         }
 

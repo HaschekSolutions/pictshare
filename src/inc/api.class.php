@@ -201,6 +201,9 @@ class API
                 'delete_code' => $delcode,
                 'delete_url' => getURL() . 'delete_' . $delcode . '/' . $answer['hash'],
             ];
+        } else if (isset($answer['reason'])) {
+            addToLog(getUserIP() . " tried to upload a file with the SHA1: " . $sha1 . " (" . $type . ", original name:" . $originalname . ") but the content controller " . get_class($cc) . " rejected it: " . $answer['reason']);
+            return ['status' => 'err', 'reason' => $answer['reason']];
         } else {
             addToLog(getUserIP() . " tried to upload a file with the SHA1: " . $sha1 . " (" . $type . ", original name:" . $originalname . ") but the upload failed. Probably in the handleUpload method of the content controller " . get_class($cc));
             return ['status' => 'err', 'reason' => 'Strange error during upload'];
