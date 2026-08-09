@@ -94,30 +94,20 @@ class API
         //check if we should get a file from a remote URL
         if (!empty($_REQUEST['url'])) {
             $url = trim(rawurldecode($_REQUEST['url']));
-            if (checkURLForPrivateIPRange($url)) {
-                addToLog(getUserIP() . " tried to get us to download a file from: " . $url . " but it is in a private IP range");
-                return ['status' => 'err', 'reason' => 'Private IP range'];
-            }
             if (!$url || !startsWith($url, 'http')) {
                 addToLog(getUserIP() . " tried to get us to download a file from: " . $url . " but it is not a valid URL");
                 return ['status' => 'err', 'reason' => 'Invalid URL'];
-            } else if ($this->remote_filesize($url) * 0.000001 > 20) //@todo: dynamic max size
-            {
-                addToLog(getUserIP() . " tried to get us to download a file from: " . $url . " but it is too big");
-                return ['status' => 'err', 'reason' => 'File too big. 20MB max'];
+            }
+
+            $result = fetchPublicUrl($url); //@todo: dynamic max size
+            if (!$result['ok']) {
+                addToLog(getUserIP() . " tried to get us to download a file from: " . $url . " but: " . $result['error']);
+                return ['status' => 'err', 'reason' => $result['error']];
             }
 
             $name = basename($url);
             $tmpfile = ROOT . DS . 'tmp' . DS . $name;
-
-            $context = stream_context_create(
-                [
-                    "http" => [
-                        "follow_location" => false,
-                    ],
-                ]
-            );
-            file_put_contents($tmpfile, file_get_contents($url, false, $context));
+            file_put_contents($tmpfile, $result['body']);
 
             return $this->handleFile($tmpfile, $hash, $url);
         }
@@ -371,18 +361,6 @@ class API
             default:
                 return 'Unknown upload error.';
         }
-    }
-
-    function remote_filesize($url) {
-        static $regex = '/^Content-Length: *+\K\d++$/im';
-        if (!$fp = @fopen($url, 'rb'))
-            return false;
-        if (
-            isset($http_response_header) &&
-            preg_match($regex, implode("\n", $http_response_header), $matches)
-        )
-            return (int)$matches[0];
-        return strlen(stream_get_contents($fp));
     }
 
     function base64ToFile($base64_string, $output_file)

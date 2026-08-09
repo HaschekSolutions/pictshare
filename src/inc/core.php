@@ -1131,6 +1131,71 @@ function checkURLForPrivateIPRange($url)
     return true;
 }
 
+/**
+ * Safely fetches a remote URL for the "upload from URL" feature.
+ *
+ * Resolves the hostname exactly once and connects directly to that
+ * resolved IP (with the original Host header / TLS SNI preserved).
+ * This closes the DNS-rebinding TOCTOU window that exists when a
+ * private-IP check and the actual fetch perform independent DNS
+ * lookups: an attacker's DNS could answer public for the check and
+ * internal for the fetch. Also enforces $maxBytes while streaming,
+ * so no separate (and equally rebindable) size-probe request is needed.
+ *
+ * @return array{ok:bool,error:?string,body:?string}
+ */
+function fetchPublicUrl($url, $maxBytes = 20971520)
+{
+    $parts = parse_url(trim($url));
+    if(!$parts || empty($parts['host']) || empty($parts['scheme']) || !in_array(strtolower($parts['scheme']), array('http','https')))
+        return array('ok'=>false, 'error'=>'Invalid URL', 'body'=>null);
+
+    $host = $parts['host'];
+    $ip = gethostbyname($host);
+    if(!is_public_ipv4($ip) && !is_public_ipv6($ip))
+        return array('ok'=>false, 'error'=>'Private IP range', 'body'=>null);
+
+    $scheme = strtolower($parts['scheme']);
+    $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
+    $path = ($parts['path'] ?? '/') . (isset($parts['query']) ? '?' . $parts['query'] : '');
+    $ipForUrl = strpos($ip, ':') !== false ? '[' . $ip . ']' : $ip;
+    $pinnedUrl = $scheme . '://' . $ipForUrl . ':' . $port . $path;
+
+    $context = stream_context_create(array(
+        'http' => array(
+            'header' => "Host: $host\r\n",
+            'follow_location' => 0,
+            'timeout' => 15,
+        ),
+        'ssl' => array(
+            'peer_name' => $host,
+            'SNI_enabled' => true,
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+        ),
+    ));
+
+    $fp = @fopen($pinnedUrl, 'rb', false, $context);
+    if(!$fp)
+        return array('ok'=>false, 'error'=>'Could not fetch URL', 'body'=>null);
+
+    $body = '';
+    while(!feof($fp))
+    {
+        $chunk = fread($fp, 8192);
+        if($chunk === false) break;
+        $body .= $chunk;
+        if(strlen($body) > $maxBytes)
+        {
+            fclose($fp);
+            return array('ok'=>false, 'error'=>'File too big. 20MB max', 'body'=>null);
+        }
+    }
+    fclose($fp);
+
+    return array('ok'=>true, 'error'=>null, 'body'=>$body);
+}
+
 function getHost($url){ 
     $URIs = parse_url(trim($url)); 
     $host = !empty($URIs['host'])? $URIs['host'] : explode('/', $URIs['path'])[0];
