@@ -33,6 +33,7 @@ if (file_exists(ROOT . '/src/lib/vendor/autoload.php'))
     require_once ROOT . '/src/lib/vendor/autoload.php';
 
 require_once ROOT . DS . 'src' . DS . 'inc' . DS . 'core.php';
+require_once __DIR__ . '/Support/FakeRedis.php';
 
 // resize.php and filters.php define functions used in unit tests
 require_once ROOT . DS . 'src' . DS . 'content-controllers' . DS . 'image' . DS . 'resize.php';
