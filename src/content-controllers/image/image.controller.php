@@ -17,10 +17,11 @@ class ImageController implements ContentController
         'image/png',
         'image/bmp',
         'image/webp',
+        'image/avif',
         'image/x-icon'
     );
     //returns all extensions registered by this type of content
-    public function getRegisteredExtensions(){return array('png','bmp','gif','jpg','jpeg','x-png','webp');}
+    public function getRegisteredExtensions(){return array('png','bmp','gif','jpg','jpeg','x-png','webp','avif');}
     
 
     public function handleUpload($tmpfile,$hash=false,$passthrough=false)
@@ -33,6 +34,7 @@ class ImageController implements ContentController
             case 6: $ext = 'bmp';break;   // bmp
             case 17: $ext = 'ico';break;  // ico
             case 18: $ext = 'webp';break; // webp
+            case 19: $ext = 'avif';break; // avif
 
             case 2:
                 //we clean up exif data of JPGs so GPS and other data is removed
@@ -153,6 +155,8 @@ class ImageController implements ContentController
 
             if( (in_array('webp',$url) && $type!='webp') || ( $this->shouldAlwaysBeWebp() && ($type=='jpg' || $type=='png') ) )
                 $modifiers['webp'] = true;
+            if( (in_array('avif',$url) && $type!='avif') || ( $this->shouldAlwaysBeAvif() && ($type=='jpg' || $type=='png') ) )
+                $modifiers['avif'] = true;
             if(isset($modifiers['size']) && in_array('forcesize', $url))
                 $modifiers['forcesize'] = true;
         }
@@ -199,6 +203,10 @@ class ImageController implements ContentController
 
                         case 'webp':
                             $type = 'webp';
+                        break;
+
+                        case 'avif':
+                            $type = 'avif';
                         break;
 
                         case 'mp4':
@@ -251,6 +259,10 @@ class ImageController implements ContentController
             {
                 $type = 'webp';
             }
+            else if ($modifiers['avif'] ?? false)
+            {
+                $type = 'avif';
+            }
             if ($saved !== false) $path = $newpath;
             
         }
@@ -283,8 +295,16 @@ class ImageController implements ContentController
                 serveFile($path);
             break;
 
-            case 'webp': 
+            case 'webp':
                 header ("Content-type: image/webp");
+                header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
+                header ("ETag: $hash");
+                header('Cache-control: public, max-age=31536000');
+                serveFile($path);
+            break;
+
+            case 'avif':
+                header ("Content-type: image/avif");
                 header ("Last-Modified: ".gmdate('D, d M Y H:i:s ', filemtime($path)) . 'GMT');
                 header ("ETag: $hash");
                 header('Cache-control: public, max-age=31536000');
@@ -332,6 +352,12 @@ class ImageController implements ContentController
                 imagewebp($im,$tmppath,(defined('WEBP_COMPRESSION')?WEBP_COMPRESSION:80));
             break;
 
+            case 'avif':
+                imagepalettetotruecolor($im);
+                imagealphablending($im, true);
+                imageavif($im,$tmppath,(defined('AVIF_QUALITY')?AVIF_QUALITY:65));
+            break;
+
             case 'gif':
                 imagegif($im, $tmppath);
             break;
@@ -370,6 +396,17 @@ class ImageController implements ContentController
         if(!isset($_SERVER['HTTP_ACCEPT']) || !$_SERVER['HTTP_ACCEPT']) return false;
 
         if(defined('ALWAYS_WEBP') && ALWAYS_WEBP && strpos( $_SERVER['HTTP_ACCEPT'], 'image/webp' ) !== false )
+            return true;
+        else
+        return false;
+    }
+
+    function shouldAlwaysBeAvif()
+    {
+        //sanity check
+        if(!isset($_SERVER['HTTP_ACCEPT']) || !$_SERVER['HTTP_ACCEPT']) return false;
+
+        if(defined('ALWAYS_AVIF') && ALWAYS_AVIF && strpos( $_SERVER['HTTP_ACCEPT'], 'image/avif' ) !== false )
             return true;
         else
         return false;
