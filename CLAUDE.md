@@ -56,7 +56,7 @@ Current controllers: `image/`, `video/`, `text/`, `url/`, `identicon/`, `placeho
 
 ### Data Storage
 
-Each uploaded file lives at `data/<hash>/<hash>` with a companion `data/<hash>/meta.json` (MIME, size, SHA1, upload time, IP, user agent, delete code).
+Each uploaded file lives at `data/<hash>/<hash>` with a companion `data/<hash>/meta.json` (MIME, size, SHA1, upload time, IP, user agent, delete code). Once a day, `tools/cron.php flushviews` merges `last_accessed` (unix timestamp) and `views` (int) into `meta.json` from Redis — see Caching below.
 
 ### Configuration
 
@@ -64,7 +64,7 @@ Configuration is generated at container startup by `docker/rootfs/start.sh` from
 
 ### Caching
 
-Redis stores `cache:byurl:<url>` (URL → controller+hash mapping) and `served:<hash>` (view counters). Redis is optional but enabled by default.
+Redis stores `cache:byurl:<url>` (URL → controller+hash mapping), `served:<hash>` (view counters), and `lastaccessed:<hash>` (unix timestamp of the most recent view). Redis is optional but enabled by default. `tools/cron.php flushviews` (run daily by `docker/rootfs/start.sh`) merges `lastaccessed:<hash>`/`served:<hash>` into each hash's `meta.json` as `last_accessed`/`views`, then clears the `lastaccessed:` key.
 
 ### API Endpoints
 

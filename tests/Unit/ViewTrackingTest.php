@@ -4,6 +4,8 @@ use PHPUnit\Framework\TestCase;
 
 class ViewTrackingTest extends TestCase
 {
+    use HashFixtureTrait;
+
     private FakeRedis $redis;
     private mixed $previousRedis;
     private mixed $previousUserAgent;
@@ -24,6 +26,7 @@ class ViewTrackingTest extends TestCase
 
     protected function tearDown(): void
     {
+        $this->cleanupTestHashes();
         $GLOBALS['redis'] = $this->previousRedis;
         $_SERVER['HTTP_USER_AGENT'] = $this->previousUserAgent;
         $_SERVER['HTTP_REFERER'] = $this->previousReferer;
@@ -76,6 +79,23 @@ class ViewTrackingTest extends TestCase
             'Dynamic controller cache hit should not create lastaccessed:1');
     }
 
+    public function testCacheHitIncrementsDynamicControllerServedCounter(): void
+    {
+        // Same cache-hit setup as above, but this time verify the dynamic-controller
+        // branch still counts views somewhere (served:<url>) instead of counting nothing,
+        // which would be a regression from the pre-Task-2 behavior (which counted into
+        // the junk key served:1, at least counting *something*).
+        $url = ['identicon', 'user@example.com', '200x200'];
+        $urlKey = 'cache:byurl:' . implode('/', $url);
+        $this->redis->set($urlKey, 'IdenticonController;1');
+
+        ob_start();
+        architect($url);
+        ob_end_clean();
+
+        $this->assertEquals('1', $this->redis->get('served:' . implode('/', $url)));
+    }
+
     // --- redisScanKeys() ---
 
     public function testRedisScanKeysReturnsMatchingKeys(): void
@@ -98,23 +118,6 @@ class ViewTrackingTest extends TestCase
 
     // --- flushViews() ---
 
-    private function makeTestHash(string $hash): void
-    {
-        $dir = TEST_DATA_DIR . DS . $hash;
-        if (!is_dir($dir)) mkdir($dir, 0777, true);
-        file_put_contents($dir . DS . $hash, 'x');
-        file_put_contents($dir . DS . 'meta.json', json_encode(['mime' => 'image/jpeg']));
-    }
-
-    private function removeTestHash(string $hash): void
-    {
-        $dir = TEST_DATA_DIR . DS . $hash;
-        if (is_dir($dir)) {
-            array_map('unlink', glob($dir . DS . '*'));
-            rmdir($dir);
-        }
-    }
-
     public function testFlushViewsMergesIntoMetaJsonAndClearsRedisKey(): void
     {
         $this->makeTestHash('flush001');
@@ -132,8 +135,6 @@ class ViewTrackingTest extends TestCase
         $this->assertEquals('image/jpeg', $meta['mime']); // pre-existing field preserved
 
         $this->assertNull($this->redis->get('lastaccessed:flush001'));
-
-        $this->removeTestHash('flush001');
     }
 
     public function testFlushViewsSkipsDeletedHash(): void
@@ -159,8 +160,6 @@ class ViewTrackingTest extends TestCase
 
         $meta = getMetadataOfHash('flush003');
         $this->assertEquals(0, $meta['views']);
-
-        $this->removeTestHash('flush003');
     }
 
     public function testFlushViewsNoOpsWithoutRedis(): void
@@ -171,5 +170,52 @@ class ViewTrackingTest extends TestCase
         $result = flushViews();
 
         $this->assertEquals(['flushed' => [], 'skipped' => []], $result);
+    }
+
+    public function testFlushViewsSurvivesCorruptMetaJsonForOtherHashes(): void
+    {
+        // flush005 has a corrupted (truncated/invalid) meta.json. Before the fix,
+        // json_decode() returning null made array_merge() in updateMetaData() a
+        // fatal TypeError, which killed the whole flushViews() run — every hash
+        // scanned after the bad one (alphabetically or iteration-order-wise) never
+        // got flushed. Verify one corrupt hash doesn't take down the others.
+        $this->makeTestHash('flush005');
+        file_put_contents(TEST_DATA_DIR . DS . 'flush005' . DS . 'meta.json', '{not valid json');
+        $this->redis->set('lastaccessed:flush005', '1712345678');
+        $this->redis->set('served:flush005', '3');
+
+        $this->makeTestHash('flush006');
+        $this->redis->set('lastaccessed:flush006', '1712345999');
+        $this->redis->set('served:flush006', '9');
+
+        $result = flushViews();
+
+        sort($result['flushed']);
+        $this->assertEquals(['flush005', 'flush006'], $result['flushed']);
+        $this->assertEquals([], $result['skipped']);
+
+        // The corrupt file's stale content is dropped, but the new fields still land
+        $meta005 = getMetadataOfHash('flush005');
+        $this->assertEquals(1712345678, $meta005['last_accessed']);
+        $this->assertEquals(3, $meta005['views']);
+
+        $meta006 = getMetadataOfHash('flush006');
+        $this->assertEquals(1712345999, $meta006['last_accessed']);
+        $this->assertEquals(9, $meta006['views']);
+    }
+
+    public function testFlushViewsSkipsPathTraversalHash(): void
+    {
+        // isExistingHash() is just is_dir(), so a bare '.' or '..' would otherwise
+        // resolve to the data dir itself (or its parent) and pass the existence
+        // check, letting updateMetaData() write meta.json outside any real hash dir.
+        $this->redis->set('lastaccessed:.', '1712345678');
+        $this->redis->set('lastaccessed:..', '1712345678');
+
+        $result = flushViews();
+
+        sort($result['skipped']);
+        $this->assertEquals(['.', '..'], $result['skipped']);
+        $this->assertEquals([], $result['flushed']);
     }
 }

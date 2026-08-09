@@ -1,8 +1,11 @@
 <?php
+// tests/Unit/StatsCacheTest.php
 use PHPUnit\Framework\TestCase;
 
 class StatsCacheTest extends TestCase
 {
+    use HashFixtureTrait;
+
     private FakeRedis $redis;
     private mixed $previousRedis;
 
@@ -15,6 +18,7 @@ class StatsCacheTest extends TestCase
 
     protected function tearDown(): void
     {
+        $this->cleanupTestHashes();
         $GLOBALS['redis'] = $this->previousRedis;
     }
 
@@ -39,26 +43,8 @@ class StatsCacheTest extends TestCase
     }
 
     // --- rebuildStatsCache() ---
-
-    /** Create a fake hash directory with a meta.json file in the test data dir. */
-    private function makeTestHash(string $hash, array $meta): void
-    {
-        $dir = TEST_DATA_DIR . DS . $hash;
-        if (!is_dir($dir)) mkdir($dir, 0777, true);
-        // Create the "file" (required for filesize())
-        file_put_contents($dir . DS . $hash, str_repeat('x', $meta['size'] ?? 10));
-        file_put_contents($dir . DS . 'meta.json', json_encode($meta));
-    }
-
-    /** Remove a fake hash directory. */
-    private function removeTestHash(string $hash): void
-    {
-        $dir = TEST_DATA_DIR . DS . $hash;
-        if (is_dir($dir)) {
-            array_map('unlink', glob($dir . DS . '*'));
-            rmdir($dir);
-        }
-    }
+    // makeTestHash()/removeTestHash() come from HashFixtureTrait (tests/Support/HashFixtureTrait.php);
+    // cleanup happens automatically in tearDown() via cleanupTestHashes().
 
     public function testRebuildStatsCacheWritesEntriesToRedis(): void
     {
@@ -76,9 +62,6 @@ class StatsCacheTest extends TestCase
         $this->assertEquals('cat.jpg',    $entry['original_filename']);
         $this->assertEquals('1.2.3.4',   $entry['ip']);
         $this->assertEquals(1024,         $entry['size']);
-
-        $this->removeTestHash('aaa111');
-        $this->removeTestHash('bbb222');
     }
 
     public function testRebuildStatsCacheSetsBuiltAt(): void

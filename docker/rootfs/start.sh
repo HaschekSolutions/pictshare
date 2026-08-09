@@ -78,8 +78,11 @@ if [[ ${REDIS_CACHING:=true} == true ]]; then
     trap "echo 'Stopping Redis'; redis-cli save; redis-cli shutdown; exit" TERM INT
     redis-server /etc/redis.conf --daemonize yes
 
-    # Daily flush of Redis-tracked last-accessed/view data into each file's meta.json
-    (while true; do sleep 86400; php /app/public/tools/cron.php flushviews; done) &
+    # Daily flush of Redis-tracked last-accessed/view data into each file's meta.json.
+    # 5-minute initial delay so it's not racing container/Redis startup, then it
+    # ticks daily from there (restart-heavy deployments would otherwise never
+    # flush, since the old loop slept 24h before its first run).
+    (sleep 300; while true; do php /app/public/tools/cron.php flushviews; sleep 86400; done) &
 fi
 
 ######### main

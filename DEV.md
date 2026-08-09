@@ -24,12 +24,19 @@ The metadata file will contain data like in the following example:
     "useragent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/136.0.0.0 Safari\/537.36",
     "delete_code": "z94fd5tyto1u2bww23kec0f52irb7x49",
     "delete_url": "http:\/\/localhost:8080\/delete_z94fd5tyto1u2bww23kec0f52irb7x49\/0gfmeo.jpg",
-    "remote_port": "35856"
+    "remote_port": "35856",
+    "last_accessed": 1747557400,
+    "views": 12
 }
 ```
+
+`last_accessed` (unix timestamp) and `views` (int) are merged in once a day by the `flushviews` cron command from the Redis keys below — they won't be present until the first flush after a file's first view.
 
 # Redis index
 If redis caching is enabled, this structure will be created on the fly:
 
 - cache:byurl:<url> => <content controller>;<file_name> # cached response
 - served:<file_name> => number of views # view count
+- lastaccessed:<file_name> => unix timestamp of the most recent view
+
+`lastaccessed:<file_name>` and the running `served:<file_name>` count are merged into that file's `meta.json` (as `last_accessed`/`views`) once a day by `php tools/cron.php flushviews`, then the `lastaccessed:` key is cleared. Hashes whose data directory has been deleted are skipped and left in Redis for a future pass.

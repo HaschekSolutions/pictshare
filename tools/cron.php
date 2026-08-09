@@ -9,7 +9,12 @@ define('ROOT', dirname(__FILE__).DS.'..');
 include_once(ROOT.DS.'src'.DS.'inc/config.inc.php');
 include_once(ROOT.DS.'src'.DS.'inc/core.php');
 
-connectRedis();
+try {
+    connectRedis();
+} catch (\Throwable $e) {
+    echo "[w] Redis unavailable: " . $e->getMessage() . "\n";
+    $GLOBALS['redis'] = null; // connect() can throw after instantiating Redis(), leave no half-connected object behind
+}
 
 switch($argv[1])
 {

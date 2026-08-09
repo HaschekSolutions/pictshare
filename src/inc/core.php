@@ -188,6 +188,8 @@ function architect($u)
                 addToLog(getUserIP()."\tviewed\t$hash\tFrom cache. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
             if($hash !== '1')
                 recordView($hash);
+            else //if it's a dynamic image, we count how many times this url was served
+                $GLOBALS['redis']->incr("served:".implode('/',$u));
             return (new $cc())->handleHash($hash,$u);
         }
     }
@@ -1362,11 +1364,13 @@ function getURL()
     return $protocol . '://' . getDomain(false).'/';
 }
 
+const VIEW_LASTACCESSED_PREFIX = 'lastaccessed:';
+
 function recordView($hash)
 {
     if (!isset($GLOBALS['redis']) || !$GLOBALS['redis']) return;
     $GLOBALS['redis']->incr("served:$hash");
-    $GLOBALS['redis']->set("lastaccessed:$hash", time());
+    $GLOBALS['redis']->set(VIEW_LASTACCESSED_PREFIX.$hash, time());
 }
 
 function redisScanKeys(string $pattern): array
@@ -1385,8 +1389,18 @@ function flushViews(): array
     $result = ['flushed' => [], 'skipped' => []];
     if (!isset($GLOBALS['redis']) || !$GLOBALS['redis']) return $result;
 
-    foreach (redisScanKeys('lastaccessed:*') as $key) {
-        $hash = substr($key, strlen('lastaccessed:'));
+    foreach (redisScanKeys(VIEW_LASTACCESSED_PREFIX.'*') as $key) {
+        $hash = substr($key, strlen(VIEW_LASTACCESSED_PREFIX));
+
+        // Defense in depth: isExistingHash() is just is_dir(), so a hash of
+        // '.' or '..' would otherwise pass it and let updateMetaData() write
+        // outside the intended hash directory. basename() alone doesn't catch
+        // '.'/'..' since basename() of either returns itself unchanged.
+        if ($hash === '' || $hash === '.' || $hash === '..' || basename($hash) !== $hash) {
+            addToLog("flushViews: skipping suspicious key $key");
+            $result['skipped'][] = $hash;
+            continue;
+        }
 
         if (!isExistingHash($hash)) {
             addToLog("flushViews: skipping $hash, hash directory no longer exists");
@@ -1394,11 +1408,16 @@ function flushViews(): array
             continue;
         }
 
-        $ts = (int)$GLOBALS['redis']->get($key);
-        $views = (int)$GLOBALS['redis']->get("served:$hash");
-        updateMetaData($hash, ['last_accessed' => $ts, 'views' => $views]);
-        $GLOBALS['redis']->del($key);
-        $result['flushed'][] = $hash;
+        try {
+            $ts = (int)$GLOBALS['redis']->get($key);
+            $views = (int)$GLOBALS['redis']->get("served:$hash");
+            updateMetaData($hash, ['last_accessed' => $ts, 'views' => $views]);
+            $GLOBALS['redis']->del($key);
+            $result['flushed'][] = $hash;
+        } catch (\Throwable $e) {
+            addToLog("flushViews: $hash failed: " . $e->getMessage());
+            $result['skipped'][] = $hash;
+        }
     }
 
     return $result;
@@ -1409,9 +1428,12 @@ function connectRedis(): void
     if (!defined('REDIS_CACHING') || REDIS_CACHING == true)
     {
         $server = (!defined('REDIS_SERVER')) ? 'localhost' : REDIS_SERVER;
-        // Unix socket paths and a nonzero port together throw RedisException
-        // under phpredis — port must be 0 for a socket path.
-        $port = (str_starts_with($server, '/')) ? 0 : ((!defined('REDIS_PORT')) ? 6379 : REDIS_PORT);
+        // A unix socket path (bare "/..." or "unix://...") combined with a
+        // nonzero port makes phpredis resolve the path as a TCP hostname
+        // instead of treating it as a socket, throwing a RedisException
+        // ("getaddrinfo ... failed"). Port must be 0 for a socket address.
+        $isSocket = str_starts_with($server, '/') || str_starts_with($server, 'unix://');
+        $port = $isSocket ? 0 : ((!defined('REDIS_PORT')) ? 6379 : REDIS_PORT);
         $GLOBALS['redis'] = new Redis();
         $GLOBALS['redis']->connect($server, $port);
     }
@@ -1422,6 +1444,7 @@ function updateMetaData($hash, $meta)
     $metaFile = getDataDir() . DS . $hash . DS . 'meta.json';
     if (file_exists($metaFile)) {
         $currentMeta = json_decode(file_get_contents($metaFile), true);
+        if (!is_array($currentMeta)) $currentMeta = [];
         $newMeta = array_merge($currentMeta, $meta);
         file_put_contents($metaFile, json_encode($newMeta));
     } else {
