@@ -186,7 +186,7 @@ function architect($u)
             list($cc, $hash) = explode(';', $cache_data);
             if(defined('LOG_VIEWS') && LOG_VIEWS===true)
                 addToLog(getUserIP()."\tviewed\t$hash\tFrom cache. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
-            $GLOBALS['redis']->incr("served:$hash");
+            recordView($hash);
             return (new $cc())->handleHash($hash,$u);
         }
     }
@@ -308,7 +308,7 @@ function architect($u)
                     $GLOBALS['redis']->set('cache:byurl:'.implode('/',$u),"$cc;$hash");
                     addToLog("Caching URL \t".implode('/',$u)."\thash: $hash\tto content controller: $cc");
                     if($hash!==true)
-                        $GLOBALS['redis']->incr("served:$hash");
+                        recordView($hash);
                     else //if it's a dynamic image, we count how many times this url was served
                         $GLOBALS['redis']->incr("served:".implode('/',$u));
                 }
@@ -1359,6 +1359,13 @@ function getURL()
         return URL;
     $protocol = strpos(strtolower($_SERVER['SERVER_PROTOCOL']), 'https') === FALSE ? 'http' : 'https';
     return $protocol . '://' . getDomain(false).'/';
+}
+
+function recordView($hash)
+{
+    if (!isset($GLOBALS['redis']) || !$GLOBALS['redis']) return;
+    $GLOBALS['redis']->incr("served:$hash");
+    $GLOBALS['redis']->set("lastaccessed:$hash", time());
 }
 
 function updateMetaData($hash, $meta)
