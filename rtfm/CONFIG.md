@@ -19,6 +19,7 @@ In this file you can set the following options. For a simple working example con
 | UPLOAD_FORM_LOCATION    | string  | If set, will only show the upload form if this url is requested. eg if you set it to /secret/upload then you only see the form if you go to http://your.pictshare.server/secret/upload but bare in mind that the uploads [via API](/rtfm/API.md) will still work for anyone|
 | ALLOWED_SUBNET          | IPv4 or IPv6 CIDR | If set, will limit uploads to IPs that match this CIDR |
 | ALWAYS_WEBP | bool | If set to `true`, JPGs will always be served as WebP, if the client supports it (if `image/webp` is in header `HTTP_ACCEPT`) | 
+| CORS_ALLOW_ORIGIN | string | If set, sends this value as the `Access-Control-Allow-Origin` header on every response. Needed if you want to reference uploads cross-origin, eg as a `<canvas>`/WebGL texture. Example: `*` or `https://your.app` |
 | UPLOAD_CODE | string  | If set, all uploads require this code via GET or POST variable "uploadcode" to succeed |
 | REDIS_SERVER (NOT IMPLEMENTED) | IP | If you define a REDIS server IP here, it will enable you to use the FFMPEG Worker |
 | UPLOAD_QUOTA (NOT IMPLEMENTED)            | int     | Size in MB. If set, will only allow uploads if combined size of uploads on Server is smaller than this value. Does not account for ALT_FOLDER data and resized versions of original uploads won't be added to calculation |

@@ -16,6 +16,7 @@ define('URL','https://dev.pictshare.net/');
 //define('FFMPEG_BINARY','');
 //define('ALT_FOLDER','/ftp/pictshare');
 //define('ALLOWED_SUBNET','192.168.0.0/24');
+//define('CORS_ALLOW_ORIGIN','*'); //needed if you want to reference uploads from another origin, eg via canvas/WebGL
 
 //S3 settings
 //

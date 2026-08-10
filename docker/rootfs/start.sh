@@ -55,6 +55,7 @@ _buildConfig() {
     echo "define('ALWAYS_WEBP', ${ALWAYS_WEBP:-false});"
     echo "define('ALWAYS_AVIF', ${ALWAYS_AVIF:-false});"
     echo "define('ALLOWED_DOMAINS', '${ALLOWED_DOMAINS:-}');"
+    echo "define('CORS_ALLOW_ORIGIN', '${CORS_ALLOW_ORIGIN:-}');"
     echo "define('SPLIT_DATA_DIR', ${SPLIT_DATA_DIR:-false});"
     echo "define('LOG_VIEWS', ${LOG_VIEWS:-false});"
     echo "define('REDIS_CACHING', ${REDIS_CACHING:-true});"

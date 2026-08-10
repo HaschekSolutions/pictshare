@@ -23,6 +23,8 @@ loadAllContentControllers();
 // redis
 connectRedis();
 
+if(defined('CORS_ALLOW_ORIGIN') && CORS_ALLOW_ORIGIN !== '')
+	header('Access-Control-Allow-Origin: '.CORS_ALLOW_ORIGIN);
 
 //parse the URL to an array and filter it
 $url = array_filter(explode('/',ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '','/')));
