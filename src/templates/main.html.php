@@ -259,3 +259,88 @@ If the status code is "200", it will return the modified image directly.
     </div>
 
 </div>
+
+<hr class="no-print border border-primary border-2 opacity-50">
+
+<h2 id="mcp" class="section-heading">Using MCP (for LLMs / AI agents)</h2>
+<div class="row">
+    <div class="col-6">
+        <h2>Basics</h2>
+
+        <p>
+            PictShare has a built-in <a target="_blank" href="https://modelcontextprotocol.io">Model Context Protocol</a> server, so LLM agents (Claude Code, Claude Desktop, and any other MCP-capable client) can upload and manage files on this instance directly — no REST API glue code needed.
+        </p>
+
+        Endpoint
+        <pre><code class="url">POST <?= getURL() ?>mcp</code></pre>
+
+        <p>Transport: Streamable HTTP.</p>
+
+        <?php if (defined('UPLOAD_CODE') && UPLOAD_CODE != ''): ?>
+        <p>This instance requires an upload code. Every MCP request must send it as a bearer token:</p>
+        <pre><code class="bash">Authorization: Bearer YOUR_UPLOAD_CODE</code></pre>
+        <?php else: ?>
+        <p>This instance has no upload code set, so the MCP endpoint is open — same as the REST API.</p>
+        <?php endif; ?>
+    </div>
+
+    <div class="col-6">
+        <h2>Connecting a client</h2>
+
+        Claude Code
+        <pre><code class="bash">claude mcp add --transport http pictshare <?= getURL() ?>mcp<?php if (defined('UPLOAD_CODE') && UPLOAD_CODE != ''): ?> \
+  --header "Authorization: Bearer YOUR_UPLOAD_CODE"<?php endif; ?></code></pre>
+
+        Claude Desktop / generic JSON config
+        <pre><code class="json">
+{
+  "mcpServers": {
+    "pictshare": {
+      "type": "http",
+      "url": "<?= getURL() ?>mcp"<?php if (defined('UPLOAD_CODE') && UPLOAD_CODE != ''): ?>,
+      "headers": {
+        "Authorization": "Bearer YOUR_UPLOAD_CODE"
+      }<?php endif; ?>
+    }
+  }
+}</code></pre>
+    </div>
+
+    <div class="w-100">
+        <hr />
+    </div>
+
+    <div class="col-6">
+        <h2>Available tools</h2>
+        <p>Once connected, an agent gets these tools:</p>
+        <ul>
+            <li><span class="badge text-bg-secondary">upload_from_url</span> — download a public http(s) URL and store it (max 20 MB)</li>
+            <li><span class="badge text-bg-secondary">upload_base64</span> — upload base64-encoded / data-URI content</li>
+            <li><span class="badge text-bg-secondary">get_file_info</span> — fetch metadata for an uploaded file</li>
+            <li><span class="badge text-bg-secondary">delete_file</span> — permanently delete a file using its delete code</li>
+            <li><span class="badge text-bg-secondary">create_album</span> — group existing files into an immutable album (max 200 hashes)</li>
+            <li><span class="badge text-bg-secondary">transform_image</span> — build a URL for an on-the-fly resized/filtered/rotated image</li>
+        </ul>
+        <p>Tool failures come back as MCP tool errors with the same human-readable reasons the REST API uses.</p>
+    </div>
+
+    <div class="col-6">
+        <h2>Testing with curl</h2>
+        <p>The endpoint speaks plain JSON-RPC 2.0, so it can be poked without an MCP client:</p>
+        <pre><code class="bash"># 1. initialize — note the Mcp-Session-Id response header
+curl -i -X POST <?= getURL() ?>mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"1.0"}}}'
+
+# 2. list tools (replace SESSION_ID with the header value from step 1)
+curl -X POST <?= getURL() ?>mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'Mcp-Session-Id: SESSION_ID' \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'</code></pre>
+
+        <p>Full reference, including per-tool parameters and troubleshooting: <a target="_blank" href="https://github.com/HaschekSolutions/pictshare/blob/master/rtfm/MCP.md">rtfm/MCP.md</a></p>
+    </div>
+
+</div>
