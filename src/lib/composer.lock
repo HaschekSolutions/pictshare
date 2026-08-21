@@ -682,16 +682,16 @@
         },
         {
             "name": "mcp/sdk",
-            "version": "v0.7.0",
+            "version": "v0.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modelcontextprotocol/php-sdk.git",
-                "reference": "a6f415578fa789783d010274d11c922e97659a8a"
+                "reference": "785fc3b9b7006ecc8a73322c939d96a4a7154345"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modelcontextprotocol/php-sdk/zipball/a6f415578fa789783d010274d11c922e97659a8a",
-                "reference": "a6f415578fa789783d010274d11c922e97659a8a",
+                "url": "https://api.github.com/repos/modelcontextprotocol/php-sdk/zipball/785fc3b9b7006ecc8a73322c939d96a4a7154345",
+                "reference": "785fc3b9b7006ecc8a73322c939d96a4a7154345",
                 "shasum": ""
             },
             "require": {
@@ -760,9 +760,9 @@
             "description": "Model Context Protocol SDK for Client and Server applications in PHP",
             "support": {
                 "issues": "https://github.com/modelcontextprotocol/php-sdk/issues",
-                "source": "https://github.com/modelcontextprotocol/php-sdk/tree/v0.7.0"
+                "source": "https://github.com/modelcontextprotocol/php-sdk/tree/v0.7.1"
             },
-            "time": "2026-07-14T22:58:00+00:00"
+            "time": "2026-08-10T20:09:23+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
