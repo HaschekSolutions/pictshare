@@ -17,6 +17,9 @@ if (file_exists(ROOT . DS . 'notice.txt'))
             <?php
             if (defined('UPLOAD_CODE') && UPLOAD_CODE != ''): ?>
                 <br>Upload Code: <input type="password" id="uploadcode" />
+            <?php endif;
+            if (defined('HTML_HOSTING_ENABLED') && HTML_HOSTING_ENABLED === true): ?>
+                <br>HTML Upload Code: <input type="password" id="htmluploadcode" /> <small>(required to publish .html files - separate from the upload code above)</small>
             <?php endif; ?>
         </p>
 

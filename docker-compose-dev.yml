@@ -15,6 +15,8 @@ services:
         - MASTER_DELETE_IP= # IP address to delete all files even without delete code
         - UPLOAD_FORM_LOCATION= # moves the upload form from / to whatever you set here
         - UPLOAD_CODE= # if set, requires this code to upload files via api or web
+        - HTML_HOSTING_ENABLED=true # DANGER: lets HTML_UPLOAD_CODE holders serve arbitrary HTML/JS on this domain. See rtfm/CONFIG.md before enabling
+        - HTML_UPLOAD_CODE=html # separate code required to publish HTML pages when HTML_HOSTING_ENABLED=true
         # image settings settings
         - ALLOW_BLOATING=false
         - JPEG_COMPRESSION=

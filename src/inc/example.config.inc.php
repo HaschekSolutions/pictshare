@@ -18,6 +18,15 @@ define('URL','https://dev.pictshare.net/');
 //define('ALLOWED_SUBNET','192.168.0.0/24');
 //define('CORS_ALLOW_ORIGIN','*'); //needed if you want to reference uploads from another origin, eg via canvas/WebGL
 
+//HTML hosting - OFF by default and for good reason.
+//Enabling this lets anyone holding HTML_UPLOAD_CODE publish arbitrary HTML+JS
+//that runs on YOUR domain - equivalent to giving them admin/shell-level trust,
+//since it can act as your logged-in browser session against /admin and the API.
+//Only turn this on if you understand that risk. See "HTML hosting" in
+//https://github.com/HaschekSolutions/pictshare/blob/master/rtfm/CONFIG.md
+//define('HTML_HOSTING_ENABLED', true);
+//define('HTML_UPLOAD_CODE','');
+
 //S3 settings
 //
 //define('S3_BUCKET','bucketname');

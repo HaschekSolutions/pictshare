@@ -138,6 +138,22 @@ class API
         $size = filesize($tmpfile);
         $type = getFileMimeType($tmpfile);
 
+        //find the controller responsible for this mime type up front, so a controller-specific
+        //upload gate (eg HtmlController's separate token) can run before the sha1-dedup shortcut
+        //below - otherwise identical content could be handed back as a fresh "ok" without ever
+        //passing that controller's own check, just because it happens to already be stored
+        $cc = null;
+        foreach (loadAllContentControllers() as $ccName) {
+            $instance = new $ccName();
+            if ($instance->mimes && in_array($type, $instance->mimes)) {
+                $cc = $instance;
+                break;
+            }
+        }
+
+        if ($cc && method_exists($cc, 'checkUploadAllowed') && !$cc->checkUploadAllowed())
+            return ['status' => 'err', 'reason' => 'Upload not allowed for this content type'];
+
         //check for duplicates
         $sha1 = sha1_file($tmpfile);
         $ehash = sha1Exists($sha1);
@@ -156,19 +172,12 @@ class API
             return ['status' => 'err', 'reason' => 'File is in the naughty list'];
         }
 
-        $answer = false;
-        foreach (loadAllContentControllers() as $cc) {
-            $cc = new $cc();
-            if ($cc->mimes && in_array($type, $cc->mimes)) {
-                $answer = $cc->handleUpload($tmpfile, $hash);
-                break;
-            }
-        }
+        $answer = $cc ? $cc->handleUpload($tmpfile, $hash) : false;
 
         if (!$answer) {
             addToLog(getUserIP() . " tried to upload a file with the SHA1: " . $sha1 . " (" . $type . ", original name:" . $originalname . ") but the file type is not supported");
             return ['status' => 'err', 'reason' => 'Unsupported mime type: ' . $type];
-        } else if ($answer['hash'] && $answer['status'] == 'ok') {
+        } else if (($answer['hash'] ?? null) && $answer['status'] == 'ok') {
             $delcode = getRandomString(32);
             $meta = [
                 'mime' => $type,

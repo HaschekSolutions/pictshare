@@ -44,6 +44,20 @@ Available values for the `CONTENTCONTROLLERS` setting are:
 - TEXT
 - VIDEO
 - URL
+- HTML (only does anything if `HTML_HOSTING_ENABLED` is also set - see below)
+
+### HTML hosting (dangerous - disabled by default)
+
+PictShare can host raw, self-contained HTML pages (inline CSS/JS included) verbatim on your domain - handy for quickly sharing one-pager demos with clients. **This is arbitrary script execution on your own domain by design** - anyone who has the code below can serve phishing pages, or JS that rides any authenticated browser session (e.g. an open `/admin` session) against your own API. Treat the code exactly like an admin password, not like a normal upload code.
+
+It is off unless you explicitly set both of the following:
+
+|Option | value type | What it does|
+|---                      | ---     | ---|
+| HTML_HOSTING_ENABLED    | bool    | Must be `true` to enable HTML hosting at all |
+| HTML_UPLOAD_CODE        | string  | Required, separate from `UPLOAD_CODE`. Must be sent as the `htmluploadcode` request field (or the `html_upload_code` argument on the MCP `upload_html` tool) to publish a page. Uploads without it are always rejected, even if your instance otherwise allows anonymous uploads |
+
+If `HTML_HOSTING_ENABLED` is `true` but `HTML_UPLOAD_CODE` is empty, hosting stays disabled - the server logs a warning on every boot either way so this is never silent. If you've whitelisted `CONTENTCONTROLLERS`, you must also add `HTML` to that list.
 
 # Storage controllers
 

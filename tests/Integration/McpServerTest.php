@@ -120,6 +120,28 @@ class McpServerTest extends PictShareTestCase
         $names = array_column($decoded['result']['tools'] ?? [], 'name');
         $this->assertContains('upload_from_url', $names);
         $this->assertContains('upload_base64', $names);
+        $this->assertContains('upload_html', $names);
+    }
+
+    public function testUploadHtmlWithCorrectCode(): void
+    {
+        $res = $this->toolResult($this->callTool('upload_html', [
+            'html' => '<html><body>hi</body></html>',
+            'html_upload_code' => HTML_UPLOAD_CODE,
+        ]));
+        $this->assertFalse($res['isError'], 'tool errored: ' . json_encode($res['data']));
+        $this->assertSame('ok', $res['data']['status']);
+        $this->assertStringEndsWith('.html', $res['data']['hash']);
+        $this->uploadedHashes[] = $res['data']['hash'];
+    }
+
+    public function testUploadHtmlRejectsWrongCode(): void
+    {
+        $res = $this->toolResult($this->callTool('upload_html', [
+            'html' => '<html><body>hi</body></html>',
+            'html_upload_code' => 'wrong',
+        ]));
+        $this->assertTrue($res['isError']);
     }
 
     public function testUploadBase64(): void

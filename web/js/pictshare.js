@@ -17,6 +17,9 @@ document.addEventListener("DOMContentLoaded", function () {
             var uploadCodeElem = document.getElementById("uploadcode");
             if (uploadCodeElem)
                 formData.append("uploadcode", uploadCodeElem.value);
+            var htmlUploadCodeElem = document.getElementById("htmluploadcode");
+            if (htmlUploadCodeElem)
+                formData.append("htmluploadcode", htmlUploadCodeElem.value);
         });
 
         myDropzone.on('error', function (file, response) {

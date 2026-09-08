@@ -63,6 +63,22 @@ _buildConfig() {
     echo "define('REDIS_PORT', ${REDIS_PORT:-6379});"
     echo "define('ADMIN_PASSWORD', '${ADMIN_PASSWORD:-}');"
     echo "define('PICTSHARE_VERSION', '${PICTSHARE_VERSION:-git}');"
+    echo "define('HTML_HOSTING_ENABLED', ${HTML_HOSTING_ENABLED:-false});"
+    echo "define('HTML_UPLOAD_CODE', '${HTML_UPLOAD_CODE:-}');"
+}
+
+# Loud, every-boot reminder - HTML hosting lets anyone with HTML_UPLOAD_CODE run
+# arbitrary script on this domain, so admins should never be able to miss that
+# it's on. Doesn't gate anything itself; the PHP side (HtmlController) is the
+# actual fail-closed check on both HTML_HOSTING_ENABLED and HTML_UPLOAD_CODE.
+_htmlHostingWarning() {
+    if [[ "${HTML_HOSTING_ENABLED:-false}" == "true" ]]; then
+        if [[ -z "${HTML_UPLOAD_CODE:-}" ]]; then
+            echo "[!] HTML_HOSTING_ENABLED is true but HTML_UPLOAD_CODE is not set - HTML hosting stays DISABLED until you set a code."
+        else
+            echo "[!!!] HTML hosting is ENABLED. Anyone holding HTML_UPLOAD_CODE can serve arbitrary HTML/JS on THIS domain - treat that code like admin/shell access. Unset HTML_HOSTING_ENABLED if you don't need this."
+        fi
+    fi
 }
 
 # starting redis
@@ -104,5 +120,6 @@ fi
 echo ' [+] Creating config'
 
 _buildConfig > src/inc/config.inc.php
+_htmlHostingWarning
 
 frankenphp run --config /etc/caddy/Caddyfile

@@ -56,6 +56,21 @@ class PictShareMcp
                     .'is detected from content. Returns hash, public url and delete_code.'
             )
             ->addTool(
+                handler: function (string $html, string $html_upload_code): array {
+                    return PictShareMcp::callApi(['upload'], [
+                        'base64' => 'base64,'.base64_encode($html),
+                        'htmluploadcode' => $html_upload_code,
+                    ]);
+                },
+                name: 'upload_html',
+                description: 'Publish a self-contained HTML page (inline CSS/JS allowed) verbatim on this '
+                    .'domain - for one-pager demos. Disabled on most instances: only works if the admin has '
+                    .'enabled HTML_HOSTING_ENABLED and given you the separate html_upload_code, which is not '
+                    .'the same as the normal upload code. This is a high-risk feature (it runs arbitrary script '
+                    .'on the host domain) - only use it when a user explicitly asks you to publish an HTML page '
+                    .'and has given you that code. Returns hash, public url and delete_code.'
+            )
+            ->addTool(
                 handler: function (string $hash): array {
                     return PictShareMcp::callApi(['info', sanatizeString(trim($hash))]);
                 },

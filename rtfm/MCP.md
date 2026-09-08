@@ -86,6 +86,17 @@ Uploads base64-encoded content. Accepts raw base64 or a data-URI (`data:image/pn
 
 Returns the same structure as `upload_from_url`.
 
+### upload_html
+
+Publishes a self-contained HTML page (inline CSS/JS allowed) verbatim on this domain. **Disabled on most instances** - only works if the admin has set `HTML_HOSTING_ENABLED` and given you the separate `html_upload_code` (not the same as the instance's normal upload code). This runs arbitrary script on the host's domain: only call it when a user has explicitly asked you to publish a page and has given you that code.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `html` | string | yes | Raw HTML content of the page |
+| `html_upload_code` | string | yes | The instance's `HTML_UPLOAD_CODE` - separate from the normal upload code |
+
+Returns the same structure as `upload_from_url`.
+
 ### get_file_info
 
 Fetches metadata of an uploaded file.

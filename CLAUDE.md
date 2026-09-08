@@ -50,7 +50,7 @@ docker run -p 8080:80 ghcr.io/hascheksolutions/pictshare
 - `handleHash($hash, $url, $path)`: render/process a file request
 - `handleUpload($tmpfile, $hash, $passthrough)`: process an upload
 
-Current controllers: `image/`, `video/`, `text/`, `url/`, `identicon/`, `placeholder/`
+Current controllers: `image/`, `video/`, `text/`, `url/`, `identicon/`, `placeholder/`, `svg/`, `html/` (hosts raw HTML/JS verbatim — disabled unless `HTML_HOSTING_ENABLED` + a separate `HTML_UPLOAD_CODE` are set; see `rtfm/CONFIG.md`)
 
 **Storage Controllers** (`src/storage-controllers/`): Each implements `StorageController` interface. They mirror files to external backends (S3, FTP, local alt folder). Key methods: `isEnabled()`, `hashExists()`, `pullFile()`, `pushFile()`, `deleteFile()`.
 
@@ -60,7 +60,7 @@ Each uploaded file lives at `data/<hash>/<hash>` with a companion `data/<hash>/m
 
 ### Configuration
 
-Configuration is generated at container startup by `docker/rootfs/start.sh` from environment variables into `src/inc/config.inc.php` as PHP constants. See `src/inc/example.config.inc.php` for all available options. Key env vars: `URL`, `ADMIN_PASSWORD`, `UPLOAD_CODE`, `MAX_UPLOAD_SIZE`, `REDIS_SERVER`, `CONTENTCONTROLLERS`, `S3_*`, `FTP_*`, `ENCRYPTION_KEY`.
+Configuration is generated at container startup by `docker/rootfs/start.sh` from environment variables into `src/inc/config.inc.php` as PHP constants. See `src/inc/example.config.inc.php` for all available options. Key env vars: `URL`, `ADMIN_PASSWORD`, `UPLOAD_CODE`, `MAX_UPLOAD_SIZE`, `REDIS_SERVER`, `CONTENTCONTROLLERS`, `S3_*`, `FTP_*`, `ENCRYPTION_KEY`, `HTML_HOSTING_ENABLED`/`HTML_UPLOAD_CODE` (dangerous — off by default, see rtfm/CONFIG.md).
 
 ### Caching
 
@@ -76,7 +76,7 @@ Redis stores `cache:byurl:<url>` (URL → controller+hash mapping), `served:<has
 | POST | `/api/passthrough/image` | Process image with modifiers, return directly |
 | GET | `/api/info` | File metadata |
 | GET | `/api/debug` | Server diagnostics |
-| POST | `/mcp` | MCP server (JSON-RPC, tools: upload_from_url, upload_base64, get_file_info, delete_file, create_album, transform_image) |
+| POST | `/mcp` | MCP server (JSON-RPC, tools: upload_from_url, upload_base64, upload_html, get_file_info, delete_file, create_album, transform_image) |
 
 ### Adding a New Content Type
 
