@@ -18,7 +18,17 @@
         .album-item img { width: 100%; height: 100%; object-fit: cover; }
         .album-item .badge-type { position: absolute; bottom: 4px; right: 4px; font-size: 0.7em; }
         .album-item .file-link { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #ccc; text-decoration: none; font-size: 0.85em; padding: 8px; text-align: center; word-break: break-all; }
+        .album-url-block { display: none; }
+        html.iframe-embed #headcontainer,
+        html.iframe-embed .footer,
+        html.iframe-embed .embed-code-block { display: none; }
+        html.iframe-embed .album-url-block { display: block; }
     </style>
+    <script>
+        if (window.self !== window.top) {
+            document.documentElement.classList.add('iframe-embed');
+        }
+    </script>
 </head>
 <body>
     <div class="container" id="headcontainer">
@@ -73,10 +83,21 @@
                 <?php endforeach; ?>
             </div>
 
-            <p class="mt-3">
+            <p class="mt-3 album-url-block">
                 <strong>Album URL:</strong>
                 <code><?= htmlspecialchars(getURL() . $album_hash, ENT_QUOTES, 'UTF-8') ?></code>
             </p>
+
+            <?php $embedCode = '<iframe src="' . getURL() . $album_hash . '" width="100%" height="600" frameborder="0"></iframe>'; ?>
+            <div class="mt-3 embed-code-block">
+                <label for="embedCodeInput" class="form-label"><strong>Embed this album:</strong></label>
+                <div class="input-group">
+                    <input id="embedCodeInput" type="text" class="form-control" readonly
+                           value="<?= htmlspecialchars($embedCode, ENT_QUOTES, 'UTF-8') ?>"
+                           onclick="this.select()">
+                    <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard ? navigator.clipboard.writeText(document.getElementById('embedCodeInput').value) : window.prompt('Copy embed code:', document.getElementById('embedCodeInput').value);">Copy</button>
+                </div>
+            </div>
         <?php endif; ?>
     </div>
 
