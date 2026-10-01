@@ -127,6 +127,32 @@ class ApiTest extends PictShareTestCase
         $this->assertEquals($r['hash'], $result['hash']);
     }
 
+    public function testApiInfoDoesNotExposeDeleteCodeOrUploaderData(): void
+    {
+        $r = $this->apiUpload('test.jpg');
+
+        $api    = new API(['info', $r['hash']]);
+        $result = $api->act();
+
+        foreach (['delete_code', 'delete_url', 'ip', 'useragent', 'remote_port'] as $key)
+            $this->assertArrayNotHasKey($key, $result);
+        $this->assertStringNotContainsString($r['delete_code'], json_encode($result));
+    }
+
+    public function testApiInfoDoesNotExposeFilenameOrViewStats(): void
+    {
+        $r = $this->apiUpload('test.jpg');
+        // views/last_accessed only land in meta.json once the flushviews cron has run
+        updateMetaData($r['hash'], ['views' => 5, 'last_accessed' => time()]);
+
+        $api    = new API(['info', $r['hash']]);
+        $result = $api->act();
+
+        foreach (['original_filename', 'views', 'last_accessed'] as $key)
+            $this->assertArrayNotHasKey($key, $result);
+        $this->assertArrayHasKey('sha1', $result);
+    }
+
     public function testApiDebugEndpoint(): void
     {
         $api    = new API(['debug']);

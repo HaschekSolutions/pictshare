@@ -79,4 +79,16 @@ class CoreFunctionsTest extends TestCase
         $this->assertEquals(8, strlen($s));
         $this->assertMatchesRegularExpression('/^[0-9a-z]+$/', $s);
     }
+
+    // delete codes come from getRandomString(), so it must not be reproducible from the seedable mt_rand state
+    public function testGetRandomStringIsNotDerivedFromSeedablePrng(): void
+    {
+        mt_srand(1234);
+        $a = getRandomString(32);
+        mt_srand(1234);
+        $b = getRandomString(32);
+        mt_srand();
+
+        $this->assertNotSame($a, $b);
+    }
 }

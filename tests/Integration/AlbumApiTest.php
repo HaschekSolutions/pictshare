@@ -149,6 +149,29 @@ class AlbumApiTest extends PictShareTestCase
         $this->assertStringContainsString($r1['hash'], $output);
     }
 
+    public function testAlbumInfoDoesNotExposeDeleteCodeOrUploaderData(): void
+    {
+        $r1 = $this->apiUpload('test.jpg');
+
+        $_REQUEST['hashes'] = [$r1['hash']];
+        try {
+            $api    = new API(['album']);
+            $result = $api->act();
+        } finally {
+            unset($_REQUEST['hashes']);
+        }
+
+        $this->assertEquals('ok', $result['status']);
+        $this->uploadedHashes[] = $result['hash'];
+
+        $info = (new API(['info', $result['hash']]))->act();
+
+        $this->assertEquals([$r1['hash']], $info['hashes']);
+        foreach (['delete_code', 'delete_url', 'ip', 'useragent'] as $key)
+            $this->assertArrayNotHasKey($key, $info);
+        $this->assertStringNotContainsString($result['delete_code'], json_encode($info));
+    }
+
     public function testAlbumDeletionCodeWorks(): void
     {
         $r1 = $this->apiUpload('test.jpg');

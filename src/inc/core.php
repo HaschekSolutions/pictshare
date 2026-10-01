@@ -279,7 +279,7 @@ function architect($u)
             {
                 $code = substr($el,7);
                 //@todo: allow MASTER_DELETE_IP to be CIDR range or coma separated
-                if(getDeleteCodeOfHash($hash)==$code || (defined('MASTER_DELETE_CODE') && MASTER_DELETE_CODE==$code ) || (defined('MASTER_DELETE_IP') && MASTER_DELETE_IP==getUserIP()) )
+                if(isValidDeleteCode($hash,$code) || (defined('MASTER_DELETE_IP') && MASTER_DELETE_IP!='' && MASTER_DELETE_IP==getUserIP()) )
                 {
                     addToLog(getUserIP()." deleted $hash\tIt was deleted by the user\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/deletes.log');
                     deleteHash($hash);
@@ -553,7 +553,7 @@ function getRandomString($length=32, $keyspace = '0123456789abcdefghijklmnopqrst
     $str = '';
     $max = (function_exists('mb_strlen') ? mb_strlen($keyspace, '8bit') : strlen($keyspace)) - 1;
     for ($i = 0; $i < $length; ++$i) {
-        $str .= $keyspace[rand(0, $max)];
+        $str .= $keyspace[random_int(0, $max)];
     }
     return $str;
 }
@@ -963,6 +963,23 @@ function getDeleteCodeOfHash($hash)
         return $metadata['delete_code'];
     else
         return false;
+}
+
+// an empty code never matches: hashes without a stored delete_code and an
+// unset MASTER_DELETE_CODE (defined as '' by the Docker config) must not be deletable
+function isValidDeleteCode($hash, $code)
+{
+    if(!is_string($code) || $code==='') return false;
+
+    $correctCode = getDeleteCodeOfHash($hash);
+    if(is_string($correctCode) && $correctCode!=='' && hash_equals($correctCode,$code))
+        return true;
+
+    $masterCode = defined('MASTER_DELETE_CODE') ? (string)MASTER_DELETE_CODE : '';
+    if($masterCode!=='' && hash_equals($masterCode,$code))
+        return true;
+
+    return false;
 }
 
 function getMetadataOfHash($hash)

@@ -47,30 +47,40 @@ class DeleteTest extends PictShareTestCase
 
     /**
      * The delete-code guard lives in architect() (core.php URL routing), not in deleteHash().
-     * We test the guard by calling the same logic it uses: comparing the code in the URL
-     * against getDeleteCodeOfHash() and MASTER_DELETE_CODE.
+     * We test the guard through isValidDeleteCode(), which both architect() and API::delete() use
+     * to compare the given code against getDeleteCodeOfHash() and MASTER_DELETE_CODE.
      */
     public function testCorrectCodePassesGuard(): void
     {
-        $this->markTestIncomplete(
-            'Guard logic test requires a real delete code from API::handleFile(). ' .
-            'This test will be implemented as part of Task 14 (API endpoint tests).'
-        );
+        $r = $this->uploadFixture('test.jpg');
+        $hash = $r['hash'];
+        updateMetaData($hash, ['delete_code' => 'correctcode0000000000000000000000']);
+
+        $this->assertTrue(isValidDeleteCode($hash, 'correctcode0000000000000000000000'));
     }
 
     public function testWrongCodeFailsGuard(): void
     {
         $r = $this->uploadFixture('test.jpg');
         $hash = $r['hash'];
-        $wrongCode = 'thisiswrongcode000000000000000000';
+        updateMetaData($hash, ['delete_code' => 'correctcode0000000000000000000000']);
 
-        $isAuthorized = (
-            getDeleteCodeOfHash($hash) === $wrongCode ||
-            (defined('MASTER_DELETE_CODE') && MASTER_DELETE_CODE === $wrongCode)
-        );
+        $this->assertFalse(isValidDeleteCode($hash, 'thisiswrongcode000000000000000000'));
+        $this->assertFalse(isValidDeleteCode($hash, ''));
+    }
 
-        $this->assertFalse($isAuthorized);
-        // File must still be present
-        $this->assertTrue(isExistingHash($hash));
+    /**
+     * Hashes without a delete_code in meta.json (legacy files, direct controller uploads)
+     * and the Docker default of MASTER_DELETE_CODE='' (see testconfig.php) must not be
+     * deletable with an empty or falsy code like /delete_/<hash> or /delete_0/<hash>.
+     */
+    public function testEmptyOrFalsyCodeFailsGuardWhenNoCodeIsStored(): void
+    {
+        $r = $this->uploadFixture('test.jpg');
+        $hash = $r['hash'];
+        $this->assertFalse(getDeleteCodeOfHash($hash));
+
+        $this->assertFalse(isValidDeleteCode($hash, ''));
+        $this->assertFalse(isValidDeleteCode($hash, '0'));
     }
 }

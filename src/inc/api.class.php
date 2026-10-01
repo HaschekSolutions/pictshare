@@ -231,7 +231,12 @@ class API
         if (!isExistingHash($hash))
             return ['status' => 'err', 'reason' => 'Hash not found'];
 
-        return getMetadataOfHash($hash);
+        // meta.json also holds the delete code, uploader details (ip, useragent, ..), the
+        // original filename and view stats, so only fields that are safe to show to
+        // anyone who knows the hash are returned
+        $public = ['mime', 'size', 'size_human', 'hash', 'sha1', 'uploaded', 'type', 'hashes', 'created'];
+
+        return array_intersect_key(getMetadataOfHash($hash) ?: [], array_flip($public));
     }
 
     public function delete()
@@ -246,10 +251,7 @@ class API
         if (!isExistingHash($hash))
             return ['status' => 'err', 'reason' => 'Hash not found'];
 
-        $correctCode = getDeleteCodeOfHash($hash);
-        $masterCode  = defined('MASTER_DELETE_CODE') ? MASTER_DELETE_CODE : null;
-
-        if ($correctCode !== $code && $masterCode !== $code)
+        if (!isValidDeleteCode($hash, $code))
             return ['status' => 'err', 'reason' => 'Invalid delete code'];
 
         deleteHash($hash);
