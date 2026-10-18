@@ -168,4 +168,40 @@ class ApiTest extends PictShareTestCase
         $this->assertEquals('err', $result['status']);
         $this->assertArrayHasKey('reason', $result);
     }
+
+    private function tmpDirListing(): array
+    {
+        return array_values(array_diff(scandir(ROOT . DS . 'tmp'), ['.', '..']));
+    }
+
+    private function base64Upload(string $data): array
+    {
+        $_REQUEST['base64'] = $data;
+        $result = (new API(['upload']))->act();
+        unset($_REQUEST['base64']);
+        if (($result['status'] ?? '') === 'ok' && empty($result['duplicate']))
+            $this->uploadedHashes[] = $result['hash'];
+        return $result;
+    }
+
+    public function testApiUploadBase64DuplicateLeavesNoTempFile(): void
+    {
+        $jpeg = 'data:image/jpeg;base64,' . base64_encode(file_get_contents(__DIR__ . '/../fixtures/test.jpg'));
+        $this->base64Upload($jpeg);
+
+        $before = $this->tmpDirListing();
+        $result = $this->base64Upload($jpeg);
+
+        $this->assertTrue($result['duplicate'] ?? false);
+        $this->assertSame($before, $this->tmpDirListing());
+    }
+
+    public function testApiUploadBase64UnsupportedTypeLeavesNoTempFile(): void
+    {
+        $before = $this->tmpDirListing();
+        $result = $this->base64Upload('data:application/octet-stream;base64,' . base64_encode(random_bytes(64)));
+
+        $this->assertEquals('err', $result['status']);
+        $this->assertSame($before, $this->tmpDirListing());
+    }
 }

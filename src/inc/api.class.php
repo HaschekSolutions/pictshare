@@ -105,21 +105,20 @@ class API
                 return ['status' => 'err', 'reason' => $result['error']];
             }
 
-            $name = basename($url);
-            $tmpfile = ROOT . DS . 'tmp' . DS . $name;
+            $tmpfile = getTempFilePath('url');
             file_put_contents($tmpfile, $result['body']);
 
-            return $this->handleFile($tmpfile, $hash, $url);
+            return $this->handleOwnTempFile($tmpfile, $hash, $url);
         }
         else if (isset($_REQUEST['base64'])) {
             $data = $_REQUEST['base64'];
             $format = $_REQUEST['format'] ?? null;
 
-            $tmpfile = ROOT . DS . 'tmp' . DS . md5(rand(0, 10000) . time()) . time();
+            $tmpfile = getTempFilePath('b64');
 
             $this->base64ToFile($data, $tmpfile);
 
-            return $this->handleFile($tmpfile, $hash);
+            return $this->handleOwnTempFile($tmpfile, $hash);
         }
 
         if (!isset($_FILES['file']) || !is_array($_FILES['file']))
@@ -129,6 +128,19 @@ class API
         } else {
             addToLog(getUserIP() . " tried to upload a file with the SHA1: " . $_FILES['file']['name'] . " (" . $_FILES['file']['type'] . ") but the upload failed with error code: " . $_FILES['file']["error"] . " (" . $this->uploadErrorMessage($_FILES['file']["error"]) . ")");
             return ['status' => 'err', 'reason' => 'Upload error: ' . $this->uploadErrorMessage($_FILES['file']["error"])];
+        }
+    }
+
+    //for temp files we created ourselves (unlike PHP's upload tmp_name, nobody else cleans
+    //them up): content controllers delete the file on success, so remove what is left
+    //when handleFile() rejects it (duplicate, naughty list, unsupported type, ..)
+    private function handleOwnTempFile($tmpfile, $hash = false, $originalname = false)
+    {
+        try {
+            return $this->handleFile($tmpfile, $hash, $originalname);
+        } finally {
+            if (is_file($tmpfile))
+                unlink($tmpfile);
         }
     }
 

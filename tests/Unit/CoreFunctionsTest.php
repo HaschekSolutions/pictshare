@@ -91,4 +91,23 @@ class CoreFunctionsTest extends TestCase
 
         $this->assertNotSame($a, $b);
     }
+
+    public function testGetTempFilePathIsInsideTmpDir(): void
+    {
+        $path = getTempFilePath();
+        $this->assertSame(ROOT . DS . 'tmp', dirname($path));
+        $this->assertFileDoesNotExist($path);
+    }
+
+    public function testGetTempFilePathIsUnpredictable(): void
+    {
+        mt_srand(1234);
+        $a = getTempFilePath('url');
+        mt_srand(1234);
+        $b = getTempFilePath('url');
+        mt_srand();
+
+        $this->assertNotSame($a, $b);
+        $this->assertStringStartsWith('url_', basename($a));
+    }
 }

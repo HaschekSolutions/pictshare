@@ -216,9 +216,10 @@ function architect($u)
                 if($c->isEnabled()===true && $c->hashExists($el))
                 {
                     $hash = $el;
-                    $c->pullFile($hash,ROOT.DS.'tmp'.DS.$hash);
-                    if(!file_exists(ROOT.DS.'tmp'.DS.$hash)) continue;
-                    storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
+                    $tmpfile = getTempFilePath('pull');
+                    $c->pullFile($hash,$tmpfile);
+                    if(!file_exists($tmpfile)) continue;
+                    storeFile($tmpfile,$hash,true);
 
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
                         addToLog(getUserIP()."\tviewed\t$hash\tIt was found in Storage Controller $contr. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
@@ -228,14 +229,16 @@ function architect($u)
                 else if($c->isEnabled()===true && defined('ENCRYPTION_KEY') && ENCRYPTION_KEY !='' && $c->hashExists($el.'.enc')) //this is an encrypted file. Let's decrypt it
                 {
                     $hash = $el.'.enc';
-                    $c->pullFile($hash,ROOT.DS.'tmp'.DS.$hash);
-                    if(!file_exists(ROOT.DS.'tmp'.DS.$hash)) continue;
+                    $encfile = getTempFilePath('pull');
+                    $c->pullFile($hash,$encfile);
+                    if(!file_exists($encfile)) continue;
                     $enc = new Encryption;
                     $hash = substr($hash,0,-4);
-                    $enc->decryptFile(ROOT.DS.'tmp'.DS.$el.'.enc', ROOT.DS.'tmp'.DS.$hash,base64_decode(ENCRYPTION_KEY));
+                    $tmpfile = getTempFilePath('pull');
+                    $enc->decryptFile($encfile, $tmpfile,base64_decode(ENCRYPTION_KEY));
 
-                    storeFile(ROOT.DS.'tmp'.DS.$hash,$hash,true);
-                    unlink(ROOT.DS.'tmp'.DS.$el.'.enc');
+                    storeFile($tmpfile,$hash,true);
+                    unlink($encfile);
 
                     if(defined('LOG_VIEWS') && LOG_VIEWS===true)
                         addToLog(getUserIP()."\tviewed\t$hash\tIt was found encrypted in Storage Controller $contr. Agent:\t".$_SERVER['HTTP_USER_AGENT']."\tref:\t".$_SERVER['HTTP_REFERER'], ROOT.DS.'logs/views.log');
@@ -547,6 +550,14 @@ function getTypeOfFile($url)
 }
 
 function isFolderWritable($dir){return is_writable($dir);}
+
+// unpredictable path in ROOT/tmp. Temp names must never derive from user input (eg the
+// basename of an upload URL): two requests sharing a name could swap each other's file
+// between validation and storeFile(), bypassing mime/sha1/naughty-list checks
+function getTempFilePath($prefix='pt')
+{
+    return ROOT.DS.'tmp'.DS.$prefix.'_'.bin2hex(random_bytes(16));
+}
 
 function getRandomString($length=32, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyz')
 {
