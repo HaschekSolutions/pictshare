@@ -35,4 +35,10 @@ ENV PICTSHARE_VERSION=${PICTSHARE_VERSION}
 
 EXPOSE 80
 
+# Security stopgap for GHSA-6wmf-4rv5-p3rp / GHSA-w8hw-w9fx-j79w (2026-10-21).
+# Keep upload progress off even after patching; fatal_error_backtraces only exists in PHP 8.5+.
+RUN for d in /usr/local/etc/php/conf.d /etc/php*/conf.d; do \
+      [ -d "$d" ] && printf 'session.upload_progress.enabled = 0\nfatal_error_backtraces = 0\n' > "$d/zz-security.ini"; \
+    done; true
+
 ENTRYPOINT ["/etc/start.sh"]
