@@ -443,7 +443,7 @@ function autoload($className)
     if (file_exists(ROOT . DS . 'src'. DS . 'interfaces' . DS . strtolower($className) . '.interface.php'))
         require_once(ROOT . DS . 'src'. DS . 'interfaces' . DS . strtolower($className) . '.interface.php');
     if ($className=='Encryption')
-        require_once(ROOT . DS . 'inc' . DS . 'encryption.php');
+        require_once(__DIR__ . DS . 'encryption.php');
 }
 
 function renderTemplate($template,$variables=[],$basepath=ROOT.'/src')

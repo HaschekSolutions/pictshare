@@ -11,8 +11,10 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
 ini_set('memory_limit', -1);
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', dirname(__FILE__).DS.'..');
-include_once(ROOT.DS.'inc/config.inc.php');
-include_once(ROOT.DS.'inc/core.php');
+include_once(ROOT.DS.'src'.DS.'inc/config.inc.php');
+include_once(ROOT.DS.'src'.DS.'inc/core.php');
+if(file_exists(ROOT.DS.'src'.DS.'lib'.DS.'vendor'.DS.'autoload.php'))
+    require_once(ROOT.DS.'src'.DS.'lib'.DS.'vendor'.DS.'autoload.php');
 
 $dir = getDataDir().DS;
 $sc = getStorageControllers();
@@ -63,7 +65,7 @@ if(!in_array('p2',$argv))
                     $hash = substr($cfile,0,-4);
                 else $hash = $cfile;
 
-                $filehashes[$contr][] = $hash;
+                $filehashes[spl_object_id($contr)][] = $hash;
 
                 if(!is_dir($dir.$hash) || !file_exists($dir.$hash.DS.$hash)) //file only on storage controller. Will download
                 {
@@ -124,7 +126,8 @@ while (false !== ($hash = readdir($dh))) {
     foreach($controllers as $contr)
     {
 
-        if( (count($filehashes[$contr]) > 0 && !in_array($hash,$filehashes[$contr])) || !$contr->hashExists($realhash) )
+        $cid = spl_object_id($contr);
+        if( (count($filehashes[$cid] ?? []) > 0 && !in_array($hash,$filehashes[$cid])) || !$contr->hashExists($realhash) )
         {
             //if($sim!==true)
             
