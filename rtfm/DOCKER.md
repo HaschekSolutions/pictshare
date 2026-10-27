@@ -33,6 +33,16 @@ chown 1000 -R /data/pictshareuploads
 docker run -d -e "MAX_UPLOAD_SIZE=1024" -v /data/pictshareuploads:/var/www/data -p 80:80 --name=pictshare hascheksolutions/pictshare:2
 ```
 
+### Docker Compose
+The repository contains one `docker-compose.yml` that builds the image from the checkout and mounts the source tree (development setup). All settings are read from a `.env` file; `.env.example` lists every option with its default.
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+The app is then on http://localhost:8080 (change `HTTP_PORT` in `.env` for another port). `.env` is git- and docker-ignored, keep secrets there. To run the published image instead, replace the `build:` block with `image: ghcr.io/hascheksolutions/pictshare:3` and remove the source mounts.
+
 ### Development
 Using these commands it will mount the current directory in the docker container so you can develop locally without building after each change.
 

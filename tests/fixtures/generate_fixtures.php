@@ -1,6 +1,6 @@
 <?php
 // tests/fixtures/generate_fixtures.php
-// Run once: docker compose -f docker-compose-dev.yml run --rm pictshare \
+// Run once: docker compose run --rm pictshare \
 //           php /app/public/tests/fixtures/generate_fixtures.php
 $dir = __DIR__;
 

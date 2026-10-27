@@ -10,14 +10,13 @@ PictShare is a self-hosted image/video/text/URL shortening service written in PH
 
 ### Run locally (development)
 ```bash
-docker compose -f docker-compose-dev.yml up --build
+cp .env.example .env    # once; every config option is listed there
+docker compose up --build
 ```
-This mounts source code as volumes and enables logging. The app is accessible at `http://localhost:8080`.
+There is a single `docker-compose.yml`: it builds the image from this checkout, mounts the source code as volumes and reads all settings from `.env`. The app is accessible at `http://localhost:8080` (`HTTP_PORT` in `.env` changes the port).
 
-### Run production image
-```bash
-docker compose up
-```
+### Run the published image
+Replace the `build:` block in `docker-compose.yml` with `image: ghcr.io/hascheksolutions/pictshare:3` and drop the source mounts, or use `docker run` (see `rtfm/DOCKER.md`).
 
 ### Build Docker image manually
 ```bash

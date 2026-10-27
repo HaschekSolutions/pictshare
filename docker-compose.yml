@@ -1,52 +1,39 @@
-version: '3.9'
+# PictShare - local / development setup
+#
+# Builds the image from this checkout and mounts the source tree, so code changes are live.
+# All settings come from .env (see .env.example for every option):
+#
+#   cp .env.example .env
+#   docker compose up --build        # http://localhost:8080/
+#
+# Run the tests:
+#   docker compose run --rm pictshare \
+#     php /app/public/src/lib/vendor/bin/phpunit --configuration /app/public/phpunit.xml
+#
+# To run the published image instead of building it, replace the `build:` block with
+#   image: ghcr.io/hascheksolutions/pictshare:3
+# and remove the source mounts (src, web, tests, phpunit.xml) from `volumes:`.
+
 services:
   pictshare:
-    image: 'HaschekSolutions/pictshare:3'
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    env_file:
+      - path: .env
+        required: false   # starts with built-in defaults if there is no .env yet
     environment:
-        - URL=http://localhost:8080/
-        - MAX_UPLOAD_SIZE=20 #in MB
-        # Security settings
-        - ADMIN_PASSWORD= # password for the admin panel. if empty, admin panel is disabled
-        - ALLOWED_SUBNET= #IP address or subnet mask to allow upload and access to the admin panel
-        - CONTENTCONTROLLERS= # limit uploaded file types
-        - MASTER_DELETE_CODE= # code to delete all files
-        - MASTER_DELETE_IP= # IP address to delete all files even without delete code
-        - UPLOAD_FORM_LOCATION= # moves the upload form from / to whatever you set here
-        - UPLOAD_CODE= # if set, requires this code to upload files via api or web
-        - HTML_HOSTING_ENABLED=false # DANGER: lets HTML_UPLOAD_CODE holders serve arbitrary HTML/JS on this domain. See rtfm/CONFIG.md before enabling
-        - HTML_UPLOAD_CODE= # separate code required to publish HTML pages when HTML_HOSTING_ENABLED=true
-        # image settings settings
-        - ALLOW_BLOATING=false
-        - JPEG_COMPRESSION=
-        - PNG_COMPRESSION=
-        - ALWAYS_WEBP=false # if true, will always serve webp images if the request included the capability
-        # alternate folder. all uploads will also be copied to this folder
-        - ALT_FOLDER=
-        # s3 settings
-        - S3_BUCKET=
-        - S3_ACCESS_KEY=
-        - S3_SECRET_KEY=
-        - S3_ENDPOINT=
-        - S3_REGION=
-        # FTP settings
-        - FTP_SERVER=
-        - FTP_PORT=
-        - FTP_USER=
-        - FTP_PASS=
-        - FTP_PASSIVEMODE=
-        - FTP_SSL=
-        - FTP_BASEDIR=
-        # encryption settings
-        - ENCRYPTION_KEY=
-        # logging settings
-        - LOG_VIEWS=false
-        # caching
-        - REDIS_CACHING=true
-        - REDIS_SERVER=localhost
-        - REDIS_PORT=6379
+      # Fallback so the app works without a .env. A URL set in .env wins.
+      - URL=${URL:-http://localhost:8080/}
     ports:
-        - 8080:80
+      - "${HTTP_PORT:-8080}:80"
     volumes:
-        - ./data:/app/public/data
-        - ./logs:/app/public/logs
-        - ./redis:/var/lib/redis # can be commeted out if REDIS_CACHING is set to false
+      - ./data:/app/public/data
+      - ./logs:/app/public/logs
+      - ./tmp:/app/public/tmp
+      - ./tmp/redis:/var/lib/redis # can be removed if REDIS_CACHING=false
+      # development: live source
+      - ./src:/app/public/src
+      - ./web:/app/public/web
+      - ./tests:/app/public/tests
+      - ./phpunit.xml:/app/public/phpunit.xml

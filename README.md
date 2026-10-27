@@ -53,6 +53,13 @@ docker run -d -p 8080:80 --name=pictshare ghcr.io/hascheksolutions/pictshare
 
 Then open http://localhost:8080 in your browser
 
+Or with docker compose from a checkout of this repo (builds locally, settings from `.env`, see `.env.example` for all options):
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
 ## Breaking changes in v3
 
 #### Dropped configuration options

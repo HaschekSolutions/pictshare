@@ -52,6 +52,7 @@ _buildConfig() {
     echo "define('FTP_BASEDIR', '${FTP_BASEDIR:-}');"
     echo "define('ENCRYPTION_KEY', '${ENCRYPTION_KEY:-}');"
     echo "define('FFMPEG_BINARY', '${FFMPEG_BINARY:-/usr/bin/ffmpeg}');"
+    echo "define('ALLOW_BLOATING', ${ALLOW_BLOATING:-true});"
     echo "define('ALWAYS_WEBP', ${ALWAYS_WEBP:-false});"
     echo "define('ALWAYS_AVIF', ${ALWAYS_AVIF:-false});"
     echo "define('ALLOWED_DOMAINS', '${ALLOWED_DOMAINS:-}');"

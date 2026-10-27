@@ -7,3 +7,6 @@ src/lib/vendor
 .github
 .vscode
 .antigravity
+.env
+.env.*
+!.env.example
