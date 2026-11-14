@@ -374,13 +374,14 @@ function storageControllerUpload($hash)
 
 function stringInFile($string,$file)
 {
-    $handle = fopen($file, 'r');
+    $handle = is_file($file) ? @fopen($file, 'r') : false;
+    if(!$handle) return false;
+    $found = false;
     while (($line = fgets($handle)) !== false) {
-        $line=trim($line);
-        if($line==$string) return true;  
+        if(trim($line)==$string) { $found = true; break; }
     }
     fclose($handle);
-    return false;
+    return $found;
 }
 
 function getNewHash($type,$length=10)
@@ -509,20 +510,35 @@ function renderSize($byte)
         return $result;
 }
 
+/**
+ * MIME type with charset of a file, eg "image/png; charset=binary", or false.
+ * Uses PHP's fileinfo and only shells out to the "file" command if fileinfo
+ * is missing or has no answer.
+ */
+function detectMimeWithCharset($file)
+{
+    if(!is_file($file)) return false;
+
+    $type = false;
+    if(class_exists('finfo'))
+    {
+        try {
+            $type = (new finfo(FILEINFO_MIME))->file($file);
+        } catch (\Throwable $e) {
+            $type = false;
+        }
+    }
+    if(!$type && strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
+        $type = @exec("file -bi " . escapeshellarg($file));
+
+    if($type && strpos($type,'/')!==false && strpos($type,';')!==false)
+        return $type;
+    return false;
+}
+
 function getTypeOfFile($url)
 {
-    // on linux use the "file" command or it will handle everything as octet-stream
-	if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
-	{
-		$content_type = exec("file -bi " . escapeshellarg($url));
-		if($content_type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
-			$type = $content_type;
-    }
-    else
-    {
-        //for windows we'll use mime_content_type. Make sure you have enabled the "exif" extension in php.ini
-        $type = mime_content_type($url);
-    }
+    $type = detectMimeWithCharset($url);
     if(!$type) return false;
     if(startsWith($type,'text')) return 'text';
 	$arr = explode(';', trim($type));
@@ -1583,9 +1599,27 @@ function connectRedis(): void
         // ("getaddrinfo ... failed"). Port must be 0 for a socket address.
         $isSocket = str_starts_with($server, '/') || str_starts_with($server, 'unix://');
         $port = $isSocket ? 0 : ((!defined('REDIS_PORT')) ? 6379 : REDIS_PORT);
-        $GLOBALS['redis'] = new Redis();
-        $GLOBALS['redis']->connect($server, $port);
+        $GLOBALS['redis'] = openRedisConnection($server, $port);
     }
+}
+
+/**
+ * Connects to Redis or returns null. Redis is only a cache, so a server that
+ * is down must not take every request with it: the connect is limited to
+ * $timeout seconds and failures are logged, after which the app runs uncached
+ * (all callers check for an unset/empty $GLOBALS['redis']).
+ */
+function openRedisConnection($server, $port, $timeout = 1.0)
+{
+    try {
+        $redis = new Redis();
+        if(@$redis->connect($server, $port, $timeout))
+            return $redis;
+        error_log("Could not connect to Redis at $server");
+    } catch (\Throwable $e) {
+        error_log("Could not connect to Redis at $server: ".$e->getMessage());
+    }
+    return null;
 }
 
 function updateMetaData($hash, $meta)
@@ -1821,14 +1855,11 @@ function rebuildMeta(){
 
 function getFileMimeType($file)
 {
-    try {
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        return $finfo->file($file);
-    } catch (Exception $e) {
-        //fallback to shell command if finfo is not available
-        $mimeType = shell_exec('file --mime-type -b ' . escapeshellarg($file));
-        return trim($mimeType);
-    }
+    // "new finfo" on a missing extension is an Error, not an Exception, so the
+    // old catch(Exception) fallback never ran - go through the shared helper
+    $type = detectMimeWithCharset($file);
+    if(!$type) return false;
+    return trim(explode(';', $type)[0]);
 }
 
 function getRelativeToDataPath(string $path): string

@@ -41,13 +41,7 @@ function getInfoAboutHash($hash)
         return array('status'=>'err','reason'=>'File not found');
     $size = filesize($file);
     $size_hr = renderSize($size);
-    $content_type = exec("file -bi " . escapeshellarg($file));
-    if($content_type && strpos($content_type,'/')!==false && strpos($content_type,';')!==false)
-    {
-        $type = $content_type;
-        $c = explode(';',$type);
-        $type = $c[0];
-    }
+    $type = getFileMimeType($file);
         
     return array('hash'=>$hash,'size_bytes'=>$size,'size_interpreted'=>$size_hr,'type'=>$type,'type_interpreted'=>getTypeOfFile($file));
 }
