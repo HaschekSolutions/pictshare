@@ -76,7 +76,7 @@ if (file_exists(ROOT . DS . 'notice.txt'))
 </div>
 
 
-<h2 id="web" class="section-heading">Using PictShare <button type="button" data-bs-target="#using-web-documentation" class="btn btn-outline-primary" data-bs-toggle="collapse">Show user documentation</button> </h2>
+<h2 id="web" class="section-heading">Using PictShare <button type="button" class="btn btn-outline-primary btn-sm docs-toggle d-print-none" data-bs-toggle="collapse" data-bs-target="#using-web-documentation" aria-expanded="false" aria-controls="using-web-documentation" data-label="user documentation">Show user documentation</button></h2>
 
 <div id="using-web-documentation" class="row collapse">
     <div class="col-6">
@@ -100,7 +100,7 @@ if (file_exists(ROOT . DS . 'notice.txt'))
 
 <hr class="no-print border border-primary border-2 opacity-50">
 
-<h2 id="api" class="section-heading">Using the API <button type="button" data-bs-target="#using-api-documentation" class="btn btn-outline-primary" data-bs-toggle="collapse">Show API documentation</button> </h2>
+<h2 id="api" class="section-heading">Using the API <button type="button" class="btn btn-outline-primary btn-sm docs-toggle d-print-none" data-bs-toggle="collapse" data-bs-target="#using-api-documentation" aria-expanded="false" aria-controls="using-api-documentation" data-label="API documentation">Show API documentation</button></h2>
 
 <div id="using-api-documentation" class="row collapse">
     <div class="col-6">
@@ -266,8 +266,9 @@ If the status code is "200", it will return the modified image directly.
 
 <hr class="no-print border border-primary border-2 opacity-50">
 
-<h2 id="mcp" class="section-heading">Using MCP (for LLMs / AI agents)</h2>
-<div class="row">
+<h2 id="mcp" class="section-heading">Using MCP (for LLMs / AI agents) <button type="button" class="btn btn-outline-primary btn-sm docs-toggle d-print-none" data-bs-toggle="collapse" data-bs-target="#using-mcp-documentation" aria-expanded="false" aria-controls="using-mcp-documentation" data-label="MCP documentation">Show MCP documentation</button></h2>
+
+<div id="using-mcp-documentation" class="row collapse">
     <div class="col-6">
         <h2>Basics</h2>
 

@@ -175,6 +175,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+// Collapsed documentation sections on the start page: keep the button label
+// in sync ("Show ..." / "Hide ...") and open the section a link points at, so
+// /#api, /#mcp and /#web still lead to visible content.
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".docs-toggle").forEach(function (button) {
+        const section = document.querySelector(button.getAttribute("data-bs-target"));
+        if (!section) return;
+        const label = button.getAttribute("data-label");
+        section.addEventListener("show.bs.collapse", function () { button.textContent = "Hide " + label; });
+        section.addEventListener("hide.bs.collapse", function () { button.textContent = "Show " + label; });
+    });
+
+    function openLinkedSection() {
+        if (!window.location.hash || window.location.hash.length < 2) return;
+        const heading = document.getElementById(window.location.hash.substring(1));
+        const button = heading && heading.querySelector(".docs-toggle");
+        const section = button && document.querySelector(button.getAttribute("data-bs-target"));
+        if (!section || section.classList.contains("show") || typeof bootstrap === "undefined") return;
+        bootstrap.Collapse.getOrCreateInstance(section, { toggle: false }).show();
+    }
+    openLinkedSection();
+    window.addEventListener("hashchange", openLinkedSection);
+});
+
 function escapeAttr(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
