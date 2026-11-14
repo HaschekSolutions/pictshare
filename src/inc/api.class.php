@@ -341,7 +341,7 @@ class API
 
     public function checkUploaderPermissions()
     {
-        if (defined('ALLOWED_SUBNET') && ALLOWED_SUBNET != '' && !isIPInRange(getUserIP(), ALLOWED_SUBNET)) {
+        if (defined('ALLOWED_SUBNET') && !isIPAllowedBySubnet(getUserIP(), ALLOWED_SUBNET)) {
             throw new Exception('Access denied');
         } else if (defined('UPLOAD_CODE') && UPLOAD_CODE != '') {
             if (!isset($_REQUEST['uploadcode']) || $_REQUEST['uploadcode'] != UPLOAD_CODE) {

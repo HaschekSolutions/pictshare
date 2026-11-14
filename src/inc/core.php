@@ -22,7 +22,7 @@ function architect($u)
     if($u[0] == '' || $u[0] == '/')
     {
         $forbidden = false;
-        if(defined('ALLOWED_SUBNET') && ALLOWED_SUBNET != '' && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
+        if(defined('ALLOWED_SUBNET') && !isIPAllowedBySubnet(getUserIP(), ALLOWED_SUBNET))
         {
             $forbidden = true;
         }
@@ -85,9 +85,7 @@ function architect($u)
     if($u[0] == 'admin' && defined('ADMIN_PASSWORD') && ADMIN_PASSWORD != '')
     {
         // block checks
-        if (defined('ALLOWED_SUBNET') && ALLOWED_SUBNET != '' && !isIPInRange(getUserIP(), ALLOWED_SUBNET))
-            return;
-        else if (defined('MASTER_DELETE_IP') && MASTER_DELETE_IP != '' && !isIPInRange(getUserIP(), MASTER_DELETE_IP))
+        if (defined('ALLOWED_SUBNET') && !isIPAllowedBySubnet(getUserIP(), ALLOWED_SUBNET))
             return;
         session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
         switch($u[1]){
@@ -281,8 +279,7 @@ function architect($u)
             if(startsWith($el,'delete_'))
             {
                 $code = substr($el,7);
-                //@todo: allow MASTER_DELETE_IP to be CIDR range or coma separated
-                if(isValidDeleteCode($hash,$code) || (defined('MASTER_DELETE_IP') && MASTER_DELETE_IP!='' && MASTER_DELETE_IP==getUserIP()) )
+                if(isValidDeleteCode($hash,$code) || (defined('MASTER_DELETE_IP') && isMasterDeleteIP(getUserIP(), MASTER_DELETE_IP)) )
                 {
                     addToLog(getUserIP()." deleted $hash\tIt was deleted by the user\t".$_SERVER['HTTP_USER_AGENT'], ROOT.DS.'logs/deletes.log');
                     deleteHash($hash);
@@ -624,25 +621,116 @@ function resolveClientIP(array $server, string $trustedProxies = '')
 }
 
 /**
- * True if $ip is one of the comma separated IPs / CIDR ranges in $list.
- * Unlike isIPInRange() a plain IP means exactly that address, and an entry of
- * the other address family (or a malformed one) never matches.
+ * True if $ip matches one of the comma separated entries in $list. An entry is
+ *  - a CIDR range (10.0.0.0/8, fd00::/8)
+ *  - a plain IP, meaning exactly that address (/32 or /128)
+ *  - a hostname, meaning every address it currently resolves to, each as a
+ *    single address. Lookups are cached, see resolveHostnameCached()
+ * Unlike isIPInRange() an entry of the other address family, with a broken
+ * mask or a hostname that doesn't resolve never matches.
+ *
+ * @param callable|null $resolver  fn(string $host): string[] - for tests
  */
-function ipMatchesList($ip, string $list)
+function ipMatchesList($ip, string $list, ?callable $resolver = null)
 {
     if(!filter_var($ip, FILTER_VALIDATE_IP)) return false;
     $isV6 = strpos($ip, ':') !== false;
 
     foreach(array_filter(array_map('trim', explode(',', $list))) as $entry)
     {
-        $net = explode('/', $entry, 2)[0];
-        if(!filter_var($net, FILTER_VALIDATE_IP)) continue;
+        $parts = explode('/', $entry, 2);
+        $net = $parts[0];
+
+        if(!filter_var($net, FILTER_VALIDATE_IP))
+        {
+            // not an IP: a hostname, unless it carries a mask
+            if(count($parts) == 2 || !filter_var($net, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) continue;
+            $resolved = $resolver ? $resolver($net) : resolveHostnameCached($net);
+            foreach($resolved as $resolvedIP)
+                if(filter_var($resolvedIP, FILTER_VALIDATE_IP) && inet_pton($resolvedIP) === inet_pton($ip)) return true;
+            continue;
+        }
+
         if((strpos($net, ':') !== false) !== $isV6) continue;
-        if(strpos($entry, '/') === false)
-            $entry .= $isV6 ? '/128' : '/32';
-        if(isIPInRange($ip, $entry)) return true;
+        $maxBits = $isV6 ? 128 : 32;
+        $bits = count($parts) == 2 ? $parts[1] : (string)$maxBits;
+        if(!ctype_digit($bits) || (int)$bits > $maxBits) continue;
+        if(isIPInRange($ip, $net.'/'.$bits)) return true;
     }
     return false;
+}
+
+/**
+ * ALLOWED_SUBNET check: an empty setting allows everyone, otherwise the IP has
+ * to match an entry (CIDR range, plain IP or hostname - see ipMatchesList()).
+ */
+function isIPAllowedBySubnet($ip, $allowedSubnet)
+{
+    if(trim((string)$allowedSubnet) === '') return true;
+    return ipMatchesList($ip, (string)$allowedSubnet);
+}
+
+/**
+ * MASTER_DELETE_IP check: may this IP delete any file without a delete code?
+ * An empty setting allows nobody; entries as in ipMatchesList().
+ */
+function isMasterDeleteIP($ip, $masterDeleteIP)
+{
+    if(trim((string)$masterDeleteIP) === '') return false;
+    return ipMatchesList($ip, (string)$masterDeleteIP);
+}
+
+/**
+ * Resolves a hostname to all its IPv4 and IPv6 addresses, cached on disk so a
+ * request doesn't wait on DNS: the name is looked up at most once per $ttl
+ * seconds. If a refresh fails the last known addresses stay in use and the
+ * lookup is retried after a minute; a name that never resolved yields [].
+ *
+ * @param callable|null $lookup    fn(string $host): string[] - for tests
+ * @param string|null   $cacheDir  defaults to ROOT/tmp
+ * @param int|null      $now       unix time - for tests
+ * @return string[]
+ */
+function resolveHostnameCached($host, $ttl = 300, ?callable $lookup = null, $cacheDir = null, $now = null)
+{
+    $host = strtolower($host);
+    $now = $now ?? time();
+    $file = ($cacheDir ?? ROOT.DS.'tmp').DS.'dnscache_'.sha1($host).'.json';
+
+    $cached = is_file($file) ? json_decode((string)@file_get_contents($file), true) : null;
+    $known = (is_array($cached) && is_array($cached['ips'] ?? null)) ? $cached['ips'] : [];
+    if(is_array($cached) && $now < (int)($cached['recheck'] ?? 0))
+        return $known;
+
+    $ips = $lookup ? $lookup($host) : lookupHostnameIPs($host);
+    $ips = array_values(array_unique(array_filter((array)$ips, fn($ip) => (bool)filter_var($ip, FILTER_VALIDATE_IP))));
+
+    if($ips)
+        $record = ['ips' => $ips, 'recheck' => $now + $ttl];
+    else
+        $record = ['ips' => $known, 'recheck' => $now + min(60, $ttl)];
+
+    @file_put_contents($file, json_encode($record), LOCK_EX);
+    return $record['ips'];
+}
+
+/**
+ * All A and AAAA addresses of a hostname. gethostbynamel() is asked as well
+ * because it honours /etc/hosts, which dns_get_record() does not.
+ *
+ * @return string[]
+ */
+function lookupHostnameIPs($host)
+{
+    $ips = [];
+    foreach((array)@dns_get_record($host, DNS_A | DNS_AAAA) as $record)
+    {
+        if(!empty($record['ip']))   $ips[] = $record['ip'];
+        if(!empty($record['ipv6'])) $ips[] = $record['ipv6'];
+    }
+    foreach((array)@gethostbynamel($host) as $ip)
+        if($ip) $ips[] = $ip;
+    return array_values(array_unique($ips));
 }
 
 // checks the list of uploaded files for this hash
@@ -1191,7 +1279,7 @@ function isCloudflare() {
 
 function executeUploadPermission()
 {
-    if(defined('ALLOWED_SUBNET') && ALLOWED_SUBNET != '' && !isIPInRange( getUserIP(), ALLOWED_SUBNET ))
+    if(defined('ALLOWED_SUBNET') && !isIPAllowedBySubnet(getUserIP(), ALLOWED_SUBNET))
     {
         http_response_code(403);
         exit(json_encode(array('status'=>'err','reason'=> 'Access denied')));
