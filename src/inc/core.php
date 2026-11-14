@@ -48,7 +48,7 @@ function architect($u)
                 $url = trim($url);
                 if(!$url) continue;
                 if(!startsWith(strtolower($url), strtolower(URL))){
-                    $o[] = 'Skipped '.$url.', because it does not start with the base URL: '.URL;
+                    $o[] = 'Skipped '.htmlspecialchars($url, ENT_QUOTES, 'UTF-8').', because it does not start with the base URL: '.htmlspecialchars(URL, ENT_QUOTES, 'UTF-8');
                     continue; // we only accept URLs that start with the base URL
                 }
                 $parts = explode('/', $url);
@@ -61,7 +61,7 @@ function architect($u)
                         if(!in_array($hash, $alreadyreported))
                             $hashes[] = $hash;
                         else
-                            $o[] = 'Skipped '.$url.', because already reported';
+                            $o[] = 'Skipped '.htmlspecialchars($url, ENT_QUOTES, 'UTF-8').', because already reported';
                         break;
                     }
                 }
@@ -89,7 +89,7 @@ function architect($u)
             return;
         else if (defined('MASTER_DELETE_IP') && MASTER_DELETE_IP != '' && !isIPInRange(getUserIP(), MASTER_DELETE_IP))
             return;
-        session_start();
+        session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
         switch($u[1]){
             case 'rebuild-meta':
                 if(!$_SESSION['admin']) {
@@ -583,30 +583,66 @@ function endswith($string, $test) {
 
 function getUserIP()
 {
-    if(isCloudflare() || !empty($_SERVER['HTTP_CF_CONNECTING_IP']))
-        return $_SERVER['HTTP_CF_CONNECTING_IP'];
-	$client  = @$_SERVER['HTTP_CLIENT_IP'];
-	$forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
-	$remote  = $_SERVER['REMOTE_ADDR'];
-	
-    if($forward != null && strpos($forward,','))
+    return resolveClientIP($_SERVER, defined('TRUSTED_PROXIES') ? TRUSTED_PROXIES : '');
+}
+
+/**
+ * Works out the client IP for a request.
+ *
+ * Forwarding headers are client-controlled, so they are only believed when the
+ * peer that sent them is a proxy we trust:
+ *  - X-Forwarded-For: only if the connection comes from TRUSTED_PROXIES. The
+ *    list is walked right to left, skipping trusted proxies, so entries a
+ *    client put in front of it are never used.
+ *  - CF-Connecting-IP: only if the peer (after resolving trusted proxies) is a
+ *    Cloudflare edge address.
+ * Everything else gets REMOTE_ADDR. Client-IP is never used.
+ *
+ * @param array  $server          $_SERVER (or a stand-in for tests)
+ * @param string $trustedProxies  comma separated IPs / CIDR ranges
+ */
+function resolveClientIP(array $server, string $trustedProxies = '')
+{
+    $ip = $server['REMOTE_ADDR'] ?? '';
+
+    if($trustedProxies !== '' && !empty($server['HTTP_X_FORWARDED_FOR']) && ipMatchesList($ip, $trustedProxies))
     {
-        $a = explode(',',$forward);
-        $forward = trim($a[0]);
+        $hops = array_reverse(array_map('trim', explode(',', $server['HTTP_X_FORWARDED_FOR'])));
+        foreach($hops as $hop)
+        {
+            if(!filter_var($hop, FILTER_VALIDATE_IP)) break;
+            $ip = $hop;
+            if(!ipMatchesList($hop, $trustedProxies)) break;
+        }
     }
-	if(filter_var($forward, FILTER_VALIDATE_IP))
-	{
-		$ip = $forward;
-	}
-    elseif(filter_var($client, FILTER_VALIDATE_IP))
-	{
-		$ip = $client;
-	}
-	else
-	{
-		$ip = $remote;
-	}
-	return $ip;
+
+    if(_cloudflare_Requests_Check($server) && _cloudflare_CheckIP($ip)
+        && filter_var($server['HTTP_CF_CONNECTING_IP'], FILTER_VALIDATE_IP))
+        return $server['HTTP_CF_CONNECTING_IP'];
+
+    return $ip;
+}
+
+/**
+ * True if $ip is one of the comma separated IPs / CIDR ranges in $list.
+ * Unlike isIPInRange() a plain IP means exactly that address, and an entry of
+ * the other address family (or a malformed one) never matches.
+ */
+function ipMatchesList($ip, string $list)
+{
+    if(!filter_var($ip, FILTER_VALIDATE_IP)) return false;
+    $isV6 = strpos($ip, ':') !== false;
+
+    foreach(array_filter(array_map('trim', explode(',', $list))) as $entry)
+    {
+        $net = explode('/', $entry, 2)[0];
+        if(!filter_var($net, FILTER_VALIDATE_IP)) continue;
+        if((strpos($net, ':') !== false) !== $isV6) continue;
+        if(strpos($entry, '/') === false)
+            $entry .= $isV6 ? '/128' : '/32';
+        if(isIPInRange($ip, $entry)) return true;
+    }
+    return false;
 }
 
 // checks the list of uploaded files for this hash
@@ -1131,22 +1167,19 @@ function _cloudflare_CheckIP($ip) {
     2c0f:f248::/32
     ")));
 
-    $is_cf_ip = false;
-    foreach ($cf_ips as $cf_ip) {
-        if (ip_in_range($ip, $cf_ip)) {
-            $is_cf_ip = true;
-            break;
-        }
-    } return $is_cf_ip;
+    // ipMatchesList() and not ip_in_range(): the latter is IPv4-only and
+    // treats every IPv6 address as a match for the IPv6 ranges above
+    return ipMatchesList($ip, implode(',', $cf_ips));
 }
 
-function _cloudflare_Requests_Check() {
+function _cloudflare_Requests_Check($server = null) {
+    if($server === null) $server = $_SERVER;
     $flag = true;
 
-    if(!isset($_SERVER['HTTP_CF_CONNECTING_IP']))   $flag = false;
-    if(!isset($_SERVER['HTTP_CF_IPCOUNTRY']))       $flag = false;
-    if(!isset($_SERVER['HTTP_CF_RAY']))             $flag = false;
-    if(!isset($_SERVER['HTTP_CF_VISITOR']))         $flag = false;
+    if(!isset($server['HTTP_CF_CONNECTING_IP']))   $flag = false;
+    if(!isset($server['HTTP_CF_IPCOUNTRY']))       $flag = false;
+    if(!isset($server['HTTP_CF_RAY']))             $flag = false;
+    if(!isset($server['HTTP_CF_VISITOR']))         $flag = false;
     return $flag;
 }
 

@@ -63,6 +63,7 @@ Every other variable can be referenced against the [default PictShare configurat
 - MASTER_DELETE_CODE (string | code if added to any url, will delete the image)
 - MASTER_DELETE_IP (string | ip which can delete any image)
 - ALLOWED_SUBNET (CIDR IP range (can be comma separated) | IP subnets which are allowed to upload files)
+- TRUSTED_PROXIES (IPs or CIDR ranges, comma separated | your own reverse proxies. Only requests from these get their client IP from X-Forwarded-For. Required behind a reverse proxy, see [CONFIG.md](/rtfm/CONFIG.md))
 - ALLOW_BLOATING (true/false | can images be bloated to higher resolutions than the originals)
 - UPLOAD_CODE (string | Code that has to be supplied via POST or GET, to upload an image)
 - UPLOAD_FORM_LOCATION (string | absolute path where upload gui will be shown)

@@ -59,4 +59,35 @@ class ReportTest extends PictShareTestCase
 
         $this->assertCount(2, getReports());
     }
+
+    // GHSA-ghw4-6hfp-5pq8: submitted URL lines are echoed back and must be escaped
+    public function testReportFormEscapesSkippedForeignUrl(): void
+    {
+        $_POST = ['urls' => '<script>alert(document.domain)</script>', 'note' => 'x'];
+        try {
+            $html = architect(['report']);
+        } finally {
+            $_POST = [];
+        }
+
+        $this->assertStringNotContainsString('<script>alert(document.domain)</script>', $html);
+        $this->assertStringContainsString('&lt;script&gt;alert(document.domain)&lt;/script&gt;', $html);
+    }
+
+    public function testReportFormEscapesAlreadyReportedUrl(): void
+    {
+        $r    = $this->uploadFixture('test.jpg', 'xssreport.jpg');
+        $hash = $r['hash'];
+        addReport([$hash], 'first');
+
+        $_POST = ['urls' => URL . '<img src=x onerror=alert(1)>/' . $hash, 'note' => 'x'];
+        try {
+            $html = architect(['report']);
+        } finally {
+            $_POST = [];
+        }
+
+        $this->assertStringNotContainsString('<img src=x onerror=alert(1)>', $html);
+        $this->assertStringContainsString('&lt;img src=x onerror=alert(1)&gt;', $html);
+    }
 }

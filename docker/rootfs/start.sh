@@ -31,6 +31,7 @@ _buildConfig() {
     echo "define('CONTENTCONTROLLERS', '${CONTENTCONTROLLERS:-}');"
     echo "define('MASTER_DELETE_CODE', '${MASTER_DELETE_CODE:-}');"
     echo "define('MASTER_DELETE_IP', '${MASTER_DELETE_IP:-}');"
+    echo "define('TRUSTED_PROXIES', '${TRUSTED_PROXIES:-}');"
     echo "define('UPLOAD_CODE', '${UPLOAD_CODE:-}');"
     echo "define('LOG_UPLOADER', ${LOG_UPLOADER:-false});"
     echo "define('MAX_RESIZED_IMAGES',${MAX_RESIZED_IMAGES:--1});"

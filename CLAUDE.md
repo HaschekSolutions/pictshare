@@ -59,7 +59,7 @@ Each uploaded file lives at `data/<hash>/<hash>` with a companion `data/<hash>/m
 
 ### Configuration
 
-Configuration is generated at container startup by `docker/rootfs/start.sh` from environment variables into `src/inc/config.inc.php` as PHP constants. See `src/inc/example.config.inc.php` for all available options. Key env vars: `URL`, `ADMIN_PASSWORD`, `UPLOAD_CODE`, `MAX_UPLOAD_SIZE`, `REDIS_SERVER`, `CONTENTCONTROLLERS`, `S3_*`, `FTP_*`, `ENCRYPTION_KEY`, `HTML_HOSTING_ENABLED`/`HTML_UPLOAD_CODE` (dangerous — off by default, see rtfm/CONFIG.md).
+Configuration is generated at container startup by `docker/rootfs/start.sh` from environment variables into `src/inc/config.inc.php` as PHP constants. See `src/inc/example.config.inc.php` for all available options. Key env vars: `URL`, `ADMIN_PASSWORD`, `UPLOAD_CODE`, `TRUSTED_PROXIES` (reverse proxies allowed to set the client IP via X-Forwarded-For), `MAX_UPLOAD_SIZE`, `REDIS_SERVER`, `CONTENTCONTROLLERS`, `S3_*`, `FTP_*`, `ENCRYPTION_KEY`, `HTML_HOSTING_ENABLED`/`HTML_UPLOAD_CODE` (dangerous — off by default, see rtfm/CONFIG.md).
 
 ### Caching
 
