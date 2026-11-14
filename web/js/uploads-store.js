@@ -136,6 +136,7 @@
             html +=     '</div>';
             html +=     '<div class="uploads-card-actions">';
             html +=       '<button type="button" class="btn btn-outline-secondary btn-sm uploads-copy" data-url="' + urlSafe + '">Copy URL</button> ';
+            html +=       '<button type="button" class="btn btn-outline-secondary btn-sm qr-toggle" data-url="' + urlSafe + '">Show QR code</button> ';
             html +=       '<button type="button" class="btn btn-outline-danger btn-sm uploads-delete" data-hash="' + hashSafe + '">Delete</button>';
             html +=     '</div>';
             html +=   '</div>';

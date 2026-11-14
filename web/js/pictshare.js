@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (typeof refreshMyUploads === 'function') refreshMyUploads();
                     }
                     uploadInfo.insertAdjacentHTML("beforeend",
-                        renderMessage(file.name + " uploaded as <a target='_blank' href='/" + response.hash + "'>" + response.hash + "</a>", "URL: <a target='_blank' href='" + response.url + "'>" + response.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + response.url + "\");'>Copy URL</button> <button id='showqrdtn-" + response.hash + "' class='btn btn-primary btn-sm' onClick='showQrcode(\"" + response.hash + "\", \""+ response.url + "\");'>Show QRCode</button><div id='" + response.hash + "' class='p-1'></div>", "success")
+                        renderMessage(file.name + " uploaded as <a target='_blank' href='/" + response.hash + "'>" + response.hash + "</a>", "URL: <a target='_blank' href='" + response.url + "'>" + response.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + response.url + "\");'>Copy URL</button> " + qrButton(response.url), "success")
                     );
                 } else if (response.status == 'err') {
                     uploadInfo.insertAdjacentHTML("beforeend",
@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         // but the current API logic determines type by content.
                         // For text/markdown, we might need to adjust src/api/upload.php
                         uploadInfo.insertAdjacentHTML("beforeend",
-                            renderMessage("Paste uploaded as <a target='_blank' href='/" + data.hash + "'>" + data.hash + "</a>", "URL: <a target='_blank' href='" + data.url + "'>" + data.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + data.url + "\");'>Copy URL</button> <button id='showqrdtn-" + data.hash + "' class='btn btn-primary btn-sm' onClick='showQrcode(\"" + data.hash + "\", \""+ data.url + "\");'>Show QRCode</button><div id='" + data.hash + "' class='p-1'></div>", "success")
+                            renderMessage("Paste uploaded as <a target='_blank' href='/" + data.hash + "'>" + data.hash + "</a>", "URL: <a target='_blank' href='" + data.url + "'>" + data.url + "</a> <button class='btn btn-primary btn-sm' onClick='navigator.clipboard.writeText(\"" + data.url + "\");'>Copy URL</button> " + qrButton(data.url), "success")
                         );
                         document.getElementById("pasteText").value = "";
                     } else {
@@ -175,18 +175,36 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-function showQrcode(hash, url) {
-    showqrbtn = document.getElementById('showqrdtn-' + hash);
-    targetDiv = document.getElementById(hash);
-
-    if (targetDiv.hasChildNodes()) {
-        targetDiv.innerHTML = '';
-        showqrbtn.textContent = "Show QRCode";
-    } else {
-        new QRCode(targetDiv, url);
-        showqrbtn.textContent = "Hide QRCode";
-    }
+function escapeAttr(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
 }
+
+// Button that toggles a QR code of the given URL. Works anywhere on the page
+// (upload results, "My Uploads"): the click is handled by one delegated
+// listener below, so no ids or inline handlers are needed and the same file
+// showing up twice can't collide.
+function qrButton(url) {
+    return "<button type='button' class='btn btn-outline-secondary btn-sm qr-toggle' data-url='" + escapeAttr(url) + "'>Show QR code</button>";
+}
+
+document.addEventListener("click", function (e) {
+    const button = e.target.closest && e.target.closest(".qr-toggle");
+    if (!button || typeof QRCode === "undefined") return;
+
+    const existing = button.parentNode.querySelector(":scope > .qr-code");
+    if (existing) {
+        existing.remove();
+        button.textContent = "Show QR code";
+        return;
+    }
+    const target = document.createElement("div");
+    target.className = "qr-code p-2";
+    button.parentNode.appendChild(target);
+    new QRCode(target, { text: button.getAttribute("data-url"), width: 160, height: 160 });
+    button.textContent = "Hide QR code";
+});
 
 function renderMessage(title, message, type) {
     if (!type)
